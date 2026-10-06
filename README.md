@@ -1,0 +1,111 @@
+# memegen-rust
+
+A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/memegen), built mainly to run locally as an **MCP server**, with the HTTP API kept as well.
+
+- All 210 upstream templates and fonts, with upstream's text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
+- PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
+- Recently rendered memes are kept in a 256 MB in-memory cache
+- A new static meme takes about 3 ms; see [Performance](#performance)
+
+## Build
+
+```sh
+cargo build --release
+```
+
+The binary reads `templates/`, `fonts/`, `emoji/` and `static/` from the repository it was built in. To use a different location, set `--root` or `MEMEGEN_ROOT`.
+
+## MCP
+
+There is no authentication. Two transports are available:
+
+| Transport | Command | Endpoint |
+|---|---|---|
+| stdio | `memegen mcp` | n/a |
+| Streamable HTTP | `memegen serve` | `http://localhost:5000/mcp` |
+
+The HTTP endpoint binds to `127.0.0.1` by default. It rejects requests whose `Host` isn't localhost (to block DNS rebinding) and browser requests with a non-local `Origin`. To allow other host names, pass `--mcp-allowed-host <host>`.
+
+### Claude Code
+
+```sh
+# stdio
+claude mcp add memegen -- /path/to/memegen-rust/target/release/memegen mcp
+
+# or over HTTP (with `memegen serve` running)
+claude mcp add --transport http memegen http://localhost:5000/mcp
+```
+
+### Claude Desktop / other clients (stdio)
+
+```json
+{
+  "mcpServers": {
+    "memegen": {
+      "command": "/path/to/memegen-rust/target/release/memegen",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+### Tools
+
+| Tool | Description |
+|---|---|
+| `list_templates` | Search templates (`filter`, `animated`). Returns ID, name, line count and example text |
+| `get_template` | Full details for one template |
+| `list_fonts` | Fonts available for `font` |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL |
+
+## HTTP API
+
+Start the server with `memegen serve` (or just `memegen`). Swagger docs are at `/docs` and the OpenAPI spec at `/openapi.json`.
+
+| Route | Description |
+|---|---|
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp}` | Render a meme. `?font=` sets the font; non-canonical text redirects with a 301 |
+| `GET /images/{template}.{ext}` | Template background without text |
+| `GET /images/` | Example memes (`?filter=`, `?animated=`) |
+| `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, redirect}` (JSON or form) |
+| `GET /templates/`, `GET /templates/{id}` | Template catalog (`?filter=`, `?animated=`) |
+| `POST /templates/{id}` | Build a meme URL for a template |
+| `GET /fonts/`, `GET /fonts/{id}` | Fonts |
+
+Text escapes in URLs: `_` → space, `__` → `_`, `--` → `-`, `~q` → `?`, `~a` → `&`, `~p` → `%`, `~h` → `#`, `~s` → `/`, `~b` → `\`, `~l` → `<`, `~g` → `>`, `~n` → newline, `''` → `"`.
+
+## Configuration
+
+| Variable / flag | Default | Purpose |
+|---|---|---|
+| `HOST` / `--host` | `127.0.0.1` | Bind address |
+| `PORT` / `--port` | `5000` | Port |
+| `DOMAIN` | unset | When set, API responses use `https://$DOMAIN` URLs |
+| `DEBUG=true` | off | Skip the render cache and re-render every request |
+| `DEFAULT_STATIC_EXTENSION` | `png` | Default format for static templates |
+| `DEFAULT_ANIMATED_EXTENSION` | `gif` | Default format for animated templates |
+| `MEMEGEN_ROOT` / `--root` | build directory | Location of the assets |
+| `RUST_LOG` | `info` (`warn` for stdio) | Log level (logs go to stderr) |
+
+## Not ported
+
+Watermarks, previews, error images, custom backgrounds and overlays, size/color/layout parameters, animated text, legacy shortcut redirects, and the remote API-key/analytics integrations.
+
+## Performance
+
+Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple Silicon Mac. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server.
+
+| Case | Upstream Python wall / CPU | Rust warm wall / CPU (1 thread) | Rust warm wall (18 threads) |
+|---|---|---|---|
+| static png, 2 lines | 44.8 / 44.7 ms | 3.7 / 3.7 ms | 3.0 ms |
+| static jpg, wrapped text | 79.5 / 79.3 ms | 7.2 / 7.2 ms | 6.6 ms |
+| static png, 3 lines rotated | 431 / 431 ms | 5.6 / 5.6 ms | 3.3 ms |
+| static png, emoji | 414 / 57 ms (Twemoji download) | 3.2 / 3.2 ms | 2.5 ms |
+| animated gif, 17 frames | 653 / 652 ms | 57 / 57 ms | 12.1 ms |
+| animated webp, 17 frames | 818 / 815 ms | 119 / 119 ms | 117.5 ms |
+
+A repeated meme comes from the in-memory cache in about 2 µs. Over HTTP, `wrk` measured about 5,800 new memes/s and 17,000 cached responses/s. Starting `memegen mcp` takes about 15 ms to the `initialize` response.
+
+## Licenses
+
+The code and templates come from memegen (MIT, see `LICENSE-upstream.txt`); fonts carry their own licenses in `fonts/`. Emoji graphics are Twemoji (CC-BY 4.0, see `emoji/LICENSE.md`).

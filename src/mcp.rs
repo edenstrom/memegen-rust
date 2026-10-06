@@ -1,0 +1,242 @@
+//! Unauthenticated MCP server exposing meme generation as tools.
+
+use std::path::PathBuf;
+use std::sync::Arc;
+
+use base64::Engine as _;
+use rmcp::handler::server::{router::tool::ToolRouter, wrapper::Parameters};
+use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerConfig};
+use rmcp::{ErrorData, ServerHandler, tool, tool_handler, tool_router};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+
+use crate::app::App;
+use crate::render::MemeRequest;
+
+const INSTRUCTIONS: &str = "Generate meme images from 200+ classic templates. \
+Typical flow: call `list_templates` (optionally with a `filter`) to find a template ID and how many \
+text lines it takes, then call `generate_meme` with that ID and one string per line. \
+Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
+Animated templates render as GIF/WebP; use `extension` to choose the format.";
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct ListTemplatesRequest {
+    /// Case-insensitive text to match against template ID, name, keywords, or example text.
+    #[serde(default)]
+    pub filter: Option<String>,
+    /// Only animated templates (true) or only static templates (false).
+    #[serde(default)]
+    pub animated: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct GetTemplateRequest {
+    /// Template ID, e.g. "fry" or "drake".
+    pub id: String,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct GenerateMemeRequest {
+    /// Template ID from `list_templates`, e.g. "fry".
+    pub template_id: String,
+    /// Lines of text in order, one per text box (see the template's `lines`). Use "" to leave a box empty.
+    pub text: Vec<String>,
+    /// Image format: "png" (default for static templates), "jpg", "gif" (default for animated templates), or "webp".
+    #[serde(default)]
+    pub extension: Option<String>,
+    /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
+    #[serde(default)]
+    pub font: Option<String>,
+    /// Absolute file path to also write the image to, e.g. "/tmp/meme.png".
+    #[serde(default)]
+    pub save_to: Option<String>,
+    /// Return the image inline in the tool result (default true).
+    #[serde(default)]
+    pub include_image: Option<bool>,
+}
+
+#[derive(Serialize)]
+struct TemplateSummary<'a> {
+    id: &'a str,
+    name: &'a str,
+    lines: usize,
+    animated: bool,
+    example: &'a [String],
+}
+
+#[derive(Clone)]
+pub struct MemegenMcp {
+    app: Arc<App>,
+    tool_router: ToolRouter<Self>,
+}
+
+impl MemegenMcp {
+    pub fn new(app: Arc<App>) -> Self {
+        Self {
+            app,
+            tool_router: Self::tool_router(),
+        }
+    }
+}
+
+fn json_text(value: &impl Serialize) -> Result<CallToolResult, ErrorData> {
+    let text = serde_json::to_string_pretty(value)
+        .map_err(|error| ErrorData::internal_error(error.to_string(), None))?;
+    Ok(CallToolResult::success(vec![ContentBlock::text(text)]))
+}
+
+#[tool_router]
+impl MemegenMcp {
+    #[tool(
+        description = "List available meme templates with their ID, name, number of text lines, \
+        whether they are animated, and example text. Use `filter` to search."
+    )]
+    async fn list_templates(
+        &self,
+        Parameters(request): Parameters<ListTemplatesRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        let filter = request.filter.unwrap_or_default();
+        let templates = self.app.catalog().filter(&filter, request.animated);
+        let summaries: Vec<TemplateSummary> = templates
+            .iter()
+            .map(|template| TemplateSummary {
+                id: &template.id,
+                name: &template.name,
+                lines: template.text.len(),
+                animated: template.is_animated(),
+                example: &template.example,
+            })
+            .collect();
+        json_text(&summaries)
+    }
+
+    #[tool(
+        description = "Get full details for one meme template, including keywords, source, and example URL."
+    )]
+    async fn get_template(
+        &self,
+        Parameters(request): Parameters<GetTemplateRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        match self.app.catalog().get(&request.id) {
+            Some(template) => json_text(&self.app.template_info(template)),
+            None => Ok(CallToolResult::error(vec![ContentBlock::text(format!(
+                "Template not found: {}. Use list_templates to find valid IDs.",
+                request.id
+            ))])),
+        }
+    }
+
+    #[tool(description = "List fonts that can be passed as `font` to generate_meme.")]
+    async fn list_fonts(&self) -> Result<CallToolResult, ErrorData> {
+        let fonts: Vec<_> = self
+            .app
+            .fonts()
+            .all()
+            .iter()
+            .map(|font| json!({ "id": font.id, "alias": font.alias, "filename": font.filename }))
+            .collect();
+        json_text(&fonts)
+    }
+
+    #[tool(
+        description = "Render a meme image from a template and lines of text. Returns the image \
+        and a shareable URL (served by `memegen serve`). Optionally saves the image to `save_to`."
+    )]
+    async fn generate_meme(
+        &self,
+        Parameters(request): Parameters<GenerateMemeRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        let config = self.app.config();
+        let template = self
+            .app
+            .catalog()
+            .get(&request.template_id)
+            .filter(|t| t.valid());
+        let Some(template) = template else {
+            return Ok(CallToolResult::error(vec![ContentBlock::text(format!(
+                "Template not found: {}. Use list_templates to find valid IDs.",
+                request.template_id
+            ))]));
+        };
+        let extension = request
+            .extension
+            .filter(|ext| !ext.is_empty())
+            .unwrap_or_else(|| {
+                template
+                    .default_extension(
+                        &config.default_static_extension,
+                        &config.default_animated_extension,
+                    )
+                    .to_string()
+            })
+            .trim_start_matches('.')
+            .to_lowercase();
+        let font = request.font.unwrap_or_default();
+
+        let rendered = match self
+            .app
+            .render(MemeRequest {
+                template_id: template.id.clone(),
+                lines: request.text.clone(),
+                font: font.clone(),
+                extension: extension.clone(),
+            })
+            .await
+        {
+            Ok(rendered) => rendered,
+            Err(error) => {
+                return Ok(CallToolResult::error(vec![ContentBlock::text(
+                    error.to_string(),
+                )]));
+            }
+        };
+
+        let mut saved_to = None;
+        if let Some(path) = request.save_to.filter(|path| !path.is_empty()) {
+            let path = PathBuf::from(path);
+            if !path.is_absolute() {
+                return Ok(CallToolResult::error(vec![ContentBlock::text(
+                    "`save_to` must be an absolute path",
+                )]));
+            }
+            if let Err(error) = tokio::fs::write(&path, &rendered.bytes).await {
+                return Ok(CallToolResult::error(vec![ContentBlock::text(format!(
+                    "Rendered the meme but could not write {}: {error}",
+                    path.display()
+                ))]));
+            }
+            saved_to = Some(path.display().to_string());
+        }
+
+        let (url, _) = self
+            .app
+            .build_url(&template.id, &request.text, &font, &extension);
+        let summary = json!({
+            "url": url,
+            "template_id": template.id,
+            "text": request.text,
+            "extension": rendered.extension,
+            "content_type": rendered.content_type,
+            "bytes": rendered.bytes.len(),
+            "saved_to": saved_to,
+        });
+
+        let mut content = Vec::new();
+        if request.include_image.unwrap_or(true) {
+            let data = base64::engine::general_purpose::STANDARD.encode(&rendered.bytes);
+            content.push(ContentBlock::image(data, rendered.content_type));
+        }
+        content.push(ContentBlock::text(summary.to_string()));
+        Ok(CallToolResult::success(content))
+    }
+}
+
+#[tool_handler(router = self.tool_router)]
+impl ServerHandler for MemegenMcp {
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::new("memegen", env!("CARGO_PKG_VERSION")))
+            .with_instructions(INSTRUCTIONS)
+    }
+}
