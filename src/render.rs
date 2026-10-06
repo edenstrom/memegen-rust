@@ -1,0 +1,744 @@
+//! Meme rendering pipeline with in-memory caches.
+
+use std::io::BufReader;
+use std::path::Path;
+use std::sync::Arc;
+
+use anyhow::{Context, Result, anyhow};
+use bytes::Bytes;
+use image::codecs::gif::GifDecoder;
+use image::codecs::jpeg::JpegEncoder;
+use image::codecs::png::{CompressionType, FilterType as PngFilter, PngEncoder};
+use image::imageops::FilterType;
+use image::{AnimationDecoder, DynamicImage, ImageDecoder, ImageEncoder, ImageReader, RgbaImage};
+use moka::sync::Cache;
+use rayon::prelude::*;
+
+use crate::config::Config;
+use crate::emoji::EmojiImages;
+use crate::fonts::Fonts;
+use crate::quantize::Palette;
+use crate::template::{Catalog, Template};
+use crate::textbox::TextBox;
+use crate::typeset::{self, DrawOptions, SizedFont};
+use crate::{settings, slug};
+
+const MAXIMUM_FRAMES: usize = 20;
+const MINIMUM_FRAMES: usize = 5;
+const WEBP_QUALITY: f32 = 75.0;
+const WEBP_METHOD: i32 = 2;
+const JPEG_QUALITY: u8 = 95;
+
+#[derive(Debug, Clone)]
+pub struct Rendered {
+    pub bytes: Bytes,
+    pub content_type: &'static str,
+    pub extension: String,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum RenderError {
+    #[error("Template not found: {0}")]
+    NotFound(String),
+    #[error("{0}")]
+    Invalid(String),
+    #[error(
+        "Custom text too long (a line exceeds {} bytes)",
+        settings::MAX_SLUG_PART_BYTES
+    )]
+    TooLong,
+    #[error("Render failed: {0}")]
+    Internal(String),
+}
+
+impl RenderError {
+    pub fn status(&self) -> u16 {
+        match self {
+            Self::NotFound(_) => 404,
+            Self::Invalid(_) => 422,
+            Self::TooLong => 414,
+            Self::Internal(_) => 500,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MemeRequest {
+    pub template_id: String,
+    pub lines: Vec<String>,
+    pub font: String,
+    pub extension: String,
+}
+
+pub fn content_type(extension: &str) -> &'static str {
+    match extension {
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        _ => "image/png",
+    }
+}
+
+struct Animation {
+    /// `(source frame index, resized frame)` for the sampled frames.
+    frames: Vec<(usize, RgbaImage)>,
+    total: usize,
+    duration: u32,
+}
+
+pub struct Renderer {
+    config: Config,
+    catalog: Arc<Catalog>,
+    fonts: Arc<Fonts>,
+    emoji: EmojiImages,
+    backgrounds: Cache<String, Arc<RgbaImage>>,
+    animations: Cache<(String, usize), Arc<Animation>>,
+    outputs: Cache<String, Arc<Rendered>>,
+}
+
+impl Renderer {
+    pub fn new(config: Config, catalog: Arc<Catalog>, fonts: Arc<Fonts>) -> Self {
+        let emoji = EmojiImages::new(&config.root);
+        Self {
+            config,
+            catalog,
+            fonts,
+            emoji,
+            backgrounds: Cache::builder()
+                .weigher(|_, image: &Arc<RgbaImage>| image.as_raw().len() as u32)
+                .max_capacity(256 * 1024 * 1024)
+                .build(),
+            animations: Cache::builder()
+                .weigher(|_, animation: &Arc<Animation>| {
+                    animation
+                        .frames
+                        .iter()
+                        .map(|(_, frame)| frame.as_raw().len() as u32)
+                        .fold(0u32, u32::saturating_add)
+                })
+                .max_capacity(512 * 1024 * 1024)
+                .build(),
+            outputs: Cache::builder()
+                .weigher(|_, rendered: &Arc<Rendered>| rendered.bytes.len() as u32)
+                .max_capacity(256 * 1024 * 1024)
+                .build(),
+        }
+    }
+
+    pub fn catalog(&self) -> &Catalog {
+        &self.catalog
+    }
+
+    pub fn fonts(&self) -> &Fonts {
+        &self.fonts
+    }
+
+    pub fn config(&self) -> &Config {
+        &self.config
+    }
+
+    /// Validate a request, then render it (or fetch it from cache).
+    pub fn render(&self, request: &MemeRequest) -> Result<Arc<Rendered>, RenderError> {
+        let extension = request.extension.to_lowercase();
+        if !settings::ALLOWED_EXTENSIONS.contains(&extension.as_str()) {
+            return Err(RenderError::Invalid(format!(
+                "Invalid extension: {extension} (expected one of {})",
+                settings::ALLOWED_EXTENSIONS.join(", ")
+            )));
+        }
+        let template = self
+            .catalog
+            .get(&request.template_id)
+            .filter(|template| template.static_image.is_some())
+            .ok_or_else(|| RenderError::NotFound(request.template_id.clone()))?
+            .clone();
+
+        let font = match request.font.as_str() {
+            "" | settings::PLACEHOLDER => String::new(),
+            name => self
+                .fonts
+                .get(name)
+                .map(|font| font.id.to_string())
+                .ok_or_else(|| RenderError::Invalid(format!("Invalid font: {name}")))?,
+        };
+
+        let slug = slug::encode(&request.lines);
+        if slug
+            .split('/')
+            .any(|part| part.len() > settings::MAX_SLUG_PART_BYTES)
+        {
+            return Err(RenderError::TooLong);
+        }
+
+        let render = || {
+            self.render_logged(&template, &request.lines, &font, &extension)
+                .map(Arc::new)
+        };
+        if self.config.debug {
+            return render().map_err(|error| RenderError::Internal(format!("{error:#}")));
+        }
+        let key = format!("{}|{slug}|{font}|{extension}", template.id);
+        self.outputs
+            .try_get_with(key, render)
+            .map_err(|error: Arc<anyhow::Error>| RenderError::Internal(format!("{error:#}")))
+    }
+
+    fn render_logged(
+        &self,
+        template: &Template,
+        lines: &[String],
+        font: &str,
+        extension: &str,
+    ) -> Result<Rendered> {
+        let started = std::time::Instant::now();
+        let bytes = self.render_bytes(template, lines, font, extension)?;
+        tracing::info!(
+            "Rendered {}/{} ({extension}, {} bytes) in {:.1?}",
+            template.id,
+            slug::encode(lines),
+            bytes.len(),
+            started.elapsed()
+        );
+        Ok(Rendered {
+            bytes: Bytes::from(bytes),
+            content_type: content_type(extension),
+            extension: extension.to_string(),
+        })
+    }
+
+    /// Render and encode without consulting or filling the output caches.
+    pub fn render_bytes(
+        &self,
+        template: &Template,
+        lines: &[String],
+        font: &str,
+        extension: &str,
+    ) -> Result<Vec<u8>> {
+        match extension {
+            "gif" | "webp" => {
+                let maximum_frames = if extension == "webp" {
+                    MAXIMUM_FRAMES * 4
+                } else {
+                    0
+                };
+                let (frames, duration) =
+                    self.render_animation(template, lines, font, maximum_frames)?;
+                if extension == "gif" {
+                    encode_gif(frames, duration)
+                } else {
+                    encode_webp(&frames, duration)
+                }
+            }
+            _ => encode_static(self.render_image(template, lines, font)?, extension),
+        }
+    }
+
+    /// Drop decoded backgrounds and rendered outputs (for cold benchmarks).
+    pub fn clear_caches(&self) {
+        self.backgrounds.invalidate_all();
+        self.animations.invalidate_all();
+        self.outputs.invalidate_all();
+    }
+
+    /// Upstream `render_image` (static output).
+    pub fn render_image(
+        &self,
+        template: &Template,
+        lines: &[String],
+        font: &str,
+    ) -> Result<RgbaImage> {
+        let background = self.background(template)?;
+        let mut image = (*background).clone();
+        let size = image.dimensions();
+        let layers: Vec<_> = template
+            .text
+            .par_iter()
+            .enumerate()
+            .map(|(index, text)| self.text_layer(text, lines.get(index), lines, font, size))
+            .collect();
+        for (point, layer) in layers.into_iter().flatten() {
+            typeset::paste_with_alpha(&mut image, &layer, point);
+        }
+        Ok(image)
+    }
+
+    /// Upstream `render_animation`, without animated-text or frame-count options.
+    fn render_animation(
+        &self,
+        template: &Template,
+        lines: &[String],
+        font: &str,
+        maximum_frames: usize,
+    ) -> Result<(Vec<RgbaImage>, u32)> {
+        let animation = self.animation(template, maximum_frames)?;
+        let Some((_, first)) = animation.frames.first() else {
+            return Err(anyhow!("no frames decoded for {}", template.id));
+        };
+        let size = first.dimensions();
+        let layers: Vec<_> = template
+            .text
+            .par_iter()
+            .enumerate()
+            .map(|(index, text)| self.text_layer(text, lines.get(index), lines, font, size))
+            .collect();
+
+        let total = animation.total;
+        let frames: Vec<RgbaImage> = animation
+            .frames
+            .par_iter()
+            .map(|(index, frame)| {
+                let percent = if total == 1 {
+                    1.0
+                } else {
+                    *index as f32 / total as f32
+                };
+                let mut image = frame.clone();
+                for (text, layer) in template.text.iter().zip(&layers) {
+                    let visible = percent == 1.0
+                        || (text.start <= percent && percent < text.stop)
+                        || text.stop == 0.0;
+                    if let (true, Some((point, layer))) = (visible, layer) {
+                        typeset::paste_with_alpha(&mut image, layer, *point);
+                    }
+                }
+                image
+            })
+            .collect();
+
+        let mut duration = animation.duration;
+        if frames.len() > MINIMUM_FRAMES {
+            let ratio = frames.len() as f64 / total.max(MAXIMUM_FRAMES) as f64;
+            duration = (250.0f64).min((duration as f64 / ratio).floor()) as u32;
+        }
+        Ok((frames, duration))
+    }
+
+    /// Upstream `get_image_element`, drawn and rotated into a layer.
+    fn text_layer(
+        &self,
+        text: &TextBox,
+        line: Option<&String>,
+        lines: &[String],
+        font_name: &str,
+        image_size: (u32, u32),
+    ) -> Option<((i64, i64), RgbaImage)> {
+        let line = line?;
+        let font = self
+            .fonts
+            .get(if font_name.is_empty() {
+                &text.font
+            } else {
+                font_name
+            })
+            .or_else(|| self.fonts.get(""))?;
+        let point = text.get_anchor(image_size);
+        let max_size = text.get_size(image_size);
+        if max_size.0 == 0 || max_size.1 == 0 {
+            return None;
+        }
+        let max_font_size =
+            (image_size.1 as f32 / if text.angle != 0.0 { 4.0 } else { 9.0 }) as u32;
+
+        let wrapped = typeset::wrap(font, line, max_size, max_font_size);
+        let line = text.stylize(&wrapped, lines);
+        if line.trim().is_empty() {
+            return None;
+        }
+        let sized: SizedFont = typeset::fit_font(font, &line, max_size, max_font_size);
+        let (x_offset, y_offset) = typeset::text_offset(&line, &sized, max_size, &text.align);
+        let (stroke_width, stroke_fill) = text.get_stroke(sized.stroke_width());
+        let rows = line.matches('\n').count() + 1;
+
+        let mut layer = RgbaImage::new(max_size.0, max_size.1);
+        typeset::draw_text(
+            &mut layer,
+            (-x_offset, -y_offset),
+            &line,
+            &sized,
+            &DrawOptions {
+                fill: typeset::parse_color(&text.color).unwrap_or([255, 255, 255, 255]),
+                stroke_width,
+                stroke_fill: typeset::parse_color(&stroke_fill).unwrap_or([0, 0, 0, 255]),
+                spacing: -y_offset / (rows * 2) as f32,
+                align: &text.align,
+            },
+            &self.emoji,
+        );
+        Some((point, typeset::rotate_expand(&layer, text.angle)))
+    }
+
+    /// Static background resized so the short side is the default size.
+    fn background(&self, template: &Template) -> Result<Arc<RgbaImage>> {
+        let path = template
+            .static_image
+            .as_ref()
+            .context("template has no image")?;
+        self.backgrounds
+            .try_get_with(template.id.clone(), || {
+                let image = load_image(path)?;
+                Ok(Arc::new(resize_default(&image, true)))
+            })
+            .map_err(|error: Arc<anyhow::Error>| anyhow!("{error:#}"))
+    }
+
+    fn animation(&self, template: &Template, maximum_frames: usize) -> Result<Arc<Animation>> {
+        let path = template
+            .animated_image
+            .as_ref()
+            .context("template has no image")?;
+        self.animations
+            .try_get_with((template.id.clone(), maximum_frames), || {
+                load_animation(path, maximum_frames).map(Arc::new)
+            })
+            .map_err(|error: Arc<anyhow::Error>| anyhow!("{error:#}"))
+    }
+}
+
+fn load_image(path: &Path) -> Result<RgbaImage> {
+    let mut decoder = ImageReader::open(path)?
+        .with_guessed_format()?
+        .into_decoder()?;
+    let orientation = decoder.orientation()?;
+    let mut image = DynamicImage::from_decoder(decoder)?;
+    image.apply_orientation(orientation);
+    Ok(image.into_rgba8())
+}
+
+fn load_animation(path: &Path, maximum_frames: usize) -> Result<Animation> {
+    let is_gif = path
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("gif"));
+    let (sources, duration) = if is_gif {
+        let decoder = GifDecoder::new(BufReader::new(std::fs::File::open(path)?))?;
+        let frames = decoder.into_frames().collect_frames()?;
+        let duration = frames
+            .first()
+            .map(|frame| {
+                let (numerator, denominator) = frame.delay().numer_denom_ms();
+                numerator / denominator.max(1)
+            })
+            .unwrap_or(100);
+        (
+            frames
+                .into_iter()
+                .map(|frame| frame.into_buffer())
+                .collect::<Vec<_>>(),
+            duration,
+        )
+    } else {
+        (vec![load_image(path)?], 100)
+    };
+    let total = sources.len();
+
+    let modulus = if maximum_frames >= total {
+        1.0
+    } else if maximum_frames > 0 {
+        round1(total as f64 / maximum_frames as f64).max(1.0)
+    } else {
+        round1(total as f64 / MAXIMUM_FRAMES as f64).max(1.0)
+    };
+
+    let frames = sources
+        .into_par_iter()
+        .enumerate()
+        .filter(|(index, _)| (*index as f64 % modulus) < 1.0)
+        .map(|(index, frame)| (index, resize_default(&frame, false)))
+        .collect();
+    Ok(Animation {
+        frames,
+        total,
+        duration,
+    })
+}
+
+fn round1(value: f64) -> f64 {
+    (value * 10.0).round() / 10.0
+}
+
+/// Upstream `resize_image(image, 0, 0, pad=False, expand=...)`.
+fn resize_default(image: &RgbaImage, expand: bool) -> RgbaImage {
+    let (width, height) = image.dimensions();
+    let ratio = width as f64 / height as f64;
+    let (default_width, default_height) = settings::DEFAULT_SIZE;
+    let (dw, dh) = (default_width as f64, default_height as f64);
+    let size = match (ratio < 1.0, expand) {
+        (true, true) => (default_width, (dh / ratio) as u32),
+        (true, false) => ((dw * ratio) as u32, default_height),
+        (false, true) => ((dw * ratio) as u32, default_height),
+        (false, false) => (default_width, (dh / ratio) as u32),
+    };
+    let size = (size.0.max(1), size.1.max(1));
+    if size == (width, height) {
+        return image.clone();
+    }
+    image::imageops::resize(image, size.0, size.1, FilterType::Lanczos3)
+}
+
+fn encode_static(image: RgbaImage, extension: &str) -> Result<Vec<u8>> {
+    let rgb = DynamicImage::ImageRgba8(image).into_rgb8();
+    let mut out = Vec::new();
+    match extension {
+        "jpg" | "jpeg" => JpegEncoder::new_with_quality(&mut out, JPEG_QUALITY).write_image(
+            rgb.as_raw(),
+            rgb.width(),
+            rgb.height(),
+            image::ExtendedColorType::Rgb8,
+        )?,
+        _ => PngEncoder::new_with_quality(&mut out, CompressionType::Fast, PngFilter::Adaptive)
+            .write_image(
+                rgb.as_raw(),
+                rgb.width(),
+                rgb.height(),
+                image::ExtendedColorType::Rgb8,
+            )?,
+    }
+    Ok(out)
+}
+
+/// Encode frames with one shared palette; later frames only store the
+/// pixels that changed (the rest are transparent over the previous frame).
+fn encode_gif(frames: Vec<RgbaImage>, duration: u32) -> Result<Vec<u8>> {
+    let first = frames.first().context("no frames")?;
+    let (width, height) = (
+        u16::try_from(first.width())?,
+        u16::try_from(first.height())?,
+    );
+    let delay = (duration as f32 / 10.0).round() as u16;
+
+    // Build one palette from an evenly spaced sample of all frames.
+    const SAMPLE_PIXELS: usize = 400_000;
+    let total_pixels: usize = frames.iter().map(|frame| frame.as_raw().len() / 4).sum();
+    let step = (total_pixels / SAMPLE_PIXELS).max(1);
+    let palette = Palette::build(
+        frames
+            .iter()
+            .flat_map(|frame| frame.as_raw().chunks_exact(4).step_by(step)),
+        255,
+    );
+    let mut global_palette: Vec<u8> = palette.colors.iter().flatten().copied().collect();
+    global_palette.resize(256 * 3, 0);
+    const TRANSPARENT: u8 = 255;
+
+    let indexed: Vec<Vec<u8>> = frames
+        .par_iter()
+        .map(|frame| {
+            frame
+                .pixels()
+                .map(|pixel| palette.index_of(pixel[0], pixel[1], pixel[2]))
+                .collect()
+        })
+        .collect();
+
+    let row = width as usize;
+    let encoded: Vec<gif::Frame<'static>> = indexed
+        .par_iter()
+        .enumerate()
+        .map(|(index, current)| {
+            let mut frame = gif::Frame {
+                delay,
+                ..Default::default()
+            };
+            if index == 0 {
+                frame.width = width;
+                frame.height = height;
+                frame.buffer = current.clone().into();
+                frame.make_lzw_pre_encoded();
+                return frame;
+            }
+            let previous = &indexed[index - 1];
+            let (mut x0, mut y0, mut x1, mut y1) = (usize::MAX, usize::MAX, 0, 0);
+            for (offset, (a, b)) in current.iter().zip(previous).enumerate() {
+                if a != b {
+                    let (x, y) = (offset % row, offset / row);
+                    x0 = x0.min(x);
+                    y0 = y0.min(y);
+                    x1 = x1.max(x);
+                    y1 = y1.max(y);
+                }
+            }
+            if x0 == usize::MAX {
+                (x0, y0, x1, y1) = (0, 0, 0, 0);
+            }
+            let mut buffer = Vec::with_capacity((x1 - x0 + 1) * (y1 - y0 + 1));
+            for y in y0..=y1 {
+                for x in x0..=x1 {
+                    let offset = y * row + x;
+                    let value = current[offset];
+                    buffer.push(if value == previous[offset] {
+                        TRANSPARENT
+                    } else {
+                        value
+                    });
+                }
+            }
+            frame.left = x0 as u16;
+            frame.top = y0 as u16;
+            frame.width = (x1 - x0 + 1) as u16;
+            frame.height = (y1 - y0 + 1) as u16;
+            frame.transparent = Some(TRANSPARENT);
+            frame.dispose = gif::DisposalMethod::Keep;
+            frame.buffer = buffer.into();
+            frame.make_lzw_pre_encoded();
+            frame
+        })
+        .collect();
+
+    let mut out = Vec::new();
+    {
+        let mut encoder = gif::Encoder::new(&mut out, width, height, &global_palette)?;
+        encoder.set_repeat(gif::Repeat::Infinite)?;
+        for frame in &encoded {
+            encoder.write_lzw_pre_encoded_frame(frame)?;
+        }
+    }
+    Ok(out)
+}
+
+fn encode_webp(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
+    let first = frames.first().context("no frames")?;
+    let (width, height) = first.dimensions();
+    if frames.len() == 1 {
+        let encoded = webp::Encoder::from_rgba(first.as_raw(), width, height).encode(WEBP_QUALITY);
+        return Ok(encoded.to_vec());
+    }
+    let mut config = webp::WebPConfig::new().map_err(|_| anyhow!("invalid WebP config"))?;
+    config.quality = WEBP_QUALITY;
+    config.lossless = 0;
+    // Method 2 encodes ~2x faster than the default (4) for ~3% larger files.
+    config.method = WEBP_METHOD;
+    let mut encoder = webp::AnimEncoder::new(width, height, &config);
+    encoder.set_loop_count(0);
+    for (index, frame) in frames.iter().enumerate() {
+        let timestamp = i32::try_from(index as u64 * duration as u64)?;
+        encoder.add_frame(webp::AnimFrame::from_rgba(
+            frame.as_raw(),
+            width,
+            height,
+            timestamp,
+        ));
+    }
+    let encoded = encoder
+        .try_encode()
+        .map_err(|error| anyhow!("WebP encoding failed: {error:?}"))?;
+    Ok(encoded.to_vec())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+    use std::path::PathBuf;
+
+    use super::*;
+
+    fn renderer() -> Renderer {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let config = Config {
+            root: root.clone(),
+            base_url: "http://localhost:5000".into(),
+            debug: true,
+            default_static_extension: "png".into(),
+            default_animated_extension: "gif".into(),
+        };
+        Renderer::new(
+            config,
+            Arc::new(Catalog::load(&root).unwrap()),
+            Arc::new(Fonts::load(&root).unwrap()),
+        )
+    }
+
+    fn decode(bytes: &[u8]) -> DynamicImage {
+        ImageReader::new(Cursor::new(bytes))
+            .with_guessed_format()
+            .unwrap()
+            .decode()
+            .unwrap()
+    }
+
+    #[test]
+    fn renders_every_template_example() {
+        let renderer = renderer();
+        let templates: Vec<_> = renderer
+            .catalog()
+            .filter("", None)
+            .into_iter()
+            .cloned()
+            .collect();
+        assert!(templates.len() > 200);
+        templates.par_iter().for_each(|template| {
+            let request = MemeRequest {
+                template_id: template.id.clone(),
+                lines: template.example.clone(),
+                font: String::new(),
+                extension: "jpg".into(),
+            };
+            let rendered = renderer
+                .render(&request)
+                .unwrap_or_else(|e| panic!("{}: {e}", template.id));
+            let image = decode(&rendered.bytes);
+            assert!(image.width().min(image.height()) >= 300, "{}", template.id);
+        });
+    }
+
+    #[test]
+    fn renders_all_formats() {
+        let renderer = renderer();
+        for (template, extension, content_type) in [
+            ("fry", "png", "image/png"),
+            ("fry", "jpeg", "image/jpeg"),
+            ("fry", "gif", "image/gif"),
+            ("fry", "webp", "image/webp"),
+            ("oprah", "gif", "image/gif"),
+            ("oprah", "webp", "image/webp"),
+        ] {
+            let request = MemeRequest {
+                template_id: template.into(),
+                lines: vec!["hello :fire:".into(), "world".into()],
+                font: "impact".into(),
+                extension: extension.into(),
+            };
+            let rendered = renderer.render(&request).unwrap();
+            assert_eq!(rendered.content_type, content_type);
+            if extension != "webp" {
+                decode(&rendered.bytes);
+            }
+        }
+    }
+
+    #[test]
+    fn validates_requests() {
+        let renderer = renderer();
+        let request = |template: &str, font: &str, extension: &str, line: &str| MemeRequest {
+            template_id: template.into(),
+            lines: vec![line.into()],
+            font: font.into(),
+            extension: extension.into(),
+        };
+        assert!(matches!(
+            renderer.render(&request("nope", "", "png", "a")),
+            Err(RenderError::NotFound(_))
+        ));
+        assert!(matches!(
+            renderer.render(&request("fry", "nope", "png", "a")),
+            Err(RenderError::Invalid(_))
+        ));
+        assert!(matches!(
+            renderer.render(&request("fry", "", "bmp", "a")),
+            Err(RenderError::Invalid(_))
+        ));
+        assert!(matches!(
+            renderer.render(&request("fry", "", "png", &"a".repeat(201))),
+            Err(RenderError::TooLong)
+        ));
+    }
+
+    #[test]
+    fn animated_template_keeps_frames() {
+        let renderer = renderer();
+        let template = renderer.catalog().get("oprah").unwrap().clone();
+        let (frames, duration) = renderer
+            .render_animation(&template, &["a".into(), "b".into()], "", 0)
+            .unwrap();
+        assert!(frames.len() > 1);
+        assert!(duration > 0);
+    }
+}
