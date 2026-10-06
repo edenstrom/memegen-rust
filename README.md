@@ -6,6 +6,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static meme takes about 3 ms; see [Performance](#performance)
+- Also runs on [Cloudflare Workers](#cloudflare-workers), with the API and a remote MCP endpoint
 
 ## Build
 
@@ -86,6 +87,30 @@ Text escapes in URLs: `_` → space, `__` → `_`, `--` → `-`, `~q` → `?`, `
 | `DEFAULT_ANIMATED_EXTENSION` | `gif` | Default format for animated templates |
 | `MEMEGEN_ROOT` / `--root` | build directory | Location of the assets |
 | `RUST_LOG` | `info` (`warn` for stdio) | Log level (logs go to stderr) |
+
+## Cloudflare Workers
+
+`worker/` builds the same code to WebAssembly with [workers-rs](https://github.com/cloudflare/workers-rs). It serves the full HTTP API plus MCP at `/mcp` (stateless Streamable HTTP, JSON responses, no sessions).
+
+```sh
+cd worker
+npx wrangler dev      # http://localhost:8787
+npx wrangler deploy   # https://memegen.<account>.workers.dev
+```
+
+The build needs the `wasm32-unknown-unknown` Rust target (`rustup target add wasm32-unknown-unknown`); wrangler installs `worker-build` on first use.
+
+- **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 1.6 MB gzipped.
+- **Startup**: the template catalog is embedded at build time; fonts (5 MB) are fetched on the first request in each isolate.
+- **Caching**: successful `/images/...` responses go into Cloudflare's cache, so a repeated meme isn't rendered again. The Cache API has no effect on `*.workers.dev`, so use a [custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) to get this. Each isolate also keeps small in-memory caches (isolates have 128 MB of memory).
+- **CPU time**: rendering needs the Workers Paid plan. In local `wrangler dev`, a new static meme took 8–17 ms and an animated GIF about 85 ms, so most renders exceed the Free plan's 10 ms CPU limit. `wrangler.toml` sets a 30 s limit.
+- **Differences from the native server**: WebP is lossless, because libwebp (C) doesn't build for `wasm32-unknown-unknown`. Animated WebP keeps 20 frames instead of 80 and is large (about 5.6 MB for `oprah`), so use GIF for animations. `generate_meme` has no `save_to`. The `/mcp` endpoint has no Host/Origin checks; it's meant to be public. Set `DOMAIN` in `wrangler.toml` to use a custom host in returned URLs (by default, URLs use the host of the first request each isolate serves).
+
+### Remote MCP
+
+```sh
+claude mcp add --transport http memegen https://memegen.<account>.workers.dev/mcp
+```
 
 ## Not ported
 

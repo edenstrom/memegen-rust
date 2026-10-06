@@ -1,2 +1,4 @@
 /target
 /.context
+/worker/build
+/worker/.wrangler

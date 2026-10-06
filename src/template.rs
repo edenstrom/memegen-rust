@@ -1,7 +1,6 @@
 //! Template catalog, ported from upstream `app/models/template.py`.
 
 use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
@@ -76,10 +75,11 @@ pub struct Template {
     pub example: Vec<String>,
     pub overlays: usize,
     pub styles: Vec<String>,
-    /// Background used for static output (first frame if only a GIF exists).
-    pub static_image: Option<PathBuf>,
-    /// Background used for animated output (GIF preferred).
-    pub animated_image: Option<PathBuf>,
+    /// Asset path of the background for static output (first frame if only
+    /// a GIF exists).
+    pub static_image: Option<String>,
+    /// Asset path of the background for animated output (GIF preferred).
+    pub animated_image: Option<String>,
 }
 
 #[derive(Serialize, schemars::JsonSchema)]
@@ -104,38 +104,27 @@ pub struct TemplateInfo {
 }
 
 impl Template {
-    fn load(id: &str, directory: &Path) -> Result<Self> {
-        let config = directory.join("config.yml");
-        let raw: RawTemplate = serde_yaml::from_str(
-            &std::fs::read_to_string(&config)
-                .with_context(|| format!("reading {}", config.display()))?,
-        )
-        .with_context(|| format!("parsing {}", config.display()))?;
+    /// Build a template from its `config.yml` and the file names in its
+    /// directory.
+    pub fn parse(id: &str, config: &str, files: &[String]) -> Result<Self> {
+        let raw: RawTemplate = serde_yaml::from_str(config).context("parsing config.yml")?;
 
-        let mut files: Vec<PathBuf> = std::fs::read_dir(directory)?
-            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
-            .filter(|path| path.is_file())
-            .collect();
+        let mut files = files.to_vec();
         files.sort();
 
-        let stem = |path: &Path| {
-            path.file_stem()
-                .and_then(|s| s.to_str())
-                .unwrap_or("")
-                .to_string()
+        let stem = |name: &str| match name.rsplit_once('.') {
+            Some((stem, _)) if !stem.is_empty() => stem.to_string(),
+            _ => name.to_string(),
         };
-        let ext = |path: &Path| {
-            path.extension()
-                .and_then(|s| s.to_str())
-                .unwrap_or("")
-                .to_lowercase()
+        let ext = |name: &str| match name.rsplit_once('.') {
+            Some((stem, ext)) if !stem.is_empty() => ext.to_lowercase(),
+            _ => String::new(),
         };
 
         let overlay = raw.overlay.unwrap_or_else(|| vec![Overlay::default()]);
         let mut styles: Vec<String> = Vec::new();
-        for path in &files {
-            let name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
-            let stem = stem(path);
+        for name in &files {
+            let stem = stem(name);
             if stem.starts_with(['.', '_']) {
                 continue;
             }
@@ -150,18 +139,19 @@ impl Template {
         }
         styles.sort();
 
-        let defaults: Vec<&PathBuf> = files
+        let defaults: Vec<&String> = files
             .iter()
-            .filter(|path| stem(path) == "default" && ext(path) != PLACEHOLDER_SUFFIX)
+            .filter(|name| stem(name) == "default" && ext(name) != PLACEHOLDER_SUFFIX)
             .collect();
+        let path = |name: &String| format!("templates/{id}/{name}");
         let gif = defaults
             .iter()
-            .find(|path| ext(path) == "gif")
-            .map(|p| (*p).clone());
+            .find(|name| ext(name) == "gif")
+            .map(|name| path(name));
         let still = defaults
             .iter()
-            .find(|path| ext(path) != "gif")
-            .map(|p| (*p).clone());
+            .find(|name| ext(name) != "gif")
+            .map(|name| path(name));
 
         Ok(Self {
             id: id.to_string(),
@@ -277,27 +267,46 @@ pub struct Catalog {
 }
 
 impl Catalog {
-    pub fn load(root: &Path) -> Result<Self> {
-        let directory = root.join("templates");
+    /// Build the catalog from `(id, config.yml contents, file names)` entries,
+    /// skipping templates whose config doesn't parse.
+    pub fn new<'a>(entries: impl IntoIterator<Item = (&'a str, &'a str, Vec<String>)>) -> Self {
         let mut templates = BTreeMap::new();
-        for entry in std::fs::read_dir(&directory)
-            .with_context(|| format!("reading {}", directory.display()))?
-        {
-            let path = entry?.path();
-            if !path.join("config.yml").exists() {
-                continue;
-            }
-            let Some(id) = path.file_name().and_then(|s| s.to_str()) else {
-                continue;
-            };
-            match Template::load(id, &path) {
+        for (id, config, files) in entries {
+            match Template::parse(id, config, &files) {
                 Ok(template) => {
                     templates.insert(id.to_string(), Arc::new(template));
                 }
                 Err(error) => tracing::warn!("Skipping template {id}: {error:#}"),
             }
         }
-        Ok(Self { templates })
+        Self { templates }
+    }
+
+    /// Load every template directory under `root/templates`.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn load(root: &std::path::Path) -> Result<Self> {
+        let directory = root.join("templates");
+        let mut entries = Vec::new();
+        for entry in std::fs::read_dir(&directory)
+            .with_context(|| format!("reading {}", directory.display()))?
+        {
+            let path = entry?.path();
+            let Ok(config) = std::fs::read_to_string(path.join("config.yml")) else {
+                continue;
+            };
+            let Some(id) = path.file_name().and_then(|s| s.to_str()) else {
+                continue;
+            };
+            let files: Vec<String> = std::fs::read_dir(&path)?
+                .filter_map(|entry| entry.ok())
+                .filter(|entry| entry.file_type().is_ok_and(|kind| kind.is_file()))
+                .filter_map(|entry| entry.file_name().into_string().ok())
+                .collect();
+            entries.push((id.to_string(), config, files));
+        }
+        Ok(Self::new(entries.iter().map(|(id, config, files)| {
+            (id.as_str(), config.as_str(), files.clone())
+        })))
     }
 
     pub fn get(&self, id: &str) -> Option<&Arc<Template>> {
@@ -317,5 +326,9 @@ impl Catalog {
 
     pub fn len(&self) -> usize {
         self.templates.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.templates.is_empty()
     }
 }

@@ -1,6 +1,7 @@
 //! Unauthenticated MCP server exposing meme generation as tools.
 
-use std::path::PathBuf;
+pub mod stateless;
+
 use std::sync::Arc;
 
 use base64::Engine as _;
@@ -19,6 +20,13 @@ Typical flow: call `list_templates` (optionally with a `filter`) to find a templ
 text lines it takes, then call `generate_meme` with that ID and one string per line. \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
 Animated templates render as GIF/WebP; use `extension` to choose the format.";
+
+#[cfg(not(target_arch = "wasm32"))]
+const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
+image and a shareable URL (served by `memegen serve`). Optionally saves the image to `save_to`.";
+#[cfg(target_arch = "wasm32")]
+const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
+image and a shareable URL.";
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ListTemplatesRequest {
@@ -49,6 +57,7 @@ pub struct GenerateMemeRequest {
     #[serde(default)]
     pub font: Option<String>,
     /// Absolute file path to also write the image to, e.g. "/tmp/meme.png".
+    #[cfg(not(target_arch = "wasm32"))]
     #[serde(default)]
     pub save_to: Option<String>,
     /// Return the image inline in the tool result (default true).
@@ -139,10 +148,7 @@ impl MemegenMcp {
         json_text(&fonts)
     }
 
-    #[tool(
-        description = "Render a meme image from a template and lines of text. Returns the image \
-        and a shareable URL (served by `memegen serve`). Optionally saves the image to `save_to`."
-    )]
+    #[tool(description = GENERATE_MEME)]
     async fn generate_meme(
         &self,
         Parameters(request): Parameters<GenerateMemeRequest>,
@@ -192,22 +198,13 @@ impl MemegenMcp {
             }
         };
 
-        let mut saved_to = None;
-        if let Some(path) = request.save_to.filter(|path| !path.is_empty()) {
-            let path = PathBuf::from(path);
-            if !path.is_absolute() {
-                return Ok(CallToolResult::error(vec![ContentBlock::text(
-                    "`save_to` must be an absolute path",
-                )]));
-            }
-            if let Err(error) = tokio::fs::write(&path, &rendered.bytes).await {
-                return Ok(CallToolResult::error(vec![ContentBlock::text(format!(
-                    "Rendered the meme but could not write {}: {error}",
-                    path.display()
-                ))]));
-            }
-            saved_to = Some(path.display().to_string());
-        }
+        #[cfg(not(target_arch = "wasm32"))]
+        let saved_to = match save(request.save_to, &rendered.bytes).await {
+            Ok(saved_to) => saved_to,
+            Err(message) => return Ok(CallToolResult::error(vec![ContentBlock::text(message)])),
+        };
+        #[cfg(target_arch = "wasm32")]
+        let saved_to: Option<String> = None;
 
         let (url, _) = self
             .app
@@ -230,6 +227,25 @@ impl MemegenMcp {
         content.push(ContentBlock::text(summary.to_string()));
         Ok(CallToolResult::success(content))
     }
+}
+
+/// Write the image to `path` if one was given; returns the path written.
+#[cfg(not(target_arch = "wasm32"))]
+async fn save(path: Option<String>, bytes: &[u8]) -> Result<Option<String>, String> {
+    let Some(path) = path.filter(|path| !path.is_empty()) else {
+        return Ok(None);
+    };
+    let path = std::path::PathBuf::from(path);
+    if !path.is_absolute() {
+        return Err("`save_to` must be an absolute path".into());
+    }
+    if let Err(error) = tokio::fs::write(&path, bytes).await {
+        return Err(format!(
+            "Rendered the meme but could not write {}: {error}",
+            path.display()
+        ));
+    }
+    Ok(Some(path.display().to_string()))
 }
 
 #[tool_handler(router = self.tool_router)]

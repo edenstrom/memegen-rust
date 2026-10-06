@@ -1,12 +1,13 @@
 //! Emoji support: `:alias:` expansion and Twemoji image lookup (upstream uses
 //! the `emoji` package plus Pilmoji, which also draws Twemoji graphics).
 
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use image::RgbaImage;
-use moka::sync::Cache;
 use unicode_segmentation::UnicodeSegmentation;
+
+use crate::assets::Source;
+use crate::cache::Cache;
 
 /// Replace `:shortcode:` aliases with emoji characters.
 pub fn emojize(text: &str) -> String {
@@ -76,32 +77,60 @@ fn twemoji_names(grapheme: &str) -> Vec<String> {
     }
 }
 
+/// Asset paths that may hold the image for an emoji, in order of preference.
+fn paths(grapheme: &str) -> impl Iterator<Item = String> {
+    twemoji_names(grapheme)
+        .into_iter()
+        .map(|name| format!("emoji/72x72/{name}.png"))
+}
+
+type Image = Option<Arc<RgbaImage>>;
+
+fn weight<K>(_: &K, image: &Image) -> u32 {
+    image
+        .as_ref()
+        .map_or(1, |image| image.as_raw().len() as u32)
+}
+
 pub struct EmojiImages {
-    directory: PathBuf,
-    cache: Cache<(String, u32), Option<Arc<RgbaImage>>>,
+    originals: Cache<String, Image>,
+    scaled: Cache<(String, u32), Image>,
+}
+
+impl Default for EmojiImages {
+    fn default() -> Self {
+        Self {
+            originals: Cache::new(8 * 1024 * 1024, weight),
+            scaled: Cache::new(16 * 1024 * 1024, weight),
+        }
+    }
 }
 
 impl EmojiImages {
-    pub fn new(root: &Path) -> Self {
-        Self {
-            directory: root.join("emoji").join("72x72"),
-            cache: Cache::new(2_048),
-        }
+    /// Asset paths to load before drawing `text`: candidates for every emoji
+    /// that isn't cached yet.
+    pub fn missing(&self, text: &str) -> Vec<String> {
+        let text = emojize(text);
+        segments(&text)
+            .filter(|grapheme| {
+                is_emoji(grapheme) && !self.originals.contains(&grapheme.to_string())
+            })
+            .flat_map(paths)
+            .collect()
     }
 
     /// Load an emoji image scaled to `size` pixels square.
-    pub fn get(&self, grapheme: &str, size: u32) -> Option<Arc<RgbaImage>> {
+    pub fn get(&self, grapheme: &str, size: u32, source: &dyn Source) -> Image {
         if size == 0 {
             return None;
         }
-        self.cache.get_with((grapheme.to_string(), size), || {
-            let path = twemoji_names(grapheme)
-                .into_iter()
-                .map(|name| self.directory.join(format!("{name}.png")))
-                .find(|path| path.exists())?;
-            let image = image::open(path).ok()?.into_rgba8();
+        self.scaled.get_with((grapheme.to_string(), size), || {
+            let image = self.originals.get_with(grapheme.to_string(), || {
+                let bytes = paths(grapheme).find_map(|path| source.read(&path))?;
+                Some(Arc::new(image::load_from_memory(&bytes).ok()?.into_rgba8()))
+            })?;
             Some(Arc::new(image::imageops::resize(
-                &image,
+                &*image,
                 size,
                 size,
                 image::imageops::FilterType::Lanczos3,
