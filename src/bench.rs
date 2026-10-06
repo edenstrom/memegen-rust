@@ -5,8 +5,9 @@ use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
 
-use crate::app::App;
-use crate::render::MemeRequest;
+use memegen::app::App;
+use memegen::assets::Source;
+use memegen::render::MemeRequest;
 
 pub struct Case {
     pub name: &'static str,
@@ -84,7 +85,7 @@ fn median(mut values: Vec<f64>) -> f64 {
     values[values.len() / 2]
 }
 
-pub fn run(app: Arc<App>, iterations: usize) -> Result<()> {
+pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> {
     let renderer = &app.renderer;
     println!(
         "{:<30} {:>11} {:>11} {:>11} {:>11} {:>11} {:>11}",
@@ -104,7 +105,7 @@ pub fn run(app: Arc<App>, iterations: usize) -> Result<()> {
             renderer.clear_caches();
             let (wall, cpu) = measure(|| {
                 renderer
-                    .render_bytes(&template, &lines, "", case.extension)
+                    .render_bytes(&template, &lines, "", case.extension, source)
                     .map(drop)
             })?;
             cold.0.push(ms(wall));
@@ -113,12 +114,12 @@ pub fn run(app: Arc<App>, iterations: usize) -> Result<()> {
 
         // Warm: background cached, output not cached (a new meme every time).
         let mut size = 0;
-        renderer.render_bytes(&template, &lines, "", case.extension)?;
+        renderer.render_bytes(&template, &lines, "", case.extension, source)?;
         let mut warm = (vec![], vec![]);
         for _ in 0..iterations {
             let (wall, cpu) = measure(|| {
                 size = renderer
-                    .render_bytes(&template, &lines, "", case.extension)?
+                    .render_bytes(&template, &lines, "", case.extension, source)?
                     .len();
                 Ok(())
             })?;
@@ -133,10 +134,15 @@ pub fn run(app: Arc<App>, iterations: usize) -> Result<()> {
             font: String::new(),
             extension: case.extension.into(),
         };
-        renderer.render(&request).ok();
+        renderer.render(&request, source).ok();
         let mut cached = vec![];
         for _ in 0..iterations {
-            let (wall, _) = measure(|| renderer.render(&request).map(drop).map_err(Into::into))?;
+            let (wall, _) = measure(|| {
+                renderer
+                    .render(&request, source)
+                    .map(drop)
+                    .map_err(Into::into)
+            })?;
             cached.push(ms(wall));
         }
 

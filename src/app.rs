@@ -2,9 +2,10 @@
 
 use std::sync::Arc;
 
-use anyhow::Result;
+use bytes::Bytes;
 use serde::Serialize;
 
+use crate::assets::Assets;
 use crate::config::Config;
 use crate::fonts::Fonts;
 use crate::render::{MemeRequest, RenderError, Rendered, Renderer};
@@ -13,6 +14,7 @@ use crate::template::{Catalog, Template, TemplateInfo};
 
 pub struct App {
     pub renderer: Renderer,
+    assets: Arc<dyn Assets>,
 }
 
 #[derive(Serialize, schemars::JsonSchema)]
@@ -22,17 +24,29 @@ pub struct ExampleImage {
 }
 
 impl App {
-    pub fn load(config: Config) -> Result<Arc<Self>> {
-        let catalog = Arc::new(Catalog::load(&config.root)?);
-        let fonts = Arc::new(Fonts::load(&config.root)?);
+    pub fn new(
+        config: Config,
+        catalog: Catalog,
+        fonts: Fonts,
+        assets: Arc<dyn Assets>,
+    ) -> Arc<Self> {
         tracing::info!(
             "Loaded {} templates and {} fonts",
             catalog.len(),
             fonts.all().len()
         );
-        Ok(Arc::new(Self {
-            renderer: Renderer::new(config, catalog, fonts),
-        }))
+        Arc::new(Self {
+            renderer: Renderer::new(config, Arc::new(catalog), Arc::new(fonts)),
+            assets,
+        })
+    }
+
+    /// Load templates and fonts from a local directory.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn load(config: Config, directory: crate::assets::Directory) -> anyhow::Result<Arc<Self>> {
+        let catalog = Catalog::load(directory.root())?;
+        let fonts = Fonts::load(&directory)?;
+        Ok(Self::new(config, catalog, fonts, Arc::new(directory)))
     }
 
     pub fn config(&self) -> &Config {
@@ -131,14 +145,39 @@ impl App {
         (url, template.is_some())
     }
 
+    /// A file from `static/`.
+    pub async fn static_file(&self, name: &str) -> Option<Bytes> {
+        let path = format!("static/{name}");
+        self.assets.load(vec![path.clone()]).await.remove(&path)
+    }
+
     /// Render on the blocking pool; rendering is CPU-bound.
+    #[cfg(not(target_arch = "wasm32"))]
     pub async fn render(
         self: &Arc<Self>,
         request: MemeRequest,
     ) -> Result<Arc<Rendered>, RenderError> {
+        let files = match self.assets.source() {
+            Some(_) => Default::default(),
+            None => self.assets.load(self.renderer.missing(&request)).await,
+        };
         let app = Arc::clone(self);
-        tokio::task::spawn_blocking(move || app.renderer.render(&request))
-            .await
-            .map_err(|error| RenderError::Internal(error.to_string()))?
+        tokio::task::spawn_blocking(move || {
+            let source = app.assets.source().unwrap_or(&files);
+            app.renderer.render(&request, source)
+        })
+        .await
+        .map_err(|error| RenderError::Internal(error.to_string()))?
+    }
+
+    /// Load the files the render needs, then render on this thread (Workers
+    /// isolates are single-threaded).
+    #[cfg(target_arch = "wasm32")]
+    pub async fn render(
+        self: &Arc<Self>,
+        request: MemeRequest,
+    ) -> Result<Arc<Rendered>, RenderError> {
+        let files = self.assets.load(self.renderer.missing(&request)).await;
+        self.renderer.render(&request, &files)
     }
 }

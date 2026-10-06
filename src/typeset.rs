@@ -2,11 +2,13 @@
 //! `textbbox` semantics closely enough to reuse upstream's layout math
 //! (`app/utils/images.py`).
 
+use std::sync::Arc;
+
 use ab_glyph::{Font as _, GlyphId, PxScale, ScaleFont, point};
 use image::{Rgba, RgbaImage};
 use imageproc::geometric_transformations::{Interpolation, Projection, warp_into};
 
-use crate::emoji::{self, EmojiImages};
+use crate::emoji;
 use crate::fonts::Font;
 use crate::settings;
 
@@ -384,14 +386,15 @@ pub struct DrawOptions<'a> {
     pub align: &'a str,
 }
 
-/// Pillow `ImageDraw.text(xy, text, ...)` with Pilmoji-style emoji images.
+/// Pillow `ImageDraw.text(xy, text, ...)` with Pilmoji-style emoji images,
+/// looked up by grapheme and pixel size.
 pub fn draw_text(
     canvas: &mut RgbaImage,
     xy: (f32, f32),
     text: &str,
     font: &SizedFont,
     options: &DrawOptions,
-    emoji_images: &EmojiImages,
+    emoji_image: &dyn Fn(&str, u32) -> Option<Arc<RgbaImage>>,
 ) {
     let (width, height) = canvas.dimensions();
     if width == 0 || height == 0 || text.trim().is_empty() {
@@ -460,7 +463,7 @@ pub fn draw_text(
     apply_mask(canvas, &coverage, mask_width, margin, options.fill);
 
     for (x, y, grapheme) in emoji_draws {
-        if let Some(image) = emoji_images.get(grapheme, emoji_size as u32) {
+        if let Some(image) = emoji_image(grapheme, emoji_size as u32) {
             paste_with_alpha(canvas, &image, (x, y));
         }
     }

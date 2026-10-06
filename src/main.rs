@@ -1,18 +1,4 @@
-mod api;
-mod app;
 mod bench;
-mod config;
-mod emoji;
-mod fonts;
-mod mcp;
-mod openapi;
-mod quantize;
-mod render;
-mod settings;
-mod slug;
-mod template;
-mod textbox;
-mod typeset;
 
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -31,9 +17,11 @@ use rmcp::transport::streamable_http_server::{
 use tower_http::cors::CorsLayer;
 use tracing_subscriber::EnvFilter;
 
-use crate::app::App;
-use crate::config::Config;
-use crate::mcp::MemegenMcp;
+use memegen::api;
+use memegen::app::App;
+use memegen::assets::Directory;
+use memegen::config::Config;
+use memegen::mcp::MemegenMcp;
 
 #[derive(Parser)]
 #[command(
@@ -68,6 +56,20 @@ struct CommonArgs {
     /// Directory containing templates/, fonts/, emoji/, and static/.
     #[arg(long, env = "MEMEGEN_ROOT", global = true)]
     root: Option<PathBuf>,
+}
+
+impl CommonArgs {
+    fn directory(&self) -> Directory {
+        Directory::new(
+            self.root
+                .clone()
+                .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR"))),
+        )
+    }
+
+    fn load(&self, port: u16) -> Result<Arc<App>> {
+        App::load(Config::from_env(port), self.directory())
+    }
 }
 
 #[derive(Args, Clone)]
@@ -105,8 +107,9 @@ async fn main() -> Result<()> {
         Some(Command::Serve(args)) => serve(args).await,
         Some(Command::Bench { common, iterations }) => {
             init_tracing("warn");
-            let app = App::load(Config::from_env(common.root, 5000))?;
-            tokio::task::spawn_blocking(move || bench::run(app, iterations)).await?
+            let app = common.load(5000)?;
+            let directory = common.directory();
+            tokio::task::spawn_blocking(move || bench::run(app, &directory, iterations)).await?
         }
         None => serve(cli.serve).await,
     }
@@ -118,7 +121,7 @@ async fn run_stdio(args: CommonArgs) -> Result<()> {
         .ok()
         .and_then(|p| p.parse().ok())
         .unwrap_or(5000);
-    let app = App::load(Config::from_env(args.root, port))?;
+    let app = args.load(port)?;
     let service = MemegenMcp::new(app).serve(rmcp::transport::stdio()).await?;
     service.waiting().await?;
     Ok(())
@@ -155,7 +158,7 @@ async fn guard_origin(request: Request, next: Next) -> Response {
 
 async fn serve(args: ServeArgs) -> Result<()> {
     init_tracing("info");
-    let app: Arc<App> = App::load(Config::from_env(args.common.root, args.port))?;
+    let app = args.common.load(args.port)?;
 
     let mut router = api::router(Arc::clone(&app)).layer(CorsLayer::permissive());
     if !args.no_mcp {

@@ -1,0 +1,19 @@
+[package]
+name = "memegen-worker"
+version = "0.1.0"
+edition = "2024"
+description = "memegen on Cloudflare Workers"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+axum = { version = "0.8", default-features = false }
+console_error_panic_hook = "0.1.7"
+futures-util = { version = "0.3", default-features = false }
+memegen = { path = ".." }
+tower-http = { version = "0.7.1", features = ["cors"] }
+tower-service = "0.3.3"
+worker = { version = "0.8.7", features = ["axum", "http"] }

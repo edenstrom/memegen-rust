@@ -1,13 +1,9 @@
-use std::path::PathBuf;
-
 use crate::settings;
 
 /// Runtime configuration, mostly sourced from environment variables
 /// (mirrors upstream `DOMAIN`, `DEBUG`, `DEFAULT_*_EXTENSION`).
 #[derive(Debug, Clone)]
 pub struct Config {
-    /// Directory containing `templates/`, `fonts/`, `emoji/`, and `static/`.
-    pub root: PathBuf,
     /// Scheme and host used for absolute URLs in API responses.
     pub base_url: String,
     /// Bypass the render cache (upstream rebuilds images when not deployed).
@@ -16,24 +12,27 @@ pub struct Config {
     pub default_animated_extension: String,
 }
 
+impl Default for Config {
+    fn default() -> Self {
+        Self::from_vars(|_| None, "http://localhost:5000".into())
+    }
+}
+
 impl Config {
-    pub fn from_env(root: Option<PathBuf>, port: u16) -> Self {
-        let root = root
-            .or_else(|| std::env::var_os("MEMEGEN_ROOT").map(PathBuf::from))
-            .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")));
-        let base_url = match std::env::var("DOMAIN") {
-            Ok(domain) if !domain.is_empty() => format!("https://{domain}"),
-            _ => format!("http://localhost:{port}"),
+    /// Build from variables looked up with `var`; `base_url` applies when
+    /// `DOMAIN` isn't set.
+    pub fn from_vars(var: impl Fn(&str) -> Option<String>, base_url: String) -> Self {
+        let base_url = match var("DOMAIN") {
+            Some(domain) if !domain.is_empty() => format!("https://{domain}"),
+            _ => base_url,
         };
-        let debug = std::env::var("DEBUG").is_ok_and(|value| value == "true");
+        let debug = var("DEBUG").is_some_and(|value| value == "true");
         let extension = |name: &str, default: &str| {
-            std::env::var(name)
-                .ok()
+            var(name)
                 .filter(|value| settings::ALLOWED_EXTENSIONS.contains(&value.as_str()))
                 .unwrap_or_else(|| default.to_string())
         };
         Self {
-            root,
             base_url,
             debug,
             default_static_extension: extension(
@@ -45,5 +44,13 @@ impl Config {
                 settings::DEFAULT_ANIMATED_EXTENSION,
             ),
         }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn from_env(port: u16) -> Self {
+        Self::from_vars(
+            |name| std::env::var(name).ok(),
+            format!("http://localhost:{port}"),
+        )
     }
 }

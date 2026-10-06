@@ -85,9 +85,9 @@ async fn openapi_spec(State(app): State<AppState>) -> Json<Value> {
 }
 
 async fn static_file(app: &App, name: &str, content_type: &'static str) -> Response {
-    match tokio::fs::read(app.config().root.join("static").join(name)).await {
-        Ok(bytes) => ([(header::CONTENT_TYPE, content_type)], bytes).into_response(),
-        Err(_) => StatusCode::NOT_FOUND.into_response(),
+    match app.static_file(name).await {
+        Some(bytes) => ([(header::CONTENT_TYPE, content_type)], bytes).into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
     }
 }
 

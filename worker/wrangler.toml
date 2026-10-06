@@ -1,0 +1,22 @@
+name = "memegen"
+main = "build/index.js"
+compatibility_date = "2026-09-01"
+
+[build]
+command = "cargo install -q worker-build@^0.8.7 && worker-build --release"
+
+# templates/, fonts/, emoji/ and static/ (symlinks to the repository root).
+# The Worker runs first for every request and reads them via the binding, so
+# the raw files aren't served directly.
+[assets]
+directory = "assets"
+binding = "ASSETS"
+run_worker_first = true
+
+# Rendering animated templates can take a few hundred milliseconds of CPU.
+[limits]
+cpu_ms = 30000
+
+[vars]
+# Set to serve URLs in responses under a custom domain (default: request host).
+# DOMAIN = "memes.example.com"

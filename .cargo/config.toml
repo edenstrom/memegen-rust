@@ -1,0 +1,3 @@
+# Workers runs WebAssembly SIMD; enabling it speeds up rendering in the Worker.
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "target-feature=+simd128"]

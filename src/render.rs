@@ -1,7 +1,6 @@
 //! Meme rendering pipeline with in-memory caches.
 
-use std::io::BufReader;
-use std::path::Path;
+use std::io::Cursor;
 use std::sync::Arc;
 
 use anyhow::{Context, Result, anyhow};
@@ -11,9 +10,10 @@ use image::codecs::jpeg::JpegEncoder;
 use image::codecs::png::{CompressionType, FilterType as PngFilter, PngEncoder};
 use image::imageops::FilterType;
 use image::{AnimationDecoder, DynamicImage, ImageDecoder, ImageEncoder, ImageReader, RgbaImage};
-use moka::sync::Cache;
 use rayon::prelude::*;
 
+use crate::assets::Source;
+use crate::cache::Cache;
 use crate::config::Config;
 use crate::emoji::EmojiImages;
 use crate::fonts::Fonts;
@@ -25,9 +25,26 @@ use crate::{settings, slug};
 
 const MAXIMUM_FRAMES: usize = 20;
 const MINIMUM_FRAMES: usize = 5;
+#[cfg(not(target_arch = "wasm32"))]
 const WEBP_QUALITY: f32 = 75.0;
+#[cfg(not(target_arch = "wasm32"))]
 const WEBP_METHOD: i32 = 2;
 const JPEG_QUALITY: u8 = 95;
+
+/// Frame budget for animated WebP (0 means upstream's default sampling).
+/// Upstream keeps 4x more frames than for GIF; the lossless encoder used on
+/// WebAssembly sticks to the GIF budget to bound memory and file size.
+#[cfg(not(target_arch = "wasm32"))]
+const WEBP_MAXIMUM_FRAMES: usize = MAXIMUM_FRAMES * 4;
+#[cfg(target_arch = "wasm32")]
+const WEBP_MAXIMUM_FRAMES: usize = 0;
+
+/// Cache budgets in MB for decoded backgrounds, decoded animations and
+/// encoded output. A Workers isolate has 128 MB of memory in total.
+#[cfg(not(target_arch = "wasm32"))]
+const CACHE_MB: (u64, u64, u64) = (256, 512, 256);
+#[cfg(target_arch = "wasm32")]
+const CACHE_MB: (u64, u64, u64) = (16, 32, 8);
 
 #[derive(Debug, Clone)]
 pub struct Rendered {
@@ -70,6 +87,14 @@ pub struct MemeRequest {
     pub extension: String,
 }
 
+fn maximum_frames(extension: &str) -> usize {
+    if extension == "webp" {
+        WEBP_MAXIMUM_FRAMES
+    } else {
+        0
+    }
+}
+
 pub fn content_type(extension: &str) -> &'static str {
     match extension {
         "jpg" | "jpeg" => "image/jpeg",
@@ -96,32 +121,32 @@ pub struct Renderer {
     outputs: Cache<String, Arc<Rendered>>,
 }
 
+/// A validated request and its output cache key.
+struct Prepared {
+    template: Arc<Template>,
+    font: String,
+    extension: String,
+    key: String,
+}
+
 impl Renderer {
     pub fn new(config: Config, catalog: Arc<Catalog>, fonts: Arc<Fonts>) -> Self {
-        let emoji = EmojiImages::new(&config.root);
+        const MB: u64 = 1024 * 1024;
+        let (backgrounds, animations, outputs) = CACHE_MB;
         Self {
             config,
             catalog,
             fonts,
-            emoji,
-            backgrounds: Cache::builder()
-                .weigher(|_, image: &Arc<RgbaImage>| image.as_raw().len() as u32)
-                .max_capacity(256 * 1024 * 1024)
-                .build(),
-            animations: Cache::builder()
-                .weigher(|_, animation: &Arc<Animation>| {
-                    animation
-                        .frames
-                        .iter()
-                        .map(|(_, frame)| frame.as_raw().len() as u32)
-                        .fold(0u32, u32::saturating_add)
-                })
-                .max_capacity(512 * 1024 * 1024)
-                .build(),
-            outputs: Cache::builder()
-                .weigher(|_, rendered: &Arc<Rendered>| rendered.bytes.len() as u32)
-                .max_capacity(256 * 1024 * 1024)
-                .build(),
+            emoji: EmojiImages::default(),
+            backgrounds: Cache::new(backgrounds * MB, |_, image| image.as_raw().len() as u32),
+            animations: Cache::new(animations * MB, |_, animation| {
+                animation
+                    .frames
+                    .iter()
+                    .map(|(_, frame)| frame.as_raw().len() as u32)
+                    .fold(0u32, u32::saturating_add)
+            }),
+            outputs: Cache::new(outputs * MB, |_, rendered| rendered.bytes.len() as u32),
         }
     }
 
@@ -137,8 +162,7 @@ impl Renderer {
         &self.config
     }
 
-    /// Validate a request, then render it (or fetch it from cache).
-    pub fn render(&self, request: &MemeRequest) -> Result<Arc<Rendered>, RenderError> {
+    fn prepare(&self, request: &MemeRequest) -> Result<Prepared, RenderError> {
         let extension = request.extension.to_lowercase();
         if !settings::ALLOWED_EXTENSIONS.contains(&extension.as_str()) {
             return Err(RenderError::Invalid(format!(
@@ -169,15 +193,69 @@ impl Renderer {
         {
             return Err(RenderError::TooLong);
         }
+        let key = format!("{}|{slug}|{font}|{extension}", template.id);
+        Ok(Prepared {
+            template,
+            font,
+            extension,
+            key,
+        })
+    }
 
+    /// Asset paths a render of `request` would read that aren't cached yet,
+    /// for sources that must load files before rendering.
+    pub fn missing(&self, request: &MemeRequest) -> Vec<String> {
+        let Ok(prepared) = self.prepare(request) else {
+            return vec![];
+        };
+        if !self.config.debug && self.outputs.contains(&prepared.key) {
+            return vec![];
+        }
+        let template = &prepared.template;
+        let extension = prepared.extension.as_str();
+        let mut paths: Vec<String> = match extension {
+            "gif" | "webp" => {
+                let key = (template.id.clone(), maximum_frames(extension));
+                (!self.animations.contains(&key))
+                    .then(|| template.animated_image.clone())
+                    .flatten()
+            }
+            _ => (!self.backgrounds.contains(&template.id))
+                .then(|| template.static_image.clone())
+                .flatten(),
+        }
+        .into_iter()
+        .chain(
+            request
+                .lines
+                .iter()
+                .flat_map(|line| self.emoji.missing(line)),
+        )
+        .collect();
+        paths.sort();
+        paths.dedup();
+        paths
+    }
+
+    /// Validate a request, then render it (or fetch it from cache).
+    pub fn render(
+        &self,
+        request: &MemeRequest,
+        source: &dyn Source,
+    ) -> Result<Arc<Rendered>, RenderError> {
+        let Prepared {
+            template,
+            font,
+            extension,
+            key,
+        } = self.prepare(request)?;
         let render = || {
-            self.render_logged(&template, &request.lines, &font, &extension)
+            self.render_logged(&template, &request.lines, &font, &extension, source)
                 .map(Arc::new)
         };
         if self.config.debug {
             return render().map_err(|error| RenderError::Internal(format!("{error:#}")));
         }
-        let key = format!("{}|{slug}|{font}|{extension}", template.id);
         self.outputs
             .try_get_with(key, render)
             .map_err(|error: Arc<anyhow::Error>| RenderError::Internal(format!("{error:#}")))
@@ -189,9 +267,13 @@ impl Renderer {
         lines: &[String],
         font: &str,
         extension: &str,
+        source: &dyn Source,
     ) -> Result<Rendered> {
+        // `Instant::now` panics on wasm32-unknown-unknown.
+        #[cfg(not(target_arch = "wasm32"))]
         let started = std::time::Instant::now();
-        let bytes = self.render_bytes(template, lines, font, extension)?;
+        let bytes = self.render_bytes(template, lines, font, extension, source)?;
+        #[cfg(not(target_arch = "wasm32"))]
         tracing::info!(
             "Rendered {}/{} ({extension}, {} bytes) in {:.1?}",
             template.id,
@@ -213,23 +295,24 @@ impl Renderer {
         lines: &[String],
         font: &str,
         extension: &str,
+        source: &dyn Source,
     ) -> Result<Vec<u8>> {
         match extension {
             "gif" | "webp" => {
-                let maximum_frames = if extension == "webp" {
-                    MAXIMUM_FRAMES * 4
-                } else {
-                    0
-                };
-                let (frames, duration) =
-                    self.render_animation(template, lines, font, maximum_frames)?;
+                let (frames, duration) = self.render_animation(
+                    template,
+                    lines,
+                    font,
+                    maximum_frames(extension),
+                    source,
+                )?;
                 if extension == "gif" {
                     encode_gif(frames, duration)
                 } else {
                     encode_webp(&frames, duration)
                 }
             }
-            _ => encode_static(self.render_image(template, lines, font)?, extension),
+            _ => encode_static(self.render_image(template, lines, font, source)?, extension),
         }
     }
 
@@ -246,15 +329,16 @@ impl Renderer {
         template: &Template,
         lines: &[String],
         font: &str,
+        source: &dyn Source,
     ) -> Result<RgbaImage> {
-        let background = self.background(template)?;
+        let background = self.background(template, source)?;
         let mut image = (*background).clone();
         let size = image.dimensions();
         let layers: Vec<_> = template
             .text
             .par_iter()
             .enumerate()
-            .map(|(index, text)| self.text_layer(text, lines.get(index), lines, font, size))
+            .map(|(index, text)| self.text_layer(text, lines.get(index), lines, font, size, source))
             .collect();
         for (point, layer) in layers.into_iter().flatten() {
             typeset::paste_with_alpha(&mut image, &layer, point);
@@ -269,8 +353,9 @@ impl Renderer {
         lines: &[String],
         font: &str,
         maximum_frames: usize,
+        source: &dyn Source,
     ) -> Result<(Vec<RgbaImage>, u32)> {
-        let animation = self.animation(template, maximum_frames)?;
+        let animation = self.animation(template, maximum_frames, source)?;
         let Some((_, first)) = animation.frames.first() else {
             return Err(anyhow!("no frames decoded for {}", template.id));
         };
@@ -279,7 +364,7 @@ impl Renderer {
             .text
             .par_iter()
             .enumerate()
-            .map(|(index, text)| self.text_layer(text, lines.get(index), lines, font, size))
+            .map(|(index, text)| self.text_layer(text, lines.get(index), lines, font, size, source))
             .collect();
 
         let total = animation.total;
@@ -321,6 +406,7 @@ impl Renderer {
         lines: &[String],
         font_name: &str,
         image_size: (u32, u32),
+        source: &dyn Source,
     ) -> Option<((i64, i64), RgbaImage)> {
         let line = line?;
         let font = self
@@ -362,40 +448,52 @@ impl Renderer {
                 spacing: -y_offset / (rows * 2) as f32,
                 align: &text.align,
             },
-            &self.emoji,
+            &|grapheme, size| self.emoji.get(grapheme, size, source),
         );
         Some((point, typeset::rotate_expand(&layer, text.angle)))
     }
 
     /// Static background resized so the short side is the default size.
-    fn background(&self, template: &Template) -> Result<Arc<RgbaImage>> {
+    fn background(&self, template: &Template, source: &dyn Source) -> Result<Arc<RgbaImage>> {
         let path = template
             .static_image
             .as_ref()
             .context("template has no image")?;
         self.backgrounds
             .try_get_with(template.id.clone(), || {
-                let image = load_image(path)?;
+                let image = load_image(&read(source, path)?)?;
                 Ok(Arc::new(resize_default(&image, true)))
             })
             .map_err(|error: Arc<anyhow::Error>| anyhow!("{error:#}"))
     }
 
-    fn animation(&self, template: &Template, maximum_frames: usize) -> Result<Arc<Animation>> {
+    fn animation(
+        &self,
+        template: &Template,
+        maximum_frames: usize,
+        source: &dyn Source,
+    ) -> Result<Arc<Animation>> {
         let path = template
             .animated_image
             .as_ref()
             .context("template has no image")?;
         self.animations
             .try_get_with((template.id.clone(), maximum_frames), || {
-                load_animation(path, maximum_frames).map(Arc::new)
+                let is_gif = path.to_lowercase().ends_with(".gif");
+                load_animation(&read(source, path)?, is_gif, maximum_frames).map(Arc::new)
             })
             .map_err(|error: Arc<anyhow::Error>| anyhow!("{error:#}"))
     }
 }
 
-fn load_image(path: &Path) -> Result<RgbaImage> {
-    let mut decoder = ImageReader::open(path)?
+fn read(source: &dyn Source, path: &str) -> Result<bytes::Bytes> {
+    source
+        .read(path)
+        .with_context(|| format!("could not read {path}"))
+}
+
+fn load_image(bytes: &[u8]) -> Result<RgbaImage> {
+    let mut decoder = ImageReader::new(Cursor::new(bytes))
         .with_guessed_format()?
         .into_decoder()?;
     let orientation = decoder.orientation()?;
@@ -404,12 +502,9 @@ fn load_image(path: &Path) -> Result<RgbaImage> {
     Ok(image.into_rgba8())
 }
 
-fn load_animation(path: &Path, maximum_frames: usize) -> Result<Animation> {
-    let is_gif = path
-        .extension()
-        .is_some_and(|ext| ext.eq_ignore_ascii_case("gif"));
+fn load_animation(bytes: &[u8], is_gif: bool, maximum_frames: usize) -> Result<Animation> {
     let (sources, duration) = if is_gif {
-        let decoder = GifDecoder::new(BufReader::new(std::fs::File::open(path)?))?;
+        let decoder = GifDecoder::new(Cursor::new(bytes))?;
         let frames = decoder.into_frames().collect_frames()?;
         let duration = frames
             .first()
@@ -426,7 +521,7 @@ fn load_animation(path: &Path, maximum_frames: usize) -> Result<Animation> {
             duration,
         )
     } else {
-        (vec![load_image(path)?], 100)
+        (vec![load_image(bytes)?], 100)
     };
     let total = sources.len();
 
@@ -594,6 +689,12 @@ fn encode_gif(frames: Vec<RgbaImage>, duration: u32) -> Result<Vec<u8>> {
     Ok(out)
 }
 
+#[cfg(target_arch = "wasm32")]
+fn encode_webp(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
+    crate::webp::encode(frames, duration)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 fn encode_webp(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
     let first = frames.first().context("no frames")?;
     let (width, height) = first.dimensions();
@@ -625,25 +726,30 @@ fn encode_webp(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
     use std::path::PathBuf;
 
     use super::*;
+    use crate::assets::{Directory, Files};
 
-    fn renderer() -> Renderer {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    fn root() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    }
+
+    fn renderer_with(debug: bool) -> Renderer {
         let config = Config {
-            root: root.clone(),
             base_url: "http://localhost:5000".into(),
-            debug: true,
-            default_static_extension: "png".into(),
-            default_animated_extension: "gif".into(),
+            debug,
+            ..Config::default()
         };
         Renderer::new(
             config,
-            Arc::new(Catalog::load(&root).unwrap()),
-            Arc::new(Fonts::load(&root).unwrap()),
+            Arc::new(Catalog::load(&root()).unwrap()),
+            Arc::new(Fonts::load(&Directory::new(root())).unwrap()),
         )
+    }
+
+    fn renderer() -> Renderer {
+        renderer_with(true)
     }
 
     fn decode(bytes: &[u8]) -> DynamicImage {
@@ -672,7 +778,7 @@ mod tests {
                 extension: "jpg".into(),
             };
             let rendered = renderer
-                .render(&request)
+                .render(&request, &Directory::new(root()))
                 .unwrap_or_else(|e| panic!("{}: {e}", template.id));
             let image = decode(&rendered.bytes);
             assert!(image.width().min(image.height()) >= 300, "{}", template.id);
@@ -696,7 +802,7 @@ mod tests {
                 font: "impact".into(),
                 extension: extension.into(),
             };
-            let rendered = renderer.render(&request).unwrap();
+            let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             assert_eq!(rendered.content_type, content_type);
             if extension != "webp" {
                 decode(&rendered.bytes);
@@ -707,6 +813,7 @@ mod tests {
     #[test]
     fn validates_requests() {
         let renderer = renderer();
+        let directory = Directory::new(root());
         let request = |template: &str, font: &str, extension: &str, line: &str| MemeRequest {
             template_id: template.into(),
             lines: vec![line.into()],
@@ -714,19 +821,19 @@ mod tests {
             extension: extension.into(),
         };
         assert!(matches!(
-            renderer.render(&request("nope", "", "png", "a")),
+            renderer.render(&request("nope", "", "png", "a"), &directory),
             Err(RenderError::NotFound(_))
         ));
         assert!(matches!(
-            renderer.render(&request("fry", "nope", "png", "a")),
+            renderer.render(&request("fry", "nope", "png", "a"), &directory),
             Err(RenderError::Invalid(_))
         ));
         assert!(matches!(
-            renderer.render(&request("fry", "", "bmp", "a")),
+            renderer.render(&request("fry", "", "bmp", "a"), &directory),
             Err(RenderError::Invalid(_))
         ));
         assert!(matches!(
-            renderer.render(&request("fry", "", "png", &"a".repeat(201))),
+            renderer.render(&request("fry", "", "png", &"a".repeat(201)), &directory),
             Err(RenderError::TooLong)
         ));
     }
@@ -736,9 +843,44 @@ mod tests {
         let renderer = renderer();
         let template = renderer.catalog().get("oprah").unwrap().clone();
         let (frames, duration) = renderer
-            .render_animation(&template, &["a".into(), "b".into()], "", 0)
+            .render_animation(
+                &template,
+                &["a".into(), "b".into()],
+                "",
+                0,
+                &Directory::new(root()),
+            )
             .unwrap();
         assert!(frames.len() > 1);
         assert!(duration > 0);
+    }
+
+    #[test]
+    fn lists_missing_assets() {
+        let renderer = renderer_with(false);
+        let directory = Directory::new(root());
+        let request = |extension: &str| MemeRequest {
+            template_id: "fry".into(),
+            lines: vec![":fire: hot".into(), ":fire:".into()],
+            font: String::new(),
+            extension: extension.into(),
+        };
+        assert_eq!(
+            renderer.missing(&request("png")),
+            ["emoji/72x72/1f525.png", "templates/fry/default.png"]
+        );
+        assert_eq!(
+            renderer.missing(&request("gif")),
+            ["emoji/72x72/1f525.png", "templates/fry/default.gif"]
+        );
+
+        // Rendering from exactly the missing files works, then nothing is missing.
+        let files: Files = directory.read_all(&renderer.missing(&request("png")));
+        renderer.render(&request("png"), &files).unwrap();
+        assert!(renderer.missing(&request("png")).is_empty());
+        let mut other = request("jpg");
+        other.lines[1] = "new text".into();
+        assert!(renderer.missing(&other).is_empty());
+        renderer.render(&other, &Files::new()).unwrap();
     }
 }

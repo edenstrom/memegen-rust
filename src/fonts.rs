@@ -1,9 +1,8 @@
-use std::path::Path;
-
 use ab_glyph::{FontArc, FontVec};
 use anyhow::{Context, Result};
 use serde::Serialize;
 
+use crate::assets::Source;
 use crate::settings;
 
 struct FontDef {
@@ -55,6 +54,10 @@ const FONT_DEFS: &[FontDef] = &[
     },
 ];
 
+fn path(filename: &str) -> String {
+    format!("fonts/{filename}")
+}
+
 pub struct Font {
     pub id: &'static str,
     pub alias: Option<&'static str>,
@@ -82,15 +85,21 @@ pub struct Fonts {
 }
 
 impl Fonts {
-    pub fn load(root: &Path) -> Result<Self> {
+    /// Asset paths of every font file.
+    pub fn paths() -> Vec<String> {
+        FONT_DEFS.iter().map(|def| path(def.filename)).collect()
+    }
+
+    pub fn load(source: &dyn Source) -> Result<Self> {
         let fonts = FONT_DEFS
             .iter()
             .map(|def| {
-                let path = root.join("fonts").join(def.filename);
-                let bytes = std::fs::read(&path)
-                    .with_context(|| format!("reading font {}", path.display()))?;
-                let data = FontVec::try_from_vec_and_index(bytes, 0)
-                    .with_context(|| format!("parsing font {}", path.display()))?;
+                let path = path(def.filename);
+                let bytes = source
+                    .read(&path)
+                    .with_context(|| format!("reading font {path}"))?;
+                let data = FontVec::try_from_vec_and_index(bytes.to_vec(), 0)
+                    .with_context(|| format!("parsing font {path}"))?;
                 Ok(Font {
                     id: def.id,
                     alias: def.alias,
