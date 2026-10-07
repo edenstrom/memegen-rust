@@ -23,10 +23,15 @@ Animated templates render as GIF/WebP; use `extension` to choose the format.";
 
 #[cfg(not(target_arch = "wasm32"))]
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
-image and a shareable URL (served by `memegen serve`). Optionally saves the image to `save_to`.";
+image and a shareable URL (served by `memegen serve`). Optionally saves the image to `save_to`. \
+Inline images over 1 MB are downscaled; the URL and `save_to` file are full size.";
 #[cfg(target_arch = "wasm32")]
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
-image and a shareable URL.";
+image and a shareable URL. Inline images over 1 MB are downscaled; the URL is full size.";
+
+/// Clients reject tool results with images over 1 MB. Base64 adds a third,
+/// so this keeps the encoded image under 1,000,000 bytes.
+const MAX_INLINE_IMAGE_BYTES: usize = 750_000;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ListTemplatesRequest {
@@ -209,20 +214,35 @@ impl MemegenMcp {
         let (url, _) = self
             .app
             .build_url(&template.id, &request.text, &font, &extension);
+        let content_type = rendered.content_type;
+        let bytes = rendered.bytes.len();
+        let inline = if request.include_image.unwrap_or(true) {
+            match self.app.fit(rendered, MAX_INLINE_IMAGE_BYTES).await {
+                Ok(inline) => Some(inline),
+                Err(error) => {
+                    return Ok(CallToolResult::error(vec![ContentBlock::text(
+                        error.to_string(),
+                    )]));
+                }
+            }
+        } else {
+            None
+        };
         let summary = json!({
             "url": url,
             "template_id": template.id,
             "text": request.text,
-            "extension": rendered.extension,
-            "content_type": rendered.content_type,
-            "bytes": rendered.bytes.len(),
+            "extension": extension,
+            "content_type": content_type,
+            "bytes": bytes,
+            "inline_bytes": inline.as_ref().map(|inline| inline.len()),
             "saved_to": saved_to,
         });
 
         let mut content = Vec::new();
-        if request.include_image.unwrap_or(true) {
-            let data = base64::engine::general_purpose::STANDARD.encode(&rendered.bytes);
-            content.push(ContentBlock::image(data, rendered.content_type));
+        if let Some(inline) = inline {
+            let data = base64::engine::general_purpose::STANDARD.encode(&inline);
+            content.push(ContentBlock::image(data, content_type));
         }
         content.push(ContentBlock::text(summary.to_string()));
         Ok(CallToolResult::success(content))

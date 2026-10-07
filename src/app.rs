@@ -189,6 +189,34 @@ impl App {
         .map_err(|error| RenderError::Internal(error.to_string()))?
     }
 
+    /// `rendered`'s bytes, downscaled in the same format if they're over
+    /// `max_bytes` (see [`crate::render::shrink`]).
+    pub async fn fit(
+        self: &Arc<Self>,
+        rendered: Arc<Rendered>,
+        max_bytes: usize,
+    ) -> Result<Bytes, RenderError> {
+        if rendered.bytes.len() <= max_bytes {
+            return Ok(rendered.bytes.clone());
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        let shrunk = {
+            let _permit = self
+                .renders
+                .acquire()
+                .await
+                .map_err(|error| RenderError::Internal(error.to_string()))?;
+            tokio::task::spawn_blocking(move || crate::render::shrink(&rendered, max_bytes))
+                .await
+                .map_err(|error| RenderError::Internal(error.to_string()))?
+        };
+        #[cfg(target_arch = "wasm32")]
+        let shrunk = crate::render::shrink(&rendered, max_bytes);
+        shrunk
+            .map(Bytes::from)
+            .map_err(|error| RenderError::Internal(format!("{error:#}")))
+    }
+
     /// Load the files the render needs, then render on this thread (Workers
     /// isolates are single-threaded).
     #[cfg(target_arch = "wasm32")]

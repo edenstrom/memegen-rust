@@ -57,7 +57,7 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `list_templates` | Search templates (`filter`, `animated`). Returns ID, name, line count and example text |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
-| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL. Inline images over 1 MB (base64) are downscaled in the same format; the URL and `save_to` stay full size |
 
 ## HTTP API
 

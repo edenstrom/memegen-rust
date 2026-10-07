@@ -7,6 +7,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result, anyhow};
 use bytes::Bytes;
 use image::codecs::gif::GifDecoder;
+use image::codecs::webp::WebPDecoder;
 use image::imageops::FilterType;
 use image::{AnimationDecoder, DynamicImage, ImageDecoder, ImageReader, RgbaImage};
 use rayon::prelude::*;
@@ -637,6 +638,65 @@ fn resize_default(image: &RgbaImage, expand: bool) -> RgbaImage {
     image::imageops::resize(image, size.0, size.1, FilterType::Lanczos3)
 }
 
+/// Re-encode `rendered` in the same format, downscaled until it's at most
+/// `max_bytes`. Animations keep every frame.
+pub fn shrink(rendered: &Rendered, max_bytes: usize) -> Result<Vec<u8>> {
+    let (frames, duration) = decode_frames(&rendered.bytes, &rendered.extension)?;
+    let (width, height) = frames.first().context("no frames")?.dimensions();
+    // Encoded size is roughly proportional to area.
+    let mut scale = (max_bytes as f64 / rendered.bytes.len() as f64).sqrt();
+    for _ in 0..8 {
+        scale *= 0.9;
+        let size = (
+            ((width as f64 * scale) as u32).max(1),
+            ((height as f64 * scale) as u32).max(1),
+        );
+        let frames: Vec<RgbaImage> = frames
+            .par_iter()
+            .map(|frame| image::imageops::resize(frame, size.0, size.1, FilterType::Lanczos3))
+            .collect();
+        let bytes = match rendered.extension.as_str() {
+            "gif" => encode_gif(frames, duration)?,
+            "webp" => crate::webp::encode(&frames, duration)?,
+            "png" => png::Strips::new(&frames[0]).encode(&[], |_| unreachable!()),
+            _ => jpeg::Rows::new(&frames[0], JPEG_QUALITY)?.encode(&[], |_| unreachable!())?,
+        };
+        if bytes.len() <= max_bytes {
+            return Ok(bytes);
+        }
+    }
+    Err(anyhow!(
+        "could not shrink the image below {max_bytes} bytes"
+    ))
+}
+
+/// Every frame of an encoded image, composited, and the first frame's delay.
+fn decode_frames(bytes: &[u8], extension: &str) -> Result<(Vec<RgbaImage>, u32)> {
+    let frames = match extension {
+        "gif" => GifDecoder::new(Cursor::new(bytes))?.into_frames(),
+        "webp" => {
+            let decoder = WebPDecoder::new(Cursor::new(bytes))?;
+            if !decoder.has_animation() {
+                return Ok((vec![load_image(bytes)?], 0));
+            }
+            decoder.into_frames()
+        }
+        _ => return Ok((vec![load_image(bytes)?], 0)),
+    }
+    .collect_frames()?;
+    let duration = frames.first().map_or(100, |frame| {
+        let (numerator, denominator) = frame.delay().numer_denom_ms();
+        numerator / denominator.max(1)
+    });
+    Ok((
+        frames
+            .into_iter()
+            .map(|frame| frame.into_buffer())
+            .collect(),
+        duration,
+    ))
+}
+
 /// Encode frames with one shared palette; later frames only store the
 /// pixels that changed (the rest are transparent over the previous frame).
 fn encode_gif(frames: Vec<RgbaImage>, duration: u32) -> Result<Vec<u8>> {
@@ -819,6 +879,35 @@ mod tests {
             if extension != "webp" {
                 decode(&rendered.bytes);
             }
+        }
+    }
+
+    #[test]
+    fn shrinks_to_fit_in_the_same_format() {
+        let renderer = renderer();
+        for (template, extension) in [
+            ("sf", "png"),
+            ("sf", "jpg"),
+            ("fine", "gif"),
+            ("fine", "webp"),
+        ] {
+            let request = MemeRequest {
+                template_id: template.into(),
+                lines: vec!["a".into(), "b".into()],
+                font: String::new(),
+                extension: extension.into(),
+            };
+            let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
+            let max_bytes = rendered.bytes.len() / 2;
+            let shrunk = shrink(&rendered, max_bytes).unwrap();
+            assert!(shrunk.len() <= max_bytes, "{template}.{extension}");
+            let (frames, _) = decode_frames(&shrunk, extension).unwrap();
+            let (original, _) = decode_frames(&rendered.bytes, extension).unwrap();
+            assert_eq!(frames.len(), original.len(), "{template}.{extension}");
+            assert!(
+                frames[0].width() < original[0].width(),
+                "{template}.{extension}"
+            );
         }
     }
 
