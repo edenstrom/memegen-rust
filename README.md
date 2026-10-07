@@ -5,7 +5,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - All 210 upstream templates and fonts, with upstream's text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
 - PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
-- A new static meme takes about 3 ms; see [Performance](#performance)
+- A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
 - Also runs on [Cloudflare Workers](#cloudflare-workers), with the API and a remote MCP endpoint
 
 ## Build
@@ -118,16 +118,16 @@ Watermarks, previews, error images, custom backgrounds and overlays, size/color/
 
 ## Performance
 
-Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple Silicon Mac. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server.
+Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple Silicon Mac. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server. Static PNG and JPG renders reuse each template's encoded background and only encode the rows the text touches.
 
 | Case | Upstream Python wall / CPU | Rust warm wall / CPU (1 thread) | Rust warm wall (18 threads) |
 |---|---|---|---|
-| static png, 2 lines | 44.8 / 44.7 ms | 3.7 / 3.7 ms | 3.0 ms |
-| static jpg, wrapped text | 79.5 / 79.3 ms | 7.2 / 7.2 ms | 6.6 ms |
-| static png, 3 lines rotated | 431 / 431 ms | 5.6 / 5.6 ms | 3.3 ms |
-| static png, emoji | 414 / 57 ms (Twemoji download) | 3.2 / 3.2 ms | 2.5 ms |
-| animated gif, 17 frames | 653 / 652 ms | 57 / 57 ms | 12.1 ms |
-| animated webp, 17 frames | 818 / 815 ms | 119 / 119 ms | 117.5 ms |
+| static png, 2 lines | 44.8 / 44.7 ms | 0.85 / 0.85 ms | 0.49 ms |
+| static jpg, wrapped text | 79.5 / 79.3 ms | 2.0 / 2.0 ms | 1.0 ms |
+| static png, 3 lines rotated | 431 / 431 ms | 2.6 / 2.6 ms | 0.69 ms |
+| static png, emoji | 414 / 57 ms (Twemoji download) | 0.66 / 0.66 ms | 0.41 ms |
+| animated gif, 17 frames | 653 / 652 ms | 52 / 52 ms | 11.3 ms |
+| animated webp, 17 frames | 818 / 815 ms | 109 / 109 ms | 108 ms |
 
 A repeated meme comes from the in-memory cache in about 2 µs. Over HTTP, `wrk` measured about 5,800 new memes/s and 17,000 cached responses/s. Starting `memegen mcp` takes about 15 ms to the `initialize` response.
 

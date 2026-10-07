@@ -1,15 +1,14 @@
 //! Meme rendering pipeline with in-memory caches.
 
 use std::io::Cursor;
+use std::ops::Range;
 use std::sync::Arc;
 
 use anyhow::{Context, Result, anyhow};
 use bytes::Bytes;
 use image::codecs::gif::GifDecoder;
-use image::codecs::jpeg::JpegEncoder;
-use image::codecs::png::{CompressionType, FilterType as PngFilter, PngEncoder};
 use image::imageops::FilterType;
-use image::{AnimationDecoder, DynamicImage, ImageDecoder, ImageEncoder, ImageReader, RgbaImage};
+use image::{AnimationDecoder, DynamicImage, ImageDecoder, ImageReader, RgbaImage};
 use rayon::prelude::*;
 
 use crate::assets::Source;
@@ -21,7 +20,7 @@ use crate::quantize::Palette;
 use crate::template::{Catalog, Template};
 use crate::textbox::TextBox;
 use crate::typeset::{self, DrawOptions, SizedFont};
-use crate::{settings, slug};
+use crate::{jpeg, png, settings, slug};
 
 const MAXIMUM_FRAMES: usize = 20;
 const MINIMUM_FRAMES: usize = 5;
@@ -39,12 +38,13 @@ const WEBP_MAXIMUM_FRAMES: usize = MAXIMUM_FRAMES * 4;
 #[cfg(target_arch = "wasm32")]
 const WEBP_MAXIMUM_FRAMES: usize = 0;
 
-/// Cache budgets in MB for decoded backgrounds, decoded animations and
-/// encoded output. A Workers isolate has 128 MB of memory in total.
+/// Cache budgets in MB for decoded backgrounds, decoded animations, encoded
+/// static backgrounds and encoded output. A Workers isolate has 128 MB of memory
+/// in total.
 #[cfg(not(target_arch = "wasm32"))]
-const CACHE_MB: (u64, u64, u64) = (256, 512, 256);
+const CACHE_MB: (u64, u64, u64, u64) = (256, 512, 128, 256);
 #[cfg(target_arch = "wasm32")]
-const CACHE_MB: (u64, u64, u64) = (16, 32, 8);
+const CACHE_MB: (u64, u64, u64, u64) = (16, 32, 4, 8);
 
 #[derive(Debug, Clone)]
 pub struct Rendered {
@@ -104,6 +104,21 @@ pub fn content_type(extension: &str) -> &'static str {
     }
 }
 
+/// A static background encoded once, so renders only encode rows with text.
+enum Encoded {
+    Png(png::Strips),
+    Jpeg(jpeg::Rows),
+}
+
+impl Encoded {
+    fn size(&self) -> usize {
+        match self {
+            Self::Png(strips) => strips.size(),
+            Self::Jpeg(rows) => rows.size(),
+        }
+    }
+}
+
 struct Animation {
     /// `(source frame index, resized frame)` for the sampled frames.
     frames: Vec<(usize, RgbaImage)>,
@@ -118,6 +133,7 @@ pub struct Renderer {
     emoji: EmojiImages,
     backgrounds: Cache<String, Arc<RgbaImage>>,
     animations: Cache<(String, usize), Arc<Animation>>,
+    encoded: Cache<(String, &'static str), Arc<Encoded>>,
     outputs: Cache<String, Arc<Rendered>>,
 }
 
@@ -132,7 +148,7 @@ struct Prepared {
 impl Renderer {
     pub fn new(config: Config, catalog: Arc<Catalog>, fonts: Arc<Fonts>) -> Self {
         const MB: u64 = 1024 * 1024;
-        let (backgrounds, animations, outputs) = CACHE_MB;
+        let (backgrounds, animations, encoded, outputs) = CACHE_MB;
         Self {
             config,
             catalog,
@@ -146,6 +162,7 @@ impl Renderer {
                     .map(|(_, frame)| frame.as_raw().len() as u32)
                     .fold(0u32, u32::saturating_add)
             }),
+            encoded: Cache::new(encoded * MB, |_, encoded| encoded.size() as u32),
             outputs: Cache::new(outputs * MB, |_, rendered| rendered.bytes.len() as u32),
         }
     }
@@ -312,7 +329,7 @@ impl Renderer {
                     encode_webp(&frames, duration)
                 }
             }
-            _ => encode_static(self.render_image(template, lines, font, source)?, extension),
+            _ => self.render_static(template, lines, font, extension, source),
         }
     }
 
@@ -320,30 +337,75 @@ impl Renderer {
     pub fn clear_caches(&self) {
         self.backgrounds.invalidate_all();
         self.animations.invalidate_all();
+        self.encoded.invalidate_all();
         self.outputs.invalidate_all();
     }
 
-    /// Upstream `render_image` (static output).
-    pub fn render_image(
+    /// Upstream `render_image` (static output). Only the rows covered by text
+    /// are encoded; the rest is copied from the template's cached encoding.
+    fn render_static(
         &self,
         template: &Template,
         lines: &[String],
         font: &str,
+        extension: &str,
         source: &dyn Source,
-    ) -> Result<RgbaImage> {
+    ) -> Result<Vec<u8>> {
         let background = self.background(template, source)?;
-        let mut image = (*background).clone();
-        let size = image.dimensions();
-        let layers: Vec<_> = template
+        let format = if extension == "png" { "png" } else { "jpg" };
+        let encoded = self
+            .encoded
+            .try_get_with((template.id.clone(), format), || {
+                anyhow::Ok(Arc::new(match format {
+                    "png" => Encoded::Png(png::Strips::new(&background)),
+                    _ => Encoded::Jpeg(jpeg::Rows::new(&background, JPEG_QUALITY)?),
+                }))
+            })
+            .map_err(|error: Arc<anyhow::Error>| anyhow!("{error:#}"))?;
+        let (width, height) = background.dimensions();
+        let layers = self.text_layers(template, lines, font, (width, height), source);
+        let dirty: Vec<_> = layers
+            .iter()
+            .map(|((_, top), layer)| {
+                let clamp = |y: i64| y.clamp(0, height as i64) as u32;
+                clamp(*top)..clamp(top + layer.height() as i64)
+            })
+            .collect();
+        let compose = |rows: Range<u32>| {
+            let row_bytes = width as usize * 4;
+            let pixels = background.as_raw()
+                [rows.start as usize * row_bytes..rows.end as usize * row_bytes]
+                .to_vec();
+            let mut image = RgbaImage::from_raw(width, rows.len() as u32, pixels)
+                .expect("buffer matches dimensions");
+            for ((left, top), layer) in &layers {
+                typeset::paste_with_alpha(&mut image, layer, (*left, top - rows.start as i64));
+            }
+            image
+        };
+        match &*encoded {
+            Encoded::Png(strips) => Ok(strips.encode(&dirty, compose)),
+            Encoded::Jpeg(rows) => rows.encode(&dirty, compose),
+        }
+    }
+
+    /// Drawn text for each of the template's text boxes that has any.
+    fn text_layers(
+        &self,
+        template: &Template,
+        lines: &[String],
+        font: &str,
+        size: (u32, u32),
+        source: &dyn Source,
+    ) -> Vec<((i64, i64), RgbaImage)> {
+        template
             .text
             .par_iter()
             .enumerate()
-            .map(|(index, text)| self.text_layer(text, lines.get(index), lines, font, size, source))
-            .collect();
-        for (point, layer) in layers.into_iter().flatten() {
-            typeset::paste_with_alpha(&mut image, &layer, point);
-        }
-        Ok(image)
+            .filter_map(|(index, text)| {
+                self.text_layer(text, lines.get(index), lines, font, size, source)
+            })
+            .collect()
     }
 
     /// Upstream `render_animation`, without animated-text or frame-count options.
@@ -450,7 +512,9 @@ impl Renderer {
             },
             &|grapheme, size| self.emoji.get(grapheme, size, source),
         );
-        Some((point, typeset::rotate_expand(&layer, text.angle)))
+        let layer = typeset::rotate_expand(layer, text.angle);
+        let ((left, top), layer) = typeset::trim(&layer)?;
+        Some(((point.0 + left as i64, point.1 + top as i64), layer))
     }
 
     /// Static background resized so the short side is the default size.
@@ -567,27 +631,6 @@ fn resize_default(image: &RgbaImage, expand: bool) -> RgbaImage {
         return image.clone();
     }
     image::imageops::resize(image, size.0, size.1, FilterType::Lanczos3)
-}
-
-fn encode_static(image: RgbaImage, extension: &str) -> Result<Vec<u8>> {
-    let rgb = DynamicImage::ImageRgba8(image).into_rgb8();
-    let mut out = Vec::new();
-    match extension {
-        "jpg" | "jpeg" => JpegEncoder::new_with_quality(&mut out, JPEG_QUALITY).write_image(
-            rgb.as_raw(),
-            rgb.width(),
-            rgb.height(),
-            image::ExtendedColorType::Rgb8,
-        )?,
-        _ => PngEncoder::new_with_quality(&mut out, CompressionType::Fast, PngFilter::Adaptive)
-            .write_image(
-                rgb.as_raw(),
-                rgb.width(),
-                rgb.height(),
-                image::ExtendedColorType::Rgb8,
-            )?,
-    }
-    Ok(out)
 }
 
 /// Encode frames with one shared palette; later frames only store the
