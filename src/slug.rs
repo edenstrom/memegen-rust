@@ -28,58 +28,72 @@ pub fn encode<S: AsRef<str>>(lines: &[S]) -> String {
 }
 
 fn encode_line(line: &str) -> String {
-    let has_trailing_under = line.contains("_ ");
-    let mut encoded = unquote(line);
-    for (before, after) in [
-        ("_", "__"),
-        ("-", "--"),
-        (" ", "_"),
-        ("?", "~q"),
-        ("%", "~p"),
-        ("#", "~h"),
-        ("\"", "''"),
-        ("/", "~s"),
-        ("\\", "~b"),
-        ("\n", "~n"),
-        ("&", "~a"),
-        ("<", "~l"),
-        (">", "~g"),
-        ("\u{2018}", "'"),
-        ("\u{2019}", "'"),
-        ("\u{201C}", "\""),
-        ("\u{201D}", "\""),
-        ("\u{2013}", "-"),
-    ] {
-        encoded = encoded.replace(before, after);
-    }
-    if has_trailing_under {
-        encoded = encoded.replace("___", "__-");
+    let mut encoded = String::new();
+    let mut previous = None;
+    for c in unquote(line).chars() {
+        let c = match c {
+            '\u{2018}' | '\u{2019}' => '\'',
+            '\u{201C}' | '\u{201D}' => '"',
+            '\u{2013}' => '-',
+            c => c,
+        };
+        match c {
+            '_' => encoded.push_str("__"),
+            '-' => encoded.push_str("--"),
+            // A space after an underscore is `-` so `decode` doesn't read the
+            // run of underscores as a leading space.
+            ' ' if previous == Some('_') => encoded.push('-'),
+            ' ' => encoded.push('_'),
+            '?' => encoded.push_str("~q"),
+            '%' => encoded.push_str("~p"),
+            '#' => encoded.push_str("~h"),
+            '"' => encoded.push_str("''"),
+            '/' => encoded.push_str("~s"),
+            '\\' => encoded.push_str("~b"),
+            '\n' => encoded.push_str("~n"),
+            '&' => encoded.push_str("~a"),
+            '<' => encoded.push_str("~l"),
+            '>' => encoded.push_str("~g"),
+            c => encoded.push(c),
+        }
+        previous = Some(c);
     }
     encoded
 }
 
+/// Decode runs of `_` and `-`: each pair is a literal character and an odd
+/// one out is a space (before underscores, after dashes, as upstream did).
+fn decode_separators(slug: &str) -> String {
+    let mut decoded = String::with_capacity(slug.len());
+    let mut chars = slug.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c != '_' && c != '-' {
+            decoded.push(c);
+            continue;
+        }
+        let mut count = 1;
+        while chars.next_if_eq(&c).is_some() {
+            count += 1;
+        }
+        let literal = c.to_string().repeat(count / 2);
+        match (count % 2 == 1, c) {
+            (false, _) => decoded.push_str(&literal),
+            (true, '_') => {
+                decoded.push(' ');
+                decoded.push_str(&literal);
+            }
+            (true, _) => {
+                decoded.push_str(&literal);
+                decoded.push(' ');
+            }
+        }
+    }
+    decoded
+}
+
 /// Decode a URL slug back into lines of text.
 pub fn decode(slug: &str) -> Vec<String> {
-    let has_dash = slug.contains("_----");
-    let has_flag = slug.contains("_--");
-    let has_arrow = slug.contains("_--~g");
-    let has_under = slug.contains("___");
-
-    let mut slug = slug.replace('_', " ").replace("  ", "_");
-    slug = slug.replace('-', " ").replace("  ", "-");
-    slug = slug.replace("''", "\"");
-
-    if has_dash {
-        slug = slug.replace("-- ", " --");
-    } else if has_flag {
-        slug = slug.replace("- ", " -");
-    }
-    if has_arrow {
-        slug = slug.replace("- ~g", " -~g");
-    }
-    if has_under {
-        slug = slug.replace("_ ", " _");
-    }
+    let mut slug = decode_separators(slug).replace("''", "\"");
 
     for (before, after) in [
         ("~q", "?"),
@@ -126,6 +140,46 @@ mod tests {
             "what? 100% #1 a/b \"q\" -dash_under".to_string(),
         ];
         assert_eq!(decode(&encode(&lines)), lines);
+    }
+
+    #[test]
+    fn round_trips_spaces_next_to_dashes_and_underscores() {
+        for line in [
+            "a - b",
+            "a -- b",
+            "a -b",
+            "a- b",
+            "a _b",
+            "a_ b",
+            "a__ b",
+            "a __b",
+            "a_ _b",
+            "a _b c_ d",
+            "_lead and trail_",
+            "-lead and trail-",
+            "a ->b",
+            "me - also me",
+        ] {
+            let lines = vec![line.to_string()];
+            assert_eq!(decode(&encode(&lines)), lines, "{line:?}");
+            assert_eq!(normalize(&encode(&lines)), (encode(&lines), false), "{line:?}");
+        }
+    }
+
+    #[test]
+    fn normalizes_typographic_punctuation() {
+        assert_eq!(encode(&["a \u{2013} b"]), "a_--_b");
+        assert_eq!(encode(&["\u{201C}hi\u{201D} it\u{2019}s"]), "''hi''_it's");
+    }
+
+    #[test]
+    fn decodes_upstream_urls() {
+        assert_eq!(decode("a-b_c"), vec!["a b c"]);
+        assert_eq!(decode("a_----b"), vec!["a --b"]);
+        assert_eq!(decode("a_--~gb"), vec!["a ->b"]);
+        assert_eq!(decode("a__-b"), vec!["a_ b"]);
+        assert_eq!(decode("a___b"), vec!["a _b"]);
+        assert_eq!(decode("a----b"), vec!["a--b"]);
     }
 
     #[test]
