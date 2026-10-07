@@ -118,7 +118,7 @@ Watermarks, previews, error images, custom backgrounds and overlays, size/color/
 
 ## Performance
 
-Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple Silicon Mac. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server. Static PNG and JPG renders reuse each template's encoded background and only encode the rows the text touches.
+Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple Silicon Mac. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server. Static PNG and JPG renders reuse each template's encoded background and only encode the rows the text touches. Animated WebP frames are encoded in parallel, each as just the area that changed since the previous frame.
 
 | Case | Upstream Python wall / CPU | Rust warm wall / CPU (1 thread) | Rust warm wall (18 threads) |
 |---|---|---|---|
@@ -127,7 +127,7 @@ Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numb
 | static png, 3 lines rotated | 431 / 431 ms | 2.6 / 2.6 ms | 0.69 ms |
 | static png, emoji | 414 / 57 ms (Twemoji download) | 0.66 / 0.66 ms | 0.41 ms |
 | animated gif, 17 frames | 653 / 652 ms | 52 / 52 ms | 11.3 ms |
-| animated webp, 17 frames | 818 / 815 ms | 109 / 109 ms | 108 ms |
+| animated webp, 17 frames | 818 / 815 ms | 118 / 118 ms | 9.4 ms |
 
 A repeated meme comes from the in-memory cache in about 2 µs. Over HTTP, `wrk` measured about 5,800 new memes/s and 17,000 cached responses/s. Starting `memegen mcp` takes about 15 ms to the `initialize` response.
 

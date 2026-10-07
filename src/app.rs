@@ -15,6 +15,11 @@ use crate::template::{Catalog, Template, TemplateInfo};
 pub struct App {
     pub renderer: Renderer,
     assets: Arc<dyn Assets>,
+    /// Bounds concurrent renders. Each render already fans out over rayon, so
+    /// running more at once only makes them steal each other's work, and the
+    /// unlucky ones wait far longer than the rest. Waiters are served in order.
+    #[cfg(not(target_arch = "wasm32"))]
+    renders: Arc<tokio::sync::Semaphore>,
 }
 
 #[derive(Serialize, schemars::JsonSchema)]
@@ -38,6 +43,10 @@ impl App {
         Arc::new(Self {
             renderer: Renderer::new(config, Arc::new(catalog), Arc::new(fonts)),
             assets,
+            #[cfg(not(target_arch = "wasm32"))]
+            renders: Arc::new(tokio::sync::Semaphore::new(
+                std::thread::available_parallelism().map_or(1, usize::from),
+            )),
         })
     }
 
@@ -151,18 +160,28 @@ impl App {
         self.assets.load(vec![path.clone()]).await.remove(&path)
     }
 
-    /// Render on the blocking pool; rendering is CPU-bound.
+    /// Render on the blocking pool; rendering is CPU-bound. Cache hits skip
+    /// the queue for a render slot.
     #[cfg(not(target_arch = "wasm32"))]
     pub async fn render(
         self: &Arc<Self>,
         request: MemeRequest,
     ) -> Result<Arc<Rendered>, RenderError> {
+        if let Some(rendered) = self.renderer.cached(&request) {
+            return Ok(rendered);
+        }
+        let permit = Arc::clone(&self.renders)
+            .acquire_owned()
+            .await
+            .map_err(|error| RenderError::Internal(error.to_string()))?;
         let files = match self.assets.source() {
             Some(_) => Default::default(),
             None => self.assets.load(self.renderer.missing(&request)).await,
         };
         let app = Arc::clone(self);
         tokio::task::spawn_blocking(move || {
+            // Held until the render ends, even if the client has gone.
+            let _permit = permit;
             let source = app.assets.source().unwrap_or(&files);
             app.renderer.render(&request, source)
         })
