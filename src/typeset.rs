@@ -4,7 +4,7 @@
 
 use std::sync::Arc;
 
-use ab_glyph::{Font as _, GlyphId, PxScale, ScaleFont, point};
+use ab_glyph::{Font as _, GlyphId, OutlinedGlyph, PxScale, PxScaleFactor, ScaleFont, point};
 use image::{Rgba, RgbaImage};
 use imageproc::geometric_transformations::{Interpolation, Projection, warp_into};
 
@@ -75,6 +75,7 @@ pub struct SizedFont<'f> {
     pub font: &'f Font,
     pub size: u32,
     scale: PxScale,
+    scale_factor: PxScaleFactor,
     ascent: f32,
 }
 
@@ -84,12 +85,13 @@ impl<'f> SizedFont<'f> {
             .data
             .pt_to_px_scale(size as f32)
             .unwrap_or(PxScale::from(size as f32));
-        let ascent = font.data.as_scaled(scale).ascent().ceil();
+        let scaled = font.data.as_scaled(scale);
         Self {
             font,
             size,
             scale,
-            ascent,
+            scale_factor: scaled.scale_factor(),
+            ascent: scaled.ascent().ceil(),
         }
     }
 
@@ -134,9 +136,8 @@ impl<'f> SizedFont<'f> {
                 if let Some(previous) = previous {
                     x += scaled.kern(previous, id);
                 }
-                let glyph = id.with_scale_and_position(self.scale, point(x, self.ascent));
-                if let Some(outlined) = self.font.data.outline_glyph(glyph) {
-                    let b = outlined.px_bounds();
+                if let Some(outline) = self.font.outline(id) {
+                    let b = outline.px_bounds(self.scale_factor, point(x, self.ascent));
                     let rect = Rect {
                         x0: b.min.x,
                         y0: b.min.y,
@@ -368,12 +369,12 @@ pub fn parse_color(value: &str) -> Option<[u8; 4]> {
 
 /// Pillow's `paste(color, mask)` blend: every channel, alpha included.
 #[inline]
-fn blend(dst: &mut Rgba<u8>, src: [u8; 4], mask: f32) {
+fn blend(dst: &mut [u8], src: [u8; 4], mask: f32) {
     if mask <= 0.0 {
         return;
     }
     let mask = mask.min(1.0);
-    for (d, s) in dst.0.iter_mut().zip(src) {
+    for (d, s) in dst.iter_mut().zip(src) {
         *d = (s as f32 * mask + *d as f32 * (1.0 - mask)).round() as u8;
     }
 }
@@ -406,6 +407,8 @@ pub fn draw_text(
     let mask_height = height as i64 + 2 * margin;
     let mut coverage = vec![0f32; (mask_width * mask_height) as usize];
     let mut emoji_draws: Vec<(i64, i64, &str)> = Vec::new();
+    // Bounds of the drawn coverage in mask coordinates: (x0, y0, x1, y1).
+    let mut ink: Option<(i64, i64, i64, i64)> = None;
 
     let lines: Vec<&str> = text.split('\n').collect();
     let layouts: Vec<LineLayout> = lines.iter().map(|line| font.layout_line(line)).collect();
@@ -428,10 +431,20 @@ pub fn draw_text(
                         font.scale,
                         point(left + x + margin as f32, top + font.ascent + margin as f32),
                     );
-                    let Some(outlined) = font.font.data.outline_glyph(glyph) else {
+                    let Some(outline) = font.font.outline(id) else {
                         continue;
                     };
+                    let outlined = OutlinedGlyph::new(glyph, outline.clone(), font.scale_factor);
                     let bounds = outlined.px_bounds();
+                    let (x0, y0) = (bounds.min.x as i64, bounds.min.y as i64);
+                    let (x1, y1) = (bounds.max.x as i64, bounds.max.y as i64);
+                    let (x0, y0) = (x0.max(0), y0.max(0));
+                    let (x1, y1) = (x1.min(mask_width), y1.min(mask_height));
+                    if x0 < x1 && y0 < y1 {
+                        ink = Some(ink.map_or((x0, y0, x1, y1), |(a, b, c, d)| {
+                            (a.min(x0), b.min(y0), c.max(x1), d.max(y1))
+                        }));
+                    }
                     outlined.draw(|gx, gy, value| {
                         let px = bounds.min.x as i64 + gx as i64;
                         let py = bounds.min.y as i64 + gy as i64;
@@ -450,17 +463,36 @@ pub fn draw_text(
         top += line_spacing;
     }
 
-    if options.stroke_width > 0 {
-        let stroke_mask = dilate(&coverage, mask_width, mask_height, stroke);
-        apply_mask(
-            canvas,
-            &stroke_mask,
-            mask_width,
-            margin,
-            options.stroke_fill,
+    if let Some(ink) = ink {
+        let stroke_mask = (options.stroke_width > 0)
+            .then(|| dilate(&coverage, mask_width, mask_height, stroke, ink));
+        // The stroke reaches at most `reach` pixels past the coverage.
+        let reach = if stroke_mask.is_some() {
+            (stroke + 0.5).ceil() as i64
+        } else {
+            0
+        };
+        let (x0, x1) = (
+            (ink.0 - reach - margin).max(0),
+            (ink.2 + reach - margin).min(width as i64),
         );
+        let (y0, y1) = (
+            (ink.1 - reach - margin).max(0),
+            (ink.3 + reach - margin).min(height as i64),
+        );
+        let row_bytes = width as usize * 4;
+        for y in y0..y1 {
+            let row = &mut canvas.as_mut()[y as usize * row_bytes..(y as usize + 1) * row_bytes];
+            let start = ((y + margin) * mask_width + margin) as usize;
+            for x in x0 as usize..x1.max(x0) as usize {
+                let pixel = &mut row[x * 4..x * 4 + 4];
+                if let Some(mask) = &stroke_mask {
+                    blend(pixel, options.stroke_fill, mask[start + x]);
+                }
+                blend(pixel, options.fill, coverage[start + x]);
+            }
+        }
     }
-    apply_mask(canvas, &coverage, mask_width, margin, options.fill);
 
     for (x, y, grapheme) in emoji_draws {
         if let Some(image) = emoji_image(grapheme, emoji_size as u32) {
@@ -469,21 +501,15 @@ pub fn draw_text(
     }
 }
 
-fn apply_mask(canvas: &mut RgbaImage, mask: &[f32], mask_width: i64, margin: i64, color: [u8; 4]) {
-    let (width, height) = canvas.dimensions();
-    for y in 0..height {
-        let row = ((y as i64 + margin) * mask_width + margin) as usize;
-        for x in 0..width {
-            let value = mask[row + x as usize];
-            if value > 0.0 {
-                blend(canvas.get_pixel_mut(x, y), color, value);
-            }
-        }
-    }
-}
-
 /// Anti-aliased morphological dilation approximating FreeType's stroker.
-fn dilate(coverage: &[f32], width: i64, height: i64, radius: f32) -> Vec<f32> {
+/// Only pixels inside `ink` (x0, y0, x1, y1) may be covered.
+fn dilate(
+    coverage: &[f32],
+    width: i64,
+    height: i64,
+    radius: f32,
+    (x0, y0, x1, y1): (i64, i64, i64, i64),
+) -> Vec<f32> {
     let reach = (radius + 0.5).ceil() as i64;
     let mut kernel = Vec::new();
     for dy in -reach..=reach {
@@ -491,18 +517,53 @@ fn dilate(coverage: &[f32], width: i64, height: i64, radius: f32) -> Vec<f32> {
             let distance = ((dx * dx + dy * dy) as f32).sqrt();
             let weight = (radius + 0.5 - distance).clamp(0.0, 1.0);
             if weight > 0.0 {
-                kernel.push((dx, dy, weight));
+                kernel.push((dx, dy, (dy * width + dx) as isize, weight));
             }
         }
     }
+    // A cell `d` away from a pixel is at least one step closer to the
+    // neighbour on that side, so when that neighbour is at least as covered it
+    // reaches the cell at least as strongly. Only spread in the other
+    // directions: kernels[sides] skips offsets toward each side in `sides`
+    // (left, right, up, down bits).
+    let kernels: Vec<Vec<_>> = (0..16)
+        .map(|sides: u8| {
+            kernel
+                .iter()
+                .copied()
+                .filter(|&(dx, dy, ..)| {
+                    !((sides & 1 != 0 && dx < 0)
+                        || (sides & 2 != 0 && dx > 0)
+                        || (sides & 4 != 0 && dy < 0)
+                        || (sides & 8 != 0 && dy > 0))
+                })
+                .collect()
+        })
+        .collect();
+
+    let stride = width as usize;
     let mut out = vec![0f32; coverage.len()];
-    for y in 0..height {
-        for x in 0..width {
-            let value = coverage[(y * width + x) as usize];
+    for y in y0..y1 {
+        for x in x0..x1 {
+            let index = (y * width + x) as usize;
+            let value = coverage[index];
             if value <= 0.0 {
                 continue;
             }
-            for &(dx, dy, weight) in &kernel {
+            let covers = |inside: bool, neighbour: usize| inside && coverage[neighbour] >= value;
+            let sides = covers(x > 0, index.wrapping_sub(1)) as usize
+                | (covers(x < width - 1, index + 1) as usize) << 1
+                | (covers(y > 0, index.wrapping_sub(stride)) as usize) << 2
+                | (covers(y < height - 1, index + stride) as usize) << 3;
+            let kernel = &kernels[sides];
+            if x >= reach && y >= reach && x < width - reach && y < height - reach {
+                for &(_, _, offset, weight) in kernel {
+                    let cell = &mut out[index.wrapping_add_signed(offset)];
+                    *cell = cell.max(value * weight);
+                }
+                continue;
+            }
+            for &(dx, dy, _, weight) in kernel {
                 let (nx, ny) = (x + dx, y + dy);
                 if nx >= 0 && ny >= 0 && nx < width && ny < height {
                     let cell = &mut out[(ny * width + nx) as usize];
@@ -517,24 +578,64 @@ fn dilate(coverage: &[f32], width: i64, height: i64, radius: f32) -> Vec<f32> {
 /// Pillow `Image.paste(im, point, mask=im)`: blend using the source alpha.
 pub fn paste_with_alpha(dst: &mut RgbaImage, src: &RgbaImage, (left, top): (i64, i64)) {
     let (dst_width, dst_height) = (dst.width() as i64, dst.height() as i64);
-    for (sx, sy, pixel) in src.enumerate_pixels() {
-        let (x, y) = (left + sx as i64, top + sy as i64);
-        if x < 0 || y < 0 || x >= dst_width || y >= dst_height || pixel[3] == 0 {
-            continue;
+    let (x0, x1) = (left.max(0), (left + src.width() as i64).min(dst_width));
+    let (y0, y1) = (top.max(0), (top + src.height() as i64).min(dst_height));
+    if x0 >= x1 || y0 >= y1 {
+        return;
+    }
+    let (dst_stride, src_stride) = (dst_width as usize * 4, src.width() as usize * 4);
+    let span = (x1 - x0) as usize * 4;
+    let (dst_x, src_x) = (x0 as usize * 4, (x0 - left) as usize * 4);
+    let dst = dst.as_mut();
+    for y in y0..y1 {
+        let d = y as usize * dst_stride + dst_x;
+        let s = (y - top) as usize * src_stride + src_x;
+        let pixels = dst[d..d + span]
+            .chunks_exact_mut(4)
+            .zip(src.as_raw()[s..s + span].chunks_exact(4));
+        for (target, pixel) in pixels {
+            match pixel[3] {
+                0 => {}
+                255 => target.copy_from_slice(pixel),
+                alpha => blend(target, pixel.try_into().unwrap(), alpha as f32 / 255.0),
+            }
         }
-        blend(
-            dst.get_pixel_mut(x as u32, y as u32),
-            pixel.0,
-            pixel[3] as f32 / 255.0,
-        );
     }
 }
 
+/// Crop to the non-transparent pixels, returning their offset.
+pub fn trim(image: &RgbaImage) -> Option<((u32, u32), RgbaImage)> {
+    let (width, height) = image.dimensions();
+    let row_bytes = width as usize * 4;
+    let row = |y: u32| &image.as_raw()[y as usize * row_bytes..(y as usize + 1) * row_bytes];
+    let opaque = |pixel: &[u8]| pixel[3] != 0;
+    let inked = |y: &u32| row(*y).chunks_exact(4).any(opaque);
+    let y0 = (0..height).find(inked)?;
+    let y1 = (y0..height).rev().find(inked)? + 1;
+    let (mut x0, mut x1) = (width, 0);
+    for y in y0..y1 {
+        // Only scan the columns outside those already known to be inked.
+        let pixels = row(y);
+        if let Some(x) = pixels[..x0 as usize * 4].chunks_exact(4).position(opaque) {
+            x0 = x as u32;
+        }
+        let right = x1.max(x0) as usize * 4;
+        if let Some(x) = pixels[right..].chunks_exact(4).rposition(opaque) {
+            x1 = (right / 4 + x + 1) as u32;
+        }
+    }
+    if (x0, y0, x1, y1) == (0, 0, width, height) {
+        return Some(((0, 0), image.clone()));
+    }
+    let cropped = image::imageops::crop_imm(image, x0, y0, x1 - x0, y1 - y0).to_image();
+    Some(((x0, y0), cropped))
+}
+
 /// Pillow `Image.rotate(angle, BICUBIC, expand=True)` (counter-clockwise).
-pub fn rotate_expand(image: &RgbaImage, angle: f32) -> RgbaImage {
+pub fn rotate_expand(image: RgbaImage, angle: f32) -> RgbaImage {
     let angle = angle.rem_euclid(360.0);
     if angle == 0.0 {
-        return image.clone();
+        return image;
     }
     let (width, height) = (image.width() as f32, image.height() as f32);
     let theta = -angle.to_radians();
@@ -562,7 +663,7 @@ pub fn rotate_expand(image: &RgbaImage, angle: f32) -> RgbaImage {
         * Projection::translate(-cx, -cy);
     let mut out = RgbaImage::new(new_width, new_height);
     warp_into(
-        image,
+        &image,
         projection,
         Interpolation::Bicubic,
         imageproc::geometric_transformations::Border::Constant(Rgba([0, 0, 0, 0])),
@@ -574,6 +675,79 @@ pub fn rotate_expand(image: &RgbaImage, angle: f32) -> RgbaImage {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The straightforward dilation `dilate` must match exactly.
+    fn dilate_reference(coverage: &[f32], width: i64, height: i64, radius: f32) -> Vec<f32> {
+        let reach = (radius + 0.5).ceil() as i64;
+        let mut out = vec![0f32; coverage.len()];
+        for y in 0..height {
+            for x in 0..width {
+                let value = coverage[(y * width + x) as usize];
+                for dy in -reach..=reach {
+                    for dx in -reach..=reach {
+                        let distance = ((dx * dx + dy * dy) as f32).sqrt();
+                        let weight = (radius + 0.5 - distance).clamp(0.0, 1.0);
+                        let (nx, ny) = (x + dx, y + dy);
+                        if value > 0.0
+                            && weight > 0.0
+                            && nx >= 0
+                            && ny >= 0
+                            && nx < width
+                            && ny < height
+                        {
+                            let cell = &mut out[(ny * width + nx) as usize];
+                            *cell = cell.max(value * weight);
+                        }
+                    }
+                }
+            }
+        }
+        out
+    }
+
+    #[test]
+    fn dilates_like_reference() {
+        let mut seed = 12345u32;
+        let mut random = move || {
+            seed = seed.wrapping_mul(1_103_515_245).wrapping_add(12345);
+            (seed >> 16) as f32 / 65536.0
+        };
+        let (width, height) = (61, 37);
+        for radius in [1.0, 2.0, 3.0] {
+            for density in [0.1, 0.5, 0.9] {
+                // Blobs of full coverage with soft edges, plus noise.
+                let coverage: Vec<f32> = (0..width * height)
+                    .map(|_| match random() {
+                        r if r < density * 0.7 => 1.0,
+                        r if r < density => random(),
+                        _ => 0.0,
+                    })
+                    .collect();
+                assert_eq!(
+                    dilate(&coverage, width, height, radius, (0, 0, width, height)),
+                    dilate_reference(&coverage, width, height, radius)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn trims_transparent_edges() {
+        let mut image = RgbaImage::new(20, 10);
+        assert!(trim(&image).is_none());
+        for (x, y) in [(5, 2), (3, 4), (12, 7), (8, 6)] {
+            image.put_pixel(x, y, Rgba([1, 2, 3, 4]));
+        }
+        let ((left, top), cropped) = trim(&image).unwrap();
+        assert_eq!(
+            (left, top, cropped.width(), cropped.height()),
+            (3, 2, 10, 6)
+        );
+        assert_eq!(cropped.get_pixel(9, 5), &Rgba([1, 2, 3, 4]));
+        image.put_pixel(0, 0, Rgba([0, 0, 0, 1]));
+        image.put_pixel(19, 9, Rgba([0, 0, 0, 1]));
+        assert_eq!(trim(&image).unwrap(), ((0, 0), image));
+    }
 
     #[test]
     fn splits_like_upstream() {

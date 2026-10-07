@@ -1,4 +1,6 @@
-use ab_glyph::{FontArc, FontVec};
+use std::sync::OnceLock;
+
+use ab_glyph::{Font as _, FontArc, FontVec, GlyphId, Outline};
 use anyhow::{Context, Result};
 use serde::Serialize;
 
@@ -63,9 +65,19 @@ pub struct Font {
     pub alias: Option<&'static str>,
     pub filename: &'static str,
     pub data: FontArc,
+    /// Parsed glyph outlines, by glyph ID; layout measures each glyph often.
+    outlines: Box<[OnceLock<Option<Outline>>]>,
 }
 
 impl Font {
+    /// The glyph's unscaled outline, parsed on first use.
+    pub fn outline(&self, id: GlyphId) -> Option<&Outline> {
+        self.outlines
+            .get(id.0 as usize)?
+            .get_or_init(|| self.data.outline(id))
+            .as_ref()
+    }
+
     pub fn is_impact(&self) -> bool {
         self.id == "impact"
     }
@@ -100,11 +112,13 @@ impl Fonts {
                     .with_context(|| format!("reading font {path}"))?;
                 let data = FontVec::try_from_vec_and_index(bytes.to_vec(), 0)
                     .with_context(|| format!("parsing font {path}"))?;
+                let outlines = (0..data.glyph_count()).map(|_| OnceLock::new()).collect();
                 Ok(Font {
                     id: def.id,
                     alias: def.alias,
                     filename: def.filename,
                     data: FontArc::new(data),
+                    outlines,
                 })
             })
             .collect::<Result<_>>()?;
