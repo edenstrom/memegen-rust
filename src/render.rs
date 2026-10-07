@@ -24,10 +24,6 @@ use crate::{jpeg, png, settings, slug};
 
 const MAXIMUM_FRAMES: usize = 20;
 const MINIMUM_FRAMES: usize = 5;
-#[cfg(not(target_arch = "wasm32"))]
-const WEBP_QUALITY: f32 = 75.0;
-#[cfg(not(target_arch = "wasm32"))]
-const WEBP_METHOD: i32 = 2;
 const JPEG_QUALITY: u8 = 95;
 
 /// Frame budget for animated WebP (0 means upstream's default sampling).
@@ -334,7 +330,7 @@ impl Renderer {
                 if extension == "gif" {
                     encode_gif(frames, duration)
                 } else {
-                    encode_webp(&frames, duration)
+                    crate::webp::encode(&frames, duration)
                 }
             }
             _ => self.render_static(template, lines, font, extension, source),
@@ -738,41 +734,6 @@ fn encode_gif(frames: Vec<RgbaImage>, duration: u32) -> Result<Vec<u8>> {
         }
     }
     Ok(out)
-}
-
-#[cfg(target_arch = "wasm32")]
-fn encode_webp(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
-    crate::webp::encode(frames, duration)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn encode_webp(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
-    let first = frames.first().context("no frames")?;
-    let (width, height) = first.dimensions();
-    if frames.len() == 1 {
-        let encoded = webp::Encoder::from_rgba(first.as_raw(), width, height).encode(WEBP_QUALITY);
-        return Ok(encoded.to_vec());
-    }
-    let mut config = webp::WebPConfig::new().map_err(|_| anyhow!("invalid WebP config"))?;
-    config.quality = WEBP_QUALITY;
-    config.lossless = 0;
-    // Method 2 encodes ~2x faster than the default (4) for ~3% larger files.
-    config.method = WEBP_METHOD;
-    let mut encoder = webp::AnimEncoder::new(width, height, &config);
-    encoder.set_loop_count(0);
-    for (index, frame) in frames.iter().enumerate() {
-        let timestamp = i32::try_from(index as u64 * duration as u64)?;
-        encoder.add_frame(webp::AnimFrame::from_rgba(
-            frame.as_raw(),
-            width,
-            height,
-            timestamp,
-        ));
-    }
-    let encoded = encoder
-        .try_encode()
-        .map_err(|error| anyhow!("WebP encoding failed: {error:?}"))?;
-    Ok(encoded.to_vec())
 }
 
 #[cfg(test)]
