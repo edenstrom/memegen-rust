@@ -254,6 +254,14 @@ impl Renderer {
         paths
     }
 
+    /// The cached output for `request`, if there is one.
+    pub fn cached(&self, request: &MemeRequest) -> Option<Arc<Rendered>> {
+        if self.config.debug {
+            return None;
+        }
+        self.outputs.get(&self.prepare(request).ok()?.key)
+    }
+
     /// Validate a request, then render it (or fetch it from cache).
     pub fn render(
         &self,

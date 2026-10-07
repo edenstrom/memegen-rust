@@ -31,6 +31,10 @@ where
         self.inner.contains_key(key)
     }
 
+    pub fn get(&self, key: &K) -> Option<V> {
+        self.inner.get(key)
+    }
+
     pub fn get_with(&self, key: K, init: impl FnOnce() -> V) -> V {
         self.inner.get_with(key, init)
     }
@@ -96,7 +100,7 @@ mod lru {
             self.state.lock().unwrap_or_else(|error| error.into_inner())
         }
 
-        fn get(&self, key: &K) -> Option<V> {
+        pub fn get(&self, key: &K) -> Option<V> {
             let mut state = self.state();
             state.clock += 1;
             let clock = state.clock;
