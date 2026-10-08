@@ -4,7 +4,6 @@ The numbers are copied from the tables in README.md; update both together.
 Writes a light and a dark SVG per chart into docs/.
 """
 
-import math
 from pathlib import Path
 
 CASES = [
@@ -19,11 +18,11 @@ CASES = [
 CHARTS = {
     "bench-latency": {
         "title": "New meme over HTTP, one connection",
-        "subtitle": "Median latency in ms, log scale (lower is better)",
+        "subtitle": "Median latency in ms, linear scale (lower is better)",
         "unit": "ms",
-        "domain": (0.1, 4_000),
+        "domain": 2_500,
         "series": {
-            "This port": [0.80, 1.2, 0.96, 0.74, 12.7, 15.2],
+            "memegen-rust": [0.80, 1.2, 0.96, 0.74, 12.7, 15.2],
             "memegen-rs": [9.3, 9.3, 11.6, 8.5, 1555, 10.2],
             "Upstream Python": [90, 129, 531, 521, 1567, 2088],
         },
@@ -31,11 +30,11 @@ CHARTS = {
     },
     "bench-throughput": {
         "title": "New memes over HTTP, 64 connections",
-        "subtitle": "Requests per second, log scale (higher is better)",
+        "subtitle": "Requests per second, linear scale (higher is better)",
         "unit": "req/s",
-        "domain": (1, 25_000),
+        "domain": 12_000,
         "series": {
-            "This port": [9964, 5665, 2838, 10192, 190, 94],
+            "memegen-rust": [9964, 5665, 2838, 10192, 190, 94],
             "memegen-rs": [1342, 1498, 1120, 1384, 6.9, 1228],
             "Upstream Python": [137, 73, 62, 88, 8.4, 5.8],
         },
@@ -43,9 +42,9 @@ CHARTS = {
     },
     "bench-render": {
         "title": "Render time in-process",
-        "subtitle": "Median wall time per new meme in ms, log scale (lower is better)",
+        "subtitle": "Median wall time per new meme in ms, linear scale (lower is better)",
         "unit": "ms",
-        "domain": (0.1, 2_500),
+        "domain": 1_200,
         "series": {
             "Rust, 18 threads": [0.50, 1.05, 0.71, 0.55, 12.2, 13.9],
             "Rust, 1 thread": [0.87, 2.0, 2.6, 0.70, 59, 131],
@@ -62,7 +61,7 @@ NOTES = {
 }
 
 # Categorical slots, stepped per mode; ink and chrome per mode. A chart's
-# `slots` keep each entity on one color across charts: this port is blue,
+# `slots` keep each entity on one color across charts: memegen-rust is blue,
 # memegen-rs orange, upstream aqua.
 THEMES = {
     "light": {
@@ -104,7 +103,16 @@ def fmt(value: float) -> str:
 
 
 def tick(value: float) -> str:
-    return f"{value:,.0f}" if value >= 1 else f"{value:g}"
+    return f"{value:,.0f}"
+
+
+def step(hi: float) -> float:
+    """A round tick spacing that gives four to six gridlines."""
+    unit = 10 ** (len(str(int(hi))) - 1)
+    for mult in (0.1, 0.2, 0.25, 0.5, 1, 2):
+        if hi / (unit * mult) <= 6:
+            return unit * mult
+    return unit * 5
 
 
 def bar_path(x0: float, x1: float, y: float, h: float, r: float = 4) -> str:
@@ -122,7 +130,7 @@ def esc(text: str) -> str:
 
 
 def render(chart: dict, theme: dict, note: str | None) -> str:
-    lo, hi = chart["domain"]
+    hi = chart["domain"]
     plot_w = WIDTH - LEFT - RIGHT
     names = list(chart["series"])
     colors = [theme["series"][i] for i in chart.get("slots", range(len(names)))]
@@ -131,7 +139,8 @@ def render(chart: dict, theme: dict, note: str | None) -> str:
     height = TOP + plot_h + 32 + (22 if note else 0)
 
     def x(value: float) -> float:
-        return LEFT + plot_w * math.log10(value / lo) / math.log10(hi / lo)
+        # At least a sliver, so the fastest bars don't vanish entirely.
+        return LEFT + max(plot_w * value / hi, 1.5)
 
     out = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{height}" '
@@ -153,13 +162,14 @@ def render(chart: dict, theme: dict, note: str | None) -> str:
         )
         lx += 18 + len(name) * 7.4 + 24
 
-    # Gridlines and ticks at each power of ten.
+    # Gridlines and ticks at round intervals from zero.
     bottom = TOP + plot_h
-    exponent = round(math.log10(lo))
-    while 10**exponent <= hi:
-        value = 10**exponent
-        gx = x(value)
-        color = theme["axis"] if value == lo else theme["grid"]
+    spacing = step(hi)
+    n = 0
+    while n * spacing <= hi:
+        value = n * spacing
+        gx = LEFT + plot_w * value / hi
+        color = theme["axis"] if value == 0 else theme["grid"]
         out.append(
             f'<line x1="{gx:.1f}" y1="{TOP}" x2="{gx:.1f}" y2="{bottom}" '
             f'stroke="{color}" stroke-width="1"/>'
@@ -169,7 +179,7 @@ def render(chart: dict, theme: dict, note: str | None) -> str:
             f'fill="{theme["muted"]}" style="font-variant-numeric: tabular-nums">'
             f"{tick(value)}</text>"
         )
-        exponent += 1
+        n += 1
 
     # Bars, each with its value at the tip.
     for i, case in enumerate(CASES):
