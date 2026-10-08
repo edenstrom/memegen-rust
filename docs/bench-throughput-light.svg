@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="462" viewBox="0 0 760 462" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif'>
+<title>New memes over HTTP, 64 connections</title>
+<text x="0" y="20" font-size="16" font-weight="600" fill="#0b0b0b">New memes over HTTP, 64 connections</text>
+<text x="0" y="40" font-size="13" fill="#52514e">Requests per second, log scale (higher is better)</text>
+<rect x="0" y="58" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="18" y="68.5" font-size="13" fill="#52514e">This port</text>
+<rect x="108.60000000000001" y="58" width="12" height="12" rx="3" fill="#eb6834"/>
+<text x="126.60000000000001" y="68.5" font-size="13" fill="#52514e">memegen-rs</text>
+<rect x="224.60000000000002" y="58" width="12" height="12" rx="3" fill="#1baf7a"/>
+<text x="242.60000000000002" y="68.5" font-size="13" fill="#52514e">Upstream Python</text>
+<line x1="196.0" y1="92" x2="196.0" y2="408" stroke="#c3c2b7" stroke-width="1"/>
+<text x="196.0" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">1</text>
+<line x1="305.1" y1="92" x2="305.1" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="305.1" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">10</text>
+<line x1="414.3" y1="92" x2="414.3" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="414.3" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">100</text>
+<line x1="523.4" y1="92" x2="523.4" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="523.4" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">1,000</text>
+<line x1="632.6" y1="92" x2="632.6" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="632.6" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">10,000</text>
+<text x="184" y="129.5" font-size="13" text-anchor="end" fill="#0b0b0b">static png, 2 lines</text>
+<path d="M196.0,108.0H628.4A4,4 0 0 1 632.4,112.0V114.0A4,4 0 0 1 628.4,118.0H196.0Z" fill="#2a78d6"><title>This port: 9,964 req/s</title></path>
+<text x="637.4" y="117" font-size="11" fill="#52514e">9,964</text>
+<path d="M196.0,120.0H533.4A4,4 0 0 1 537.4,124.0V126.0A4,4 0 0 1 533.4,130.0H196.0Z" fill="#eb6834"><title>memegen-rs: 1,342 req/s</title></path>
+<text x="542.4" y="129" font-size="11" fill="#52514e">1,342</text>
+<path d="M196.0,132.0H425.2A4,4 0 0 1 429.2,136.0V138.0A4,4 0 0 1 425.2,142.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 137 req/s</title></path>
+<text x="434.2" y="141" font-size="11" fill="#52514e">137</text>
+<text x="184" y="179.5" font-size="13" text-anchor="end" fill="#0b0b0b">static jpg, wrapped text</text>
+<path d="M196.0,158.0H601.6A4,4 0 0 1 605.6,162.0V164.0A4,4 0 0 1 601.6,168.0H196.0Z" fill="#2a78d6"><title>This port: 5,665 req/s</title></path>
+<text x="610.6" y="167" font-size="11" fill="#52514e">5,665</text>
+<path d="M196.0,170.0H538.6A4,4 0 0 1 542.6,174.0V176.0A4,4 0 0 1 538.6,180.0H196.0Z" fill="#eb6834"><title>memegen-rs: 1,498 req/s</title></path>
+<text x="547.6" y="179" font-size="11" fill="#52514e">1,498</text>
+<path d="M196.0,182.0H395.4A4,4 0 0 1 399.4,186.0V188.0A4,4 0 0 1 395.4,192.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 73 req/s</title></path>
+<text x="404.4" y="191" font-size="11" fill="#52514e">73</text>
+<text x="184" y="229.5" font-size="13" text-anchor="end" fill="#0b0b0b">static png, 3 lines rotated</text>
+<path d="M196.0,208.0H568.9A4,4 0 0 1 572.9,212.0V214.0A4,4 0 0 1 568.9,218.0H196.0Z" fill="#2a78d6"><title>This port: 2,838 req/s</title></path>
+<text x="577.9" y="217" font-size="11" fill="#52514e">2,838</text>
+<path d="M196.0,220.0H524.8A4,4 0 0 1 528.8,224.0V226.0A4,4 0 0 1 524.8,230.0H196.0Z" fill="#eb6834"><title>memegen-rs: 1,120 req/s</title></path>
+<text x="533.8" y="229" font-size="11" fill="#52514e">1,120</text>
+<path d="M196.0,232.0H387.6A4,4 0 0 1 391.6,236.0V238.0A4,4 0 0 1 387.6,242.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 62 req/s</title></path>
+<text x="396.6" y="241" font-size="11" fill="#52514e">62</text>
+<text x="184" y="279.5" font-size="13" text-anchor="end" fill="#0b0b0b">static png, emoji</text>
+<path d="M196.0,258.0H629.5A4,4 0 0 1 633.5,262.0V264.0A4,4 0 0 1 629.5,268.0H196.0Z" fill="#2a78d6"><title>This port: 10,192 req/s</title></path>
+<text x="638.5" y="267" font-size="11" fill="#52514e">10,192</text>
+<path d="M196.0,270.0H534.8A4,4 0 0 1 538.8,274.0V276.0A4,4 0 0 1 534.8,280.0H196.0Z" fill="#eb6834"><title>memegen-rs: 1,384 req/s</title></path>
+<text x="543.8" y="279" font-size="11" fill="#52514e">1,384¹</text>
+<path d="M196.0,282.0H404.2A4,4 0 0 1 408.2,286.0V288.0A4,4 0 0 1 404.2,292.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 88 req/s</title></path>
+<text x="413.2" y="291" font-size="11" fill="#52514e">88</text>
+<text x="184" y="329.5" font-size="13" text-anchor="end" fill="#0b0b0b">animated gif, 24 frames</text>
+<path d="M196.0,308.0H440.7A4,4 0 0 1 444.7,312.0V314.0A4,4 0 0 1 440.7,318.0H196.0Z" fill="#2a78d6"><title>This port: 190 req/s</title></path>
+<text x="449.7" y="317" font-size="11" fill="#52514e">190</text>
+<path d="M196.0,320.0H283.6A4,4 0 0 1 287.6,324.0V326.0A4,4 0 0 1 283.6,330.0H196.0Z" fill="#eb6834"><title>memegen-rs: 6.9 req/s</title></path>
+<text x="292.6" y="329" font-size="11" fill="#52514e">6.9</text>
+<path d="M196.0,332.0H292.9A4,4 0 0 1 296.9,336.0V338.0A4,4 0 0 1 292.9,342.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 8.4 req/s</title></path>
+<text x="301.9" y="341" font-size="11" fill="#52514e">8.4</text>
+<text x="184" y="379.5" font-size="13" text-anchor="end" fill="#0b0b0b">animated webp, 24 frames</text>
+<path d="M196.0,358.0H407.4A4,4 0 0 1 411.4,362.0V364.0A4,4 0 0 1 407.4,368.0H196.0Z" fill="#2a78d6"><title>This port: 94 req/s</title></path>
+<text x="416.4" y="367" font-size="11" fill="#52514e">94</text>
+<path d="M196.0,370.0H529.2A4,4 0 0 1 533.2,374.0V376.0A4,4 0 0 1 529.2,380.0H196.0Z" fill="#eb6834"><title>memegen-rs: 1,228 req/s</title></path>
+<text x="538.2" y="379" font-size="11" fill="#52514e">1,228²</text>
+<path d="M196.0,382.0H275.3A4,4 0 0 1 279.3,386.0V388.0A4,4 0 0 1 275.3,392.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 5.8 req/s</title></path>
+<text x="284.3" y="391" font-size="11" fill="#52514e">5.8</text>
+<text x="0" y="456" font-size="12" fill="#6b6964">memegen-rs: ¹ draws :fire: as text, no color emoji · ² returns a single still frame</text>
+</svg>

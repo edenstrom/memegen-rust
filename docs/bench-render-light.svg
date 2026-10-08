@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="440" viewBox="0 0 760 440" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif'>
+<title>Render time in-process</title>
+<text x="0" y="20" font-size="16" font-weight="600" fill="#0b0b0b">Render time in-process</text>
+<text x="0" y="40" font-size="13" fill="#52514e">Median wall time per new meme in ms, log scale (lower is better)</text>
+<rect x="0" y="58" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="18" y="68.5" font-size="13" fill="#52514e">Rust, 18 threads</text>
+<rect x="160.4" y="58" width="12" height="12" rx="3" fill="#eda100"/>
+<text x="178.4" y="68.5" font-size="13" fill="#52514e">Rust, 1 thread</text>
+<rect x="306.0" y="58" width="12" height="12" rx="3" fill="#1baf7a"/>
+<text x="324.0" y="68.5" font-size="13" fill="#52514e">Upstream Python</text>
+<line x1="196.0" y1="92" x2="196.0" y2="408" stroke="#c3c2b7" stroke-width="1"/>
+<text x="196.0" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">0.1</text>
+<line x1="305.1" y1="92" x2="305.1" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="305.1" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">1</text>
+<line x1="414.3" y1="92" x2="414.3" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="414.3" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">10</text>
+<line x1="523.4" y1="92" x2="523.4" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="523.4" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">100</text>
+<line x1="632.6" y1="92" x2="632.6" y2="408" stroke="#e1e0d9" stroke-width="1"/>
+<text x="632.6" y="426" font-size="11" text-anchor="middle" fill="#6b6964" style="font-variant-numeric: tabular-nums">1,000</text>
+<text x="184" y="129.5" font-size="13" text-anchor="end" fill="#0b0b0b">static png, 2 lines</text>
+<path d="M196.0,108.0H268.3A4,4 0 0 1 272.3,112.0V114.0A4,4 0 0 1 268.3,118.0H196.0Z" fill="#2a78d6"><title>Rust, 18 threads: 0.5 ms</title></path>
+<text x="277.3" y="117" font-size="11" fill="#52514e">0.5</text>
+<path d="M196.0,120.0H294.5A4,4 0 0 1 298.5,124.0V126.0A4,4 0 0 1 294.5,130.0H196.0Z" fill="#eda100"><title>Rust, 1 thread: 0.87 ms</title></path>
+<text x="303.5" y="129" font-size="11" fill="#52514e">0.87</text>
+<path d="M196.0,132.0H479.9A4,4 0 0 1 483.9,136.0V138.0A4,4 0 0 1 479.9,142.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 43.4 ms</title></path>
+<text x="488.9" y="141" font-size="11" fill="#52514e">43.4</text>
+<text x="184" y="179.5" font-size="13" text-anchor="end" fill="#0b0b0b">static jpg, wrapped text</text>
+<path d="M196.0,158.0H303.5A4,4 0 0 1 307.5,162.0V164.0A4,4 0 0 1 303.5,168.0H196.0Z" fill="#2a78d6"><title>Rust, 18 threads: 1.05 ms</title></path>
+<text x="312.5" y="167" font-size="11" fill="#52514e">1.05</text>
+<path d="M196.0,170.0H334.0A4,4 0 0 1 338.0,174.0V176.0A4,4 0 0 1 334.0,180.0H196.0Z" fill="#eda100"><title>Rust, 1 thread: 2 ms</title></path>
+<text x="343.0" y="179" font-size="11" fill="#52514e">2</text>
+<path d="M196.0,182.0H507.6A4,4 0 0 1 511.6,186.0V188.0A4,4 0 0 1 507.6,192.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 77.9 ms</title></path>
+<text x="516.6" y="191" font-size="11" fill="#52514e">77.9</text>
+<text x="184" y="229.5" font-size="13" text-anchor="end" fill="#0b0b0b">static png, 3 lines rotated</text>
+<path d="M196.0,208.0H284.9A4,4 0 0 1 288.9,212.0V214.0A4,4 0 0 1 284.9,218.0H196.0Z" fill="#2a78d6"><title>Rust, 18 threads: 0.71 ms</title></path>
+<text x="293.9" y="217" font-size="11" fill="#52514e">0.71</text>
+<path d="M196.0,220.0H346.4A4,4 0 0 1 350.4,224.0V226.0A4,4 0 0 1 346.4,230.0H196.0Z" fill="#eda100"><title>Rust, 1 thread: 2.6 ms</title></path>
+<text x="355.4" y="229" font-size="11" fill="#52514e">2.6</text>
+<path d="M196.0,232.0H587.8A4,4 0 0 1 591.8,236.0V238.0A4,4 0 0 1 587.8,242.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 423 ms</title></path>
+<text x="596.8" y="241" font-size="11" fill="#52514e">423</text>
+<text x="184" y="279.5" font-size="13" text-anchor="end" fill="#0b0b0b">static png, emoji</text>
+<path d="M196.0,258.0H272.8A4,4 0 0 1 276.8,262.0V264.0A4,4 0 0 1 272.8,268.0H196.0Z" fill="#2a78d6"><title>Rust, 18 threads: 0.55 ms</title></path>
+<text x="281.8" y="267" font-size="11" fill="#52514e">0.55</text>
+<path d="M196.0,270.0H284.2A4,4 0 0 1 288.2,274.0V276.0A4,4 0 0 1 284.2,280.0H196.0Z" fill="#eda100"><title>Rust, 1 thread: 0.7 ms</title></path>
+<text x="293.2" y="279" font-size="11" fill="#52514e">0.7</text>
+<path d="M196.0,282.0H531.9A4,4 0 0 1 535.9,286.0V288.0A4,4 0 0 1 531.9,292.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 130 ms</title></path>
+<text x="540.9" y="291" font-size="11" fill="#52514e">130</text>
+<text x="184" y="329.5" font-size="13" text-anchor="end" fill="#0b0b0b">animated gif, 24 frames</text>
+<path d="M196.0,308.0H419.7A4,4 0 0 1 423.7,312.0V314.0A4,4 0 0 1 419.7,318.0H196.0Z" fill="#2a78d6"><title>Rust, 18 threads: 12.2 ms</title></path>
+<text x="428.7" y="317" font-size="11" fill="#52514e">12.2</text>
+<path d="M196.0,320.0H494.4A4,4 0 0 1 498.4,324.0V326.0A4,4 0 0 1 494.4,330.0H196.0Z" fill="#eda100"><title>Rust, 1 thread: 59 ms</title></path>
+<text x="503.4" y="329" font-size="11" fill="#52514e">59</text>
+<path d="M196.0,332.0H615.6A4,4 0 0 1 619.6,336.0V338.0A4,4 0 0 1 615.6,342.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 761 ms</title></path>
+<text x="624.6" y="341" font-size="11" fill="#52514e">761</text>
+<text x="184" y="379.5" font-size="13" text-anchor="end" fill="#0b0b0b">animated webp, 24 frames</text>
+<path d="M196.0,358.0H425.9A4,4 0 0 1 429.9,362.0V364.0A4,4 0 0 1 425.9,368.0H196.0Z" fill="#2a78d6"><title>Rust, 18 threads: 13.9 ms</title></path>
+<text x="434.9" y="367" font-size="11" fill="#52514e">13.9</text>
+<path d="M196.0,370.0H532.2A4,4 0 0 1 536.2,374.0V376.0A4,4 0 0 1 532.2,380.0H196.0Z" fill="#eda100"><title>Rust, 1 thread: 131 ms</title></path>
+<text x="541.2" y="379" font-size="11" fill="#52514e">131</text>
+<path d="M196.0,382.0H631.2A4,4 0 0 1 635.2,386.0V388.0A4,4 0 0 1 631.2,392.0H196.0Z" fill="#1baf7a"><title>Upstream Python: 1,057 ms</title></path>
+<text x="640.2" y="391" font-size="11" fill="#52514e">1,057</text>
+</svg>
