@@ -120,10 +120,15 @@ Watermarks, previews, error images, custom backgrounds and overlays, size/color/
 
 Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple M5 Pro. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server. Static PNG and JPG renders reuse each template's encoded background and only encode the rows the text touches. Animated WebP frames are encoded in parallel, each as just the area that changed since the previous frame.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/bench-render-dark.svg">
+  <img src="docs/bench-render-light.svg" alt="Bar chart of in-process render time per case for Rust on 18 threads, Rust on 1 thread, and upstream Python; the table below has the values" width="760">
+</picture>
+
 | Case | Upstream Python wall / CPU | Rust warm wall / CPU (1 thread) | Rust warm wall (18 threads) |
 |---|---|---|---|
 | static png, 2 lines | 43.4 / 43.3 ms | 0.87 / 0.88 ms | 0.50 ms |
-| static jpg, wrapped text | 77.9 / 77.9 ms | 2.0 / 2.0 ms | 1.1 ms |
+| static jpg, wrapped text | 77.9 / 77.9 ms | 2.0 / 2.0 ms | 1.05 ms |
 | static png, 3 lines rotated | 423 / 422 ms | 2.6 / 2.7 ms | 0.71 ms |
 | static png, emoji | 130 / 47 ms (Twemoji download) | 0.70 / 0.70 ms | 0.55 ms |
 | animated gif, 24 frames | 761 / 759 ms | 59 / 59 ms | 12.2 ms |
@@ -137,6 +142,11 @@ A repeated meme comes from the in-memory cache in about 1 µs. Starting `memegen
 
 One connection, median latency:
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/bench-latency-dark.svg">
+  <img src="docs/bench-latency-light.svg" alt="Bar chart of median HTTP latency per case for this port, memegen-rs, and upstream Python; the table below has the values" width="760">
+</picture>
+
 | Case | This port | memegen-rs | Upstream Python |
 |---|---|---|---|
 | static png, 2 lines | 0.80 ms | 9.3 ms | 90 ms |
@@ -148,6 +158,11 @@ One connection, median latency:
 
 64 connections, requests/s (p99 latency):
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/bench-throughput-dark.svg">
+  <img src="docs/bench-throughput-light.svg" alt="Bar chart of requests per second at 64 connections per case for this port, memegen-rs, and upstream Python; the table below has the values" width="760">
+</picture>
+
 | Case | This port | memegen-rs | Upstream Python |
 |---|---|---|---|
 | static png, 2 lines | 9,964 (9.5 ms) | 1,342 (65 ms) | 137 (767 ms) |
@@ -157,7 +172,7 @@ One connection, median latency:
 | animated gif, 24 frames | 190 (666 ms) | 6.9 (9,866 ms) | 8.4 (7,605 ms) |
 | animated webp, 24 frames | 94 (1,853 ms) | 1,228 (65 ms)² | 5.8 (10,965 ms) |
 
-memegen-rs renders at the template's own size, so it draws fewer pixels: `fry` comes out at 603×452 rather than 800×600, and the GIF at 498×361 rather than 600×434. ¹ memegen-rs has no color emoji and draws `:fire:` as text. ² memegen-rs has no animated WebP and returns a single still frame.
+The charts are drawn by `python3 docs/charts.py` from the numbers in these tables. memegen-rs renders at the template's own size, so it draws fewer pixels: `fry` comes out at 603×452 rather than 800×600, and the GIF at 498×361 rather than 600×434. ¹ memegen-rs has no color emoji and draws `:fire:` as text. ² memegen-rs has no animated WebP and returns a single still frame.
 
 With 64 connections requesting the same meme, `wrk` measured about 17,000 cached responses/s.
 
