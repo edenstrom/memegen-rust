@@ -118,18 +118,48 @@ Watermarks, previews, error images, custom backgrounds and overlays, size/color/
 
 ## Performance
 
-Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple Silicon Mac. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server. Static PNG and JPG renders reuse each template's encoded background and only encode the rows the text touches. Animated WebP frames are encoded in parallel, each as just the area that changed since the previous frame.
+Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numbers). These are medians on an 18-core Apple M5 Pro. "Warm" means the template background is already decoded but the meme itself is new; this is the normal case in a running server. Static PNG and JPG renders reuse each template's encoded background and only encode the rows the text touches. Animated WebP frames are encoded in parallel, each as just the area that changed since the previous frame.
 
 | Case | Upstream Python wall / CPU | Rust warm wall / CPU (1 thread) | Rust warm wall (18 threads) |
 |---|---|---|---|
-| static png, 2 lines | 44.8 / 44.7 ms | 0.85 / 0.85 ms | 0.49 ms |
-| static jpg, wrapped text | 79.5 / 79.3 ms | 2.0 / 2.0 ms | 1.0 ms |
-| static png, 3 lines rotated | 431 / 431 ms | 2.6 / 2.6 ms | 0.69 ms |
-| static png, emoji | 414 / 57 ms (Twemoji download) | 0.66 / 0.66 ms | 0.41 ms |
-| animated gif, 17 frames | 653 / 652 ms | 52 / 52 ms | 11.3 ms |
-| animated webp, 17 frames | 818 / 815 ms | 118 / 118 ms | 9.4 ms |
+| static png, 2 lines | 43.4 / 43.3 ms | 0.87 / 0.88 ms | 0.50 ms |
+| static jpg, wrapped text | 77.9 / 77.9 ms | 2.0 / 2.0 ms | 1.1 ms |
+| static png, 3 lines rotated | 423 / 422 ms | 2.6 / 2.7 ms | 0.71 ms |
+| static png, emoji | 130 / 47 ms (Twemoji download) | 0.70 / 0.70 ms | 0.55 ms |
+| animated gif, 24 frames | 761 / 759 ms | 59 / 59 ms | 12.2 ms |
+| animated webp, 24 frames | 1,057 / 1,053 ms | 131 / 131 ms | 13.9 ms |
 
-A repeated meme comes from the in-memory cache in about 2 µs. Over HTTP, `wrk` measured about 5,800 new memes/s and 17,000 cached responses/s. Starting `memegen mcp` takes about 15 ms to the `initialize` response.
+A repeated meme comes from the in-memory cache in about 1 µs. Starting `memegen mcp` takes about 13 ms to the `initialize` response.
+
+### Over HTTP
+
+`memegen bench --url <base URL>` load-tests any running memegen-compatible server: this one, upstream memegen, or [memegen-rs](https://github.com/tenequm/memegen-rs). Each connection sends requests back to back for 5 seconds per case, and every request is a new meme, so no server cache is hit. Below, the three servers ran on the same machine, one at a time: this port (`memegen serve`), memegen-rs at `852bd13` with no render cache, and upstream under gunicorn with 18 uvicorn workers.
+
+One connection, median latency:
+
+| Case | This port | memegen-rs | Upstream Python |
+|---|---|---|---|
+| static png, 2 lines | 0.80 ms | 9.3 ms | 90 ms |
+| static jpg, wrapped text | 1.2 ms | 9.3 ms | 129 ms |
+| static png, 3 lines rotated | 0.96 ms | 11.6 ms | 531 ms |
+| static png, emoji | 0.74 ms | 8.5 ms¹ | 521 ms |
+| animated gif, 24 frames | 12.7 ms | 1,555 ms | 1,567 ms |
+| animated webp, 24 frames | 15.2 ms | 10.2 ms² | 2,088 ms |
+
+64 connections, requests/s (p99 latency):
+
+| Case | This port | memegen-rs | Upstream Python |
+|---|---|---|---|
+| static png, 2 lines | 9,964 (9.5 ms) | 1,342 (65 ms) | 137 (767 ms) |
+| static jpg, wrapped text | 5,665 (18 ms) | 1,498 (53 ms) | 73 (1,529 ms) |
+| static png, 3 lines rotated | 2,838 (68 ms) | 1,120 (75 ms) | 62 (3,390 ms) |
+| static png, emoji | 10,192 (9.0 ms) | 1,384 (68 ms) | 88 (1,322 ms) |
+| animated gif, 24 frames | 190 (666 ms) | 6.9 (9,866 ms) | 8.4 (7,605 ms) |
+| animated webp, 24 frames | 94 (1,853 ms) | 1,228 (65 ms)² | 5.8 (10,965 ms) |
+
+memegen-rs renders at the template's own size, so it draws fewer pixels: `fry` comes out at 603×452 rather than 800×600, and the GIF at 498×361 rather than 600×434. ¹ memegen-rs has no color emoji and draws `:fire:` as text. ² memegen-rs has no animated WebP and returns a single still frame.
+
+With 64 connections requesting the same meme, `wrk` measured about 17,000 cached responses/s.
 
 ## Licenses
 

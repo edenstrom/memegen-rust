@@ -3,6 +3,7 @@ mod bench;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::Result;
 use axum::extract::Request;
@@ -41,13 +42,23 @@ enum Command {
     Serve(ServeArgs),
     /// Run an MCP server over stdio.
     Mcp(CommonArgs),
-    /// Measure wall-clock and CPU time per render.
+    /// Measure wall-clock and CPU time per render, or load-test a running
+    /// server (this one, upstream memegen, or memegen-rs) with --url.
     Bench {
         #[command(flatten)]
         common: CommonArgs,
         /// Iterations per case.
         #[arg(long, default_value_t = 30)]
         iterations: usize,
+        /// Base URL of a running memegen-compatible server to load-test over HTTP.
+        #[arg(long)]
+        url: Option<String>,
+        /// Concurrent connections for --url, one run per value.
+        #[arg(long, value_delimiter = ',', default_value = "1,64")]
+        connections: Vec<usize>,
+        /// Seconds per case and connection count for --url.
+        #[arg(long, default_value_t = 5)]
+        seconds: u64,
     },
 }
 
@@ -105,7 +116,15 @@ async fn main() -> Result<()> {
     match cli.command {
         Some(Command::Mcp(common)) => run_stdio(common).await,
         Some(Command::Serve(args)) => serve(args).await,
-        Some(Command::Bench { common, iterations }) => {
+        Some(Command::Bench {
+            url: Some(url),
+            connections,
+            seconds,
+            ..
+        }) => bench::run_http(&url, &connections, Duration::from_secs(seconds)).await,
+        Some(Command::Bench {
+            common, iterations, ..
+        }) => {
             init_tracing("warn");
             let app = common.load(5000)?;
             let directory = common.directory();
