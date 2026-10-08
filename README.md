@@ -138,16 +138,16 @@ A repeated meme comes from the in-memory cache in about 1 µs. Starting `memegen
 
 ### Over HTTP
 
-`memegen bench --url <base URL>` load-tests any running memegen-compatible server: this one, upstream memegen, or [memegen-rs](https://github.com/tenequm/memegen-rs). Each connection sends requests back to back for 5 seconds per case, and every request is a new meme, so no server cache is hit. Below, the three servers ran on the same machine, one at a time: this port (`memegen serve`), memegen-rs at `852bd13` with no render cache, and upstream under gunicorn with 18 uvicorn workers.
+`memegen bench --url <base URL>` load-tests any running memegen-compatible server: this one, upstream memegen, or [memegen-rs](https://github.com/tenequm/memegen-rs). Each connection sends requests back to back for 5 seconds per case, and every request is a new meme, so no server cache is hit. Below, the three servers ran on the same machine, one at a time: memegen-rust (`memegen serve`), memegen-rs at `852bd13` with no render cache, and upstream under gunicorn with 18 uvicorn workers.
 
 One connection, median latency:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/bench-latency-dark.svg">
-  <img src="docs/bench-latency-light.svg" alt="Bar chart of median HTTP latency per case for this port, memegen-rs, and upstream Python; the table below has the values" width="760">
+  <img src="docs/bench-latency-light.svg" alt="Bar chart of median HTTP latency per case for memegen-rust, memegen-rs, and upstream Python; the table below has the values" width="760">
 </picture>
 
-| Case | This port | memegen-rs | Upstream Python |
+| Case | memegen-rust | memegen-rs | Upstream Python |
 |---|---|---|---|
 | static png, 2 lines | 0.80 ms | 9.3 ms | 90 ms |
 | static jpg, wrapped text | 1.2 ms | 9.3 ms | 129 ms |
@@ -160,10 +160,10 @@ One connection, median latency:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/bench-throughput-dark.svg">
-  <img src="docs/bench-throughput-light.svg" alt="Bar chart of requests per second at 64 connections per case for this port, memegen-rs, and upstream Python; the table below has the values" width="760">
+  <img src="docs/bench-throughput-light.svg" alt="Bar chart of requests per second at 64 connections per case for memegen-rust, memegen-rs, and upstream Python; the table below has the values" width="760">
 </picture>
 
-| Case | This port | memegen-rs | Upstream Python |
+| Case | memegen-rust | memegen-rs | Upstream Python |
 |---|---|---|---|
 | static png, 2 lines | 9,964 (9.5 ms) | 1,342 (65 ms) | 137 (767 ms) |
 | static jpg, wrapped text | 5,665 (18 ms) | 1,498 (53 ms) | 73 (1,529 ms) |
