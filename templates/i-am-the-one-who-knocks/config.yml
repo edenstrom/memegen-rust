@@ -1,0 +1,36 @@
+name: I Am the One Who Knocks
+source: https://imgflip.com/meme/46134782/I-am-the-one-who-knocks
+description: "Walter White's menacing declaration of who is in charge, used dramatically to claim control or responsibility. Top line is the setup, bottom line is the 'I am the one who knocks' declaration."
+keywords:
+  - walter white
+  - breaking bad
+  - bryan cranston
+  - i am the danger
+  - menacing
+  - dramatic
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.003
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.177
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.81
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - WHEN NOBODY ELSE WANTS TO DO THE DISHES
+  - "I AM THE ONE WHO KNOCKS!"

@@ -1,0 +1,25 @@
+name: Makima Is Listening
+source: https://imgflip.com/meme/434528469/Makima-is-listening
+description: Makima from Chainsaw Man writing in her notebook while calmly listening. Used when someone is quietly paying close attention to everything you say, with the single line going on the notebook.
+keywords:
+  - makima
+  - chainsaw man
+  - notebook
+  - listening
+  - manga
+  - taking notes
+  - anime
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.495
+    anchor_y: 0.28
+    angle: 0.0
+    scale_x: 0.236
+    scale_y: 0.21
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Makima is listening

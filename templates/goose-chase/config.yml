@@ -1,0 +1,49 @@
+name: Goose Chase
+source: https://imgflip.com/meme/398221598/Goose-Chase
+description: 'A goose-drawn panic spiral: a small mistake sets off anxiety, which takes off after the person. Top line is the slight mistake, middle line is the person, bottom-right line is the anxiety chasing them.'
+keywords:
+  - goose
+  - anxiety
+  - mistake
+  - running away
+  - panic
+  - chase
+  - overthinking
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.1
+    angle: 0.0
+    scale_x: 0.45
+    scale_y: 0.38
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.54
+    angle: 0.0
+    scale_x: 0.35
+    scale_y: 0.455
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.58
+    anchor_y: 0.795
+    angle: 0.0
+    scale_x: 0.37
+    scale_y: 0.19
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me making a slight mistake
+  - Me
+  - My anxiety

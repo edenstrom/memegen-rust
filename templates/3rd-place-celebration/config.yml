@@ -1,0 +1,37 @@
+name: 3rd Place Celebration
+source: https://imgflip.com/meme/224480326/3rd-Place-Celebration
+description: "Celebrating a third-place finish as if it were a victory, shown in a six-panel comic of a bronze medalist's over-the-top celebration. Top line is the setup, bottom line is the reaction."
+keywords:
+  - third place
+  - bronze
+  - celebration
+  - podium
+  - champagne
+  - sports
+  - comic
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.86
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Finishing third in the race"
+  - "Celebrating like I won gold"

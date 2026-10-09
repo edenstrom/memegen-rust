@@ -1,0 +1,37 @@
+name: "Powder That Makes You Say Yes"
+source: https://imgflip.com/meme/142097891/Powder-that-makes-you-say-yes
+description: "A vintage comic panel of a sales pitch for a powder that makes people agree. The speech bubble holds the pitch, the paper holds the product."
+keywords:
+  - "vintage comic"
+  - "pulp comic"
+  - "powder"
+  - "sales pitch"
+  - "yes"
+  - "persuasion"
+  - "hypnotism"
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.43
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.38
+    scale_y: 0.20
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.66
+    anchor_y: 0.40
+    angle: 0.0
+    scale_x: 0.32
+    scale_y: 0.22
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Yes"
+  - "Powder that makes you say yes"

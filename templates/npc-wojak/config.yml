@@ -1,0 +1,36 @@
+name: NPC Wojak
+source: https://imgflip.com/meme/286126573/Confused-Math-Lady
+description: An emotionless NPC reacting to a statement, then turning angry at a simple counter-question. Top-left line is the statement, top-right line is the counter-question.
+keywords:
+  - npc
+  - wojak
+  - angry npc
+  - reaction
+  - four panels
+  - dialogue
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.42
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.53
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.42
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Statement of fact
+  - Simple counter-question

@@ -1,0 +1,36 @@
+name: Darth Vader Where Is Padme
+source: https://imgflip.com/meme/264138731/Darth-Vader-Where-is-Padme
+description: Darth Vader anxiously asking where Padme is, from Revenge of the Sith, used for asking about someone who may have been hurt by you. Top line is the question, bottom line is the uncomfortable answer.
+keywords:
+  - darth vader
+  - padme
+  - star wars
+  - revenge of the sith
+  - where is she
+  - is she safe
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Where is Padme? Is she safe? Is she alright?
+  - It seems, in your anger, you killed her.

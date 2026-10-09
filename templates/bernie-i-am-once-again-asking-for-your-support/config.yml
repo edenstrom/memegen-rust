@@ -1,0 +1,37 @@
+name: Bernie I Am Once Again Asking For Your Support
+source: https://imgflip.com/memetemplate/222403160
+description: "Repeating a request with sincere, slightly pleading insistence, as a running joke about asking for the same thing again. Top line is the opening, bottom line is the request."
+keywords:
+  - Bernie Sanders
+  - asking
+  - request
+  - repeated
+  - pleading
+  - support
+  - once again
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.68
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "I am once again asking"
+  - "For your cat photos"

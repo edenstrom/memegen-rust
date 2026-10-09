@@ -1,0 +1,36 @@
+name: Dr Evil Laser
+source: https://imgflip.com/meme/Dr-Evil-Laser
+description: Dr. Evil doing air quotes from Austin Powers, used to sarcastically question something someone calls a big deal. Top line is the word, bottom line is the quoted phrase.
+keywords:
+  - dr evil
+  - laser
+  - air quotes
+  - austin powers
+  - sarcasm
+  - quotes
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.002
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.148
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "\"LASER\""
+  - IN "QUOTES"

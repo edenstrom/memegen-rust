@@ -1,0 +1,24 @@
+name: Man Holding Cardboard Sign
+source: https://imgflip.com/meme/504321965/Man-Holding-Cardboard-Sign
+description: A man holding up a handwritten cardboard sign with a message for the world. Used for sharing a strong opinion written as a sign, with the single line going on the cardboard.
+keywords:
+  - cardboard sign
+  - man holding sign
+  - protest
+  - opinion
+  - rant
+  - message
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.4
+    anchor_y: 0.09
+    angle: 0.0
+    scale_x: 0.32
+    scale_y: 0.366
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Stop replying to emails with 'thanks!'"

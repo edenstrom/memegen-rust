@@ -1,0 +1,26 @@
+name: "Why Is My Sister's Name Rose"
+source: https://imgflip.com/meme/152073600/Why-is-my-sisters-name-Rose
+description: "A pointed question with a suspicious or obvious answer, shown by the smug photo below. The question goes in the white area above the photo."
+keywords:
+  - "stock photo"
+  - "father and son"
+  - "car"
+  - "smirk"
+  - "question"
+  - "awkward"
+  - "family"
+  - "smug"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.04
+    anchor_y: 0.04
+    angle: 0.0
+    scale_x: 0.92
+    scale_y: 0.28
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Why is my dad's car playlist all Phil Collins?"

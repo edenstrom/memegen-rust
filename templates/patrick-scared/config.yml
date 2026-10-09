@@ -1,0 +1,37 @@
+name: "Patrick Scared"
+source: https://imgflip.com/meme/176735426/patrick-scared
+description: "Fish police hold up a blank wanted poster while a scared Patrick looks on. The top poster carries the accusation, the bottom poster the reaction."
+keywords:
+  - "SpongeBob"
+  - "Patrick Star"
+  - "wanted poster"
+  - "fish police"
+  - "scared"
+  - "reaction"
+  - "Bikini Bottom"
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.45
+    anchor_y: 0.22
+    angle: 0.0
+    scale_x: 0.30
+    scale_y: 0.22
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.56
+    angle: 0.0
+    scale_x: 0.30
+    scale_y: 0.20
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Wanted: Ugly"
+  - "My face"

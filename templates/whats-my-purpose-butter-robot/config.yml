@@ -1,0 +1,38 @@
+name: "What's My Purpose - Butter Robot"
+source: https://imgflip.com/meme/111944027/Whats-My-Purpose---Butter-Robot
+description: "Asking a grand existential question and getting a mundane, humbling answer. Top line is the robot's question, bottom line is the small job it is given."
+keywords:
+  - "Rick and Morty"
+  - "butter robot"
+  - "purpose"
+  - "existential"
+  - "mundane"
+  - "pass butter"
+  - "robot"
+  - "sitcom"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "What's my purpose?"
+  - "You pass butter."

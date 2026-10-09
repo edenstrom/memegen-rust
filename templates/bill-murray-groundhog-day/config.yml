@@ -1,0 +1,36 @@
+name: Bill Murray Groundhog Day
+source: https://imgflip.com/meme/49396946/Bill-Murray-Groundhog-Day
+description: Being stuck repeating the same thing over and over, or the same annoying situation happening again. Top line sets up the repetition, bottom line is the reaction, usually a single word like "again".
+keywords:
+  - Bill Murray
+  - Groundhog Day
+  - repetition
+  - deja vu
+  - annoyed
+  - reporter
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - It's Groundhog Day
+  - Again

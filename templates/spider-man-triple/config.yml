@@ -1,0 +1,49 @@
+name: 'Spider-Man Triple'
+source: https://imgflip.com/memetemplate/206151308
+description: 'Three people each pointing at another and accusing them of the same thing. The left, middle, and right lines match the three figures from left to right.'
+keywords:
+  - 'spider-man'
+  - 'pointing'
+  - 'blame'
+  - 'accusation'
+  - 'mutual accusation'
+  - 'hypocrisy'
+  - 'reciprocal blame'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.33
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.33
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.34
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.66
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.34
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'I BROKE THE BUILD'
+  - 'YOU BROKE THE BUILD'
+  - 'WE ALL BROKE THE BUILD'

@@ -1,0 +1,37 @@
+name: "AJ Styles & Undertaker"
+source: https://imgflip.com/memetemplate/234202281
+description: "A loud, boastful claim delivered with an ominous figure looming behind, unimpressed. Top line is the claim, bottom line is the stoic reply."
+keywords:
+  - WWE
+  - wrestling
+  - Undertaker
+  - AJ Styles
+  - ominous
+  - intimidation
+  - boast
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "I'm going to win this match!"
+  - "The Undertaker: Not today."

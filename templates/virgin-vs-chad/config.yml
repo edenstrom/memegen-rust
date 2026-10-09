@@ -1,0 +1,50 @@
+name: "Virgin vs Chad"
+source: https://imgflip.com/meme/237925155/Virgin-vs-Chad
+description: "Comparing three tiers of the same behaviour: the weakest or most awkward on the left, a middling everyman in the middle, and the most extreme, confident version on the right. Each label goes above its figure."
+keywords:
+  - "Virgin"
+  - "Chad"
+  - "Brad"
+  - "comparison"
+  - "three tiers"
+  - "drawing"
+  - "escalation"
+  - "extremes"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.01
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.31
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.34
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.31
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.67
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.31
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Plays Minecraft alone"
+  - "Plays Minecraft with friends"
+  - "Streams Minecraft to 3000 viewers"

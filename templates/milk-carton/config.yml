@@ -1,0 +1,36 @@
+name: Milk Carton
+source: https://imgflip.com/meme/79023506/Milk-carton
+description: A missing-person style milk carton with a photo on it. Used for something you have lost track of, with the top line on the photo and the bottom line below it.
+keywords:
+  - milk carton
+  - missing
+  - have you seen me
+  - missing person
+  - lost
+  - gone
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.328
+    anchor_y: 0.355
+    angle: 0.0
+    scale_x: 0.522
+    scale_y: 0.449
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.387
+    anchor_y: 0.924
+    angle: 0.0
+    scale_x: 0.416
+    scale_y: 0.048
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My motivation
+  - Nobody

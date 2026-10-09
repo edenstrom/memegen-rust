@@ -1,0 +1,36 @@
+name: Don't You Squidward
+source: https://imgflip.com/meme/Dont-You-Squidward
+description: SpongeBob grinning smugly at Squidward, used for teasing someone about something they secretly like. Top line is the thing they like, bottom line is the taunt.
+keywords:
+  - spongebob
+  - squidward
+  - smug
+  - krabby patties
+  - teasing
+  - grinning
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - YOU LIKE KRABBY PATTIES
+  - DON'T YOU SQUIDWARD?

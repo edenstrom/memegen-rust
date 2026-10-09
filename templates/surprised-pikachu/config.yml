@@ -1,0 +1,36 @@
+name: Surprised Pikachu
+source: https://imgflip.com/memetemplate/155067746
+description: Being shocked by a predictable consequence of your own action. Top line is the action or setup, bottom line is the obvious result.
+keywords:
+  - surprised pikachu
+  - pikachu
+  - pokemon
+  - shocked
+  - obvious consequence
+  - reaction
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.94
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.21
+    angle: 0.0
+    scale_x: 0.94
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me: *does something stupid*"
+  - "The obvious consequence: *happens*"

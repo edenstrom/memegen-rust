@@ -1,0 +1,37 @@
+name: "Note Passing"
+source: https://imgflip.com/meme/61087503/Note-passing
+description: "Passing a note to someone and getting a hostile reaction. Top line is what the note says, bottom line is the angry reply written on the paper."
+keywords:
+  - "note passing"
+  - "classroom"
+  - "school"
+  - "passing notes"
+  - "angry"
+  - "cartoon"
+  - "reply"
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.10
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.49
+    anchor_y: 0.64
+    angle: 0.0
+    scale_x: 0.25
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Psst, did you do the homework?"
+  - "No. Don't talk to me."

@@ -1,0 +1,37 @@
+name: "Obama Medal"
+source: https://imgflip.com/meme/89853322/obama-medal
+description: "Giving yourself an award or taking credit for something, usually as a self-deprecating or self-congratulating joke. Top line is the award, bottom line is 'Also me' or the recipient."
+keywords:
+  - "Barack Obama"
+  - "medal"
+  - "self-praise"
+  - "award"
+  - "credit"
+  - "humble brag"
+  - "presidential"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.86
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me for finishing my checklist"
+  - "Also me"

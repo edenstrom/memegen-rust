@@ -1,0 +1,36 @@
+name: "I Am Going to Create an Environment That Is So Toxic"
+source: https://imgflip.com/meme/367437833/I-am-going-to-create-an-environment-that-is-so-toxic-blank
+description: "Sue Sylvester gleefully announcing a hostile, toxic environment she is going to build. First box is what she is creating, second box is the negative quality it has."
+keywords:
+  - glee
+  - sue sylvester
+  - toxic
+  - villain
+  - i am going to create
+  - environment
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.185
+    anchor_y: 0.876
+    angle: 0.0
+    scale_x: 0.287
+    scale_y: 0.065
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.701
+    anchor_y: 0.873
+    angle: 0.0
+    scale_x: 0.127
+    scale_y: 0.076
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - a discord server
+  - toxic

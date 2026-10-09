@@ -1,0 +1,74 @@
+name: "Who Wants to Be a Millionaire?"
+source: https://imgflip.com/meme/165567092/Who-wants-to-be-a-millionaire
+description: "Reacting to a bizarre or absurd multiple-choice situation with a wide-eyed, incredulous stare. The top box is the question, and A to D are the four answer choices."
+keywords:
+  - "Steve Harvey"
+  - "Who Wants to Be a Millionaire"
+  - "game show"
+  - "multiple choice"
+  - "shocked"
+  - "incredulous"
+  - "quiz"
+  - "answer"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.16
+    anchor_y: 0.655
+    angle: 0.0
+    scale_x: 0.68
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.19
+    anchor_y: 0.79
+    angle: 0.0
+    scale_x: 0.27
+    scale_y: 0.06
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.6
+    anchor_y: 0.79
+    angle: 0.0
+    scale_x: 0.25
+    scale_y: 0.06
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.19
+    anchor_y: 0.885
+    angle: 0.0
+    scale_x: 0.27
+    scale_y: 0.055
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.6
+    anchor_y: 0.885
+    angle: 0.0
+    scale_x: 0.25
+    scale_y: 0.055
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Which one is the real reason I'm late?"
+  - "Traffic"
+  - "I hit snooze"
+  - "I forgot my keys"
+  - "I didn't want to go"

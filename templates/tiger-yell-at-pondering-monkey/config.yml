@@ -1,0 +1,38 @@
+name: Tiger Yelling at Pondering Monkey
+source: https://imgflip.com/meme/582050050/tiger-yell-at-pondering-monkey
+description: Being yelled at by someone furious while you stay completely unbothered and lost in thought. Left line is the one yelling, right line is the one pondering.
+keywords:
+  - tiger
+  - lioness
+  - yell
+  - screaming
+  - pondering
+  - monkey
+  - chimpanzee
+  - unfazed
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.4
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.55
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.42
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My mom yelling at me to clean my room
+  - Me thinking about lore of a video game

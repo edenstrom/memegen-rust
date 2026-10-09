@@ -1,0 +1,24 @@
+name: 'Silent Movie Card'
+source: https://imgflip.com/meme/23646296/Silent-Movie-Card
+description: 'A dramatic line of dialogue presented as a silent film intertitle, for old-timey or theatrical drama. The single line sits on the card.'
+keywords:
+  - 'silent movie'
+  - 'intertitle'
+  - 'title card'
+  - 'dramatic'
+  - 'vintage'
+  - 'dialogue'
+text:
+  - style: upper
+    color: white
+    font: thin
+    anchor_x: 0.15
+    anchor_y: 0.3
+    angle: 0.0
+    scale_x: 0.7
+    scale_y: 0.4
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'I HAVE WAITED THREE HOURS FOR THIS BUS'

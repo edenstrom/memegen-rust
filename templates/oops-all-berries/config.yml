@@ -1,0 +1,37 @@
+name: "Oops! All Berries"
+source: https://imgflip.com/meme/152344231/Oops-All-Berries
+description: "A cereal box with a blank bowl of milk and a banner, used when you get an excess of one thing instead of the mix you wanted. Top line is the plan, bottom line is what you got."
+keywords:
+  - "Cap'n Crunch"
+  - "Oops All Berries"
+  - "cereal"
+  - "breakfast"
+  - "mistake"
+  - "excess"
+  - "berries"
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.24
+    anchor_y: 0.13
+    angle: 0.0
+    scale_x: 0.40
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.20
+    anchor_y: 0.47
+    angle: 0.0
+    scale_x: 0.60
+    scale_y: 0.10
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "I wanted a mixed playlist"
+  - "Only Taylor Swift"

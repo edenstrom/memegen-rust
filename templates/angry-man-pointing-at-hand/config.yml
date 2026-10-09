@@ -1,0 +1,37 @@
+name: Angry Man Pointing at Hand
+source: https://imgflip.com/meme/180517785/Angry-Man-pointing-at-hand
+description: "An exasperated accusation of a clear failure, pointing at the evidence on an open palm. Top line is the accusation, bottom line is the evidence."
+keywords:
+  - painting
+  - pointing
+  - accusation
+  - exasperation
+  - scolding
+  - argument
+  - confrontation
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "You said you'd be here by eight"
+  - "It's now 10:45"

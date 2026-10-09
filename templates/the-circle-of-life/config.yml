@@ -1,0 +1,36 @@
+name: The Circle of Life
+source: https://imgflip.com/meme/73012190/the-circle-of-life
+description: Presenting something ordinary as if it were a sacred, grand moment, like Rafiki raising Simba. Top line is the thing being presented, bottom line is the presenter.
+keywords:
+  - lion king
+  - rafiki
+  - simba
+  - holding up
+  - presentation
+  - grand reveal
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.2
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.55
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.5
+    anchor_y: 0.395
+    angle: 0.0
+    scale_x: 0.225
+    scale_y: 0.495
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My new hobby
+  - Me

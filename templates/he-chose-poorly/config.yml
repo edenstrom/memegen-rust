@@ -1,0 +1,36 @@
+name: He Chose Poorly
+source: https://imgflip.com/meme/386198399/Confused-John-Travolta-Pulp-Fiction
+description: A character making a bad choice and suffering the consequences, from Indiana Jones and the Last Crusade. Top line is the choice, bottom line is the grim outcome.
+keywords:
+  - indiana jones
+  - last crusade
+  - grail
+  - bad choice
+  - consequences
+  - skeleton
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Choosing the cheapest hosting provider
+  - Website down for three days

@@ -1,0 +1,36 @@
+name: Drake Josh Megan
+source: https://imgflip.com/meme/206731966/Drake-Josh-Megan
+description: Josh from Drake and Josh squinting suspiciously, used for a skeptical look when something goes wrong. Top line is the trigger, bottom line is the person or thing being suspected.
+keywords:
+  - josh peck
+  - megan
+  - drake and josh
+  - squinting
+  - suspicious
+  - skeptical
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.003
+    angle: 0.0
+    scale_x: 0.979
+    scale_y: 0.147
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.979
+    scale_y: 0.155
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - WHEN SOMETHING GOES WRONG
+  - MEGAN...

@@ -1,0 +1,36 @@
+name: 'Surprised Koala'
+source: https://imgflip.com/meme/Surprised-Koala
+description: 'A soaked, dishevelled koala with its tongue out, looking shocked and a bit ridiculous. Top line is the setup, bottom line is the surprise.'
+keywords:
+  - 'wet koala'
+  - 'shocked'
+  - 'surprised'
+  - 'crazy'
+  - 'animal'
+  - 'koala'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.002
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.148
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'WHEN YOU REALIZE IT''S MONDAY'
+  - 'AND YOU HAVEN''T DONE YOUR HOMEWORK'

@@ -1,0 +1,38 @@
+name: "What Kind of American"
+source: https://imgflip.com/meme/499301001/What-kind-of-American
+description: "A deadpan question about what kind of American someone is, answered in the bottom line. Used for awkward or confrontational questions about identity."
+keywords:
+  - "American"
+  - "deadpan"
+  - "movie still"
+  - "soldier"
+  - "red sunglasses"
+  - "question"
+  - "identity"
+  - "confrontation"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Are you a patriot or a traitor?"
+  - "A patriot who loves tacos"

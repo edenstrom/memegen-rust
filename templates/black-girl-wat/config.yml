@@ -1,0 +1,36 @@
+name: Black Girl Wat
+source: https://imgflip.com/meme/Black-Girl-Wat
+description: Reacting to something baffling or unbelievable with a confused, incredulous face. Top line is the baffling thing, bottom line is the confused reaction.
+keywords:
+  - wat
+  - confused
+  - incredulous
+  - reaction
+  - disbelief
+  - what
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When they say they don't like mac and cheese
+  - Excuse me?

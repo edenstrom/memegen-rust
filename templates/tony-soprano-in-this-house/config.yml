@@ -1,0 +1,37 @@
+name: Tony Soprano in This House
+source: https://imgflip.com/meme/323402576/Tony-Soprano-in-this-house
+description: Declaring authority over a place in an angry, dramatic way, usually to shut down an argument. Top line is the declaration, bottom line is the verdict.
+keywords:
+  - tony soprano
+  - sopranos
+  - in this house
+  - pointing
+  - bathrobe
+  - angry
+  - authority
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.003
+    angle: 0.0
+    scale_x: 0.97
+    scale_y: 0.147
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.97
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - IN THIS HOUSE, CHRISTOPHER COLUMBUS IS A HERO!
+  - END OF STORY!

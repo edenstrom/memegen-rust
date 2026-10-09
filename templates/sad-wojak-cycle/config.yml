@@ -1,0 +1,49 @@
+name: "Sad Wojak Cycle"
+source: https://imgflip.com/meme/434474643/Sad-wojak-cycle
+description: "A sad wojak caught in a loop of arrows, repeating the same exhausting cycle. The top line is the first step, the right line the second, the bottom line the third."
+keywords:
+  - "wojak"
+  - "sad"
+  - "cycle"
+  - "insomnia"
+  - "tired"
+  - "loop"
+  - "exhaustion"
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.36
+    anchor_y: 0.08
+    angle: 0.0
+    scale_x: 0.30
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.70
+    anchor_y: 0.42
+    angle: 0.0
+    scale_x: 0.25
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.36
+    anchor_y: 0.80
+    angle: 0.0
+    scale_x: 0.30
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Go to sleep"
+  - "Can't sleep"
+  - "Wake up tired"

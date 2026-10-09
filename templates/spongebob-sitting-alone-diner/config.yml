@@ -1,0 +1,37 @@
+name: "SpongeBob Sitting Alone in a Diner"
+source: https://imgflip.com/meme/258651081/Penguin-pointing-at-shipping-label
+description: "SpongeBob sitting alone at a diner table, waiting. Top line is the setup, bottom line is what happens next."
+keywords:
+  - "SpongeBob"
+  - "SpongeBob SquarePants"
+  - "diner"
+  - "waiting"
+  - "restaurant"
+  - "sad"
+  - "waiter"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me waiting for my food to arrive"
+  - "When the waiter walks past with someone else's order"

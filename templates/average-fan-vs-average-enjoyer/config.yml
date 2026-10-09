@@ -1,0 +1,37 @@
+name: Average Fan vs Average Enjoyer
+source: https://imgflip.com/meme/316989420/Average-Fan-vs-Average-Enjoyer
+description: "Contrasting an obsessive, overly invested fan with a relaxed enjoyer of the same thing. The left label is the fan, the right label is the enjoyer."
+keywords:
+  - fan
+  - enjoyer
+  - comparison
+  - fandom
+  - stereotype
+  - obsession
+  - casual
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.5
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Obsesses over every detail"
+  - "Just enjoys the show"

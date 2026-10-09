@@ -1,0 +1,37 @@
+name: "Normal and Dark Mr. Incredible"
+source: https://imgflip.com/meme/336492590/Normal-and-dark-mrincredibles
+description: "A cheerful version of something beside an unsettling dark version of the same thing. The left label is the normal version, the right label is the dark one."
+keywords:
+  - "Mr. Incredible"
+  - "The Incredibles"
+  - "Pixar"
+  - "dark version"
+  - "contrast"
+  - "creepy"
+  - "hidden truth"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me at work on Monday"
+  - "Me at work on Friday at 5pm"

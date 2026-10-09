@@ -1,0 +1,49 @@
+name: "Protected Kevin Hart"
+source: https://imgflip.com/meme/151831837/Protected-Kevin-Hart
+description: "Hiding behind someone else to avoid a person or situation you would rather not face. Top left is the person approaching, the centre label is you, the bottom label is who you are avoiding."
+keywords:
+  - "Kevin Hart"
+  - "protection"
+  - "shield"
+  - "avoidance"
+  - "introvert"
+  - "social awkwardness"
+  - "hiding"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.42
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.45
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.28
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.60
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.40
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "My extroverted friend"
+  - "Me"
+  - "The waiter who got my order wrong"

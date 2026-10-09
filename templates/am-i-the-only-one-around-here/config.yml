@@ -1,0 +1,37 @@
+name: Am I The Only One Around Here
+source: https://imgflip.com/meme/Am-I-The-Only-One-Around-Here
+description: "Feeling like the only person who cares about a rule or standard while everyone else ignores it. Top line is what others ignore, bottom line is the complaint."
+keywords:
+  - The Big Lebowski
+  - Walter Sobchak
+  - rules
+  - complaint
+  - frustration
+  - lone voice
+  - standards
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Nobody reads the instructions"
+  - "Am I the only one around here?"

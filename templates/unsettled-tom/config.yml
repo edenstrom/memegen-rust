@@ -1,0 +1,38 @@
+name: "Unsettled Tom"
+source: https://imgflip.com/meme/Unsettled-Tom
+description: "Staring in silent, unsettled judgement at something you cannot unsee. Top line sets up the situation, bottom line is what Tom is unsettled by."
+keywords:
+  - "Tom"
+  - "Tom and Jerry"
+  - "unsettled"
+  - "stare"
+  - "judgement"
+  - "cartoon cat"
+  - "uncomfortable"
+  - "awkward"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "When the group chat starts a conspiracy"
+  - "Why are we even here?"

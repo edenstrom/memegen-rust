@@ -1,0 +1,37 @@
+name: 'How Do You Do, Fellow Kids?'
+source: https://imgflip.com/meme/58910635/Steve-Buscemi-Fellow-Kids
+description: 'Trying too hard to relate to younger people or current trends in an awkward way. Top line is the setup, bottom line is the awkward greeting.'
+keywords:
+  - 'steve buscemi'
+  - 'how do you do fellow kids'
+  - 'awkward'
+  - 'trying too hard'
+  - 'skateboard'
+  - 'cool'
+  - 'teenagers'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'WHEN YOU SAY ''NO CAP'' AT THE STANDUP'
+  - 'HOW DO YOU DO, FELLOW KIDS?'

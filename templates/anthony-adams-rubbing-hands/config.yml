@@ -1,0 +1,37 @@
+name: Anthony Adams Rubbing Hands
+source: https://imgflip.com/meme/196595107/Anthony-Adams-Rubbing-Hands
+description: "Rubbing hands together in gleeful anticipation of a scheme or a good outcome. Top line is the setup, bottom line is the anticipated payoff."
+keywords:
+  - Anthony Adams
+  - rubbing hands
+  - scheming
+  - gleeful
+  - anticipation
+  - evil plan
+  - excitement
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Finally, the plan is ready"
+  - "Nobody will ever suspect a thing"

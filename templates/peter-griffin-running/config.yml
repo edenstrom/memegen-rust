@@ -1,0 +1,38 @@
+name: "Peter Griffin Running Away"
+source: https://imgflip.com/meme/491107549/Vince-McMahon-Crying
+description: "Fleeing a situation as fast as possible, usually to escape something awkward or overwhelming. Top line is what you are running from, bottom line is the escape."
+keywords:
+  - "Peter Griffin"
+  - "Family Guy"
+  - "running away"
+  - "escape"
+  - "fleeing"
+  - "panic"
+  - "avoidance"
+  - "plane"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "When someone asks if I have a minute"
+  - "Me leaving the building"

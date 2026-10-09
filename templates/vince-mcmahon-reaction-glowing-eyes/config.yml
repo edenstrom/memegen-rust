@@ -1,0 +1,62 @@
+name: Vince McMahon Reaction with Glowing Eyes
+source: https://imgflip.com/meme/126882756/Vince-McMahon-Reaction-wGlowing-Eyes
+description: "An escalating reaction from mild interest to shocked, glowing-eyed astonishment. Each panel is a stronger stage, so the bottom line is the most extreme."
+keywords:
+  - "Vince McMahon"
+  - "WWE"
+  - "escalating reaction"
+  - "shocked"
+  - "glowing eyes"
+  - "astonishment"
+  - "wrestling"
+  - "overwhelmed"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.03
+    anchor_y: 0.043
+    angle: 0.0
+    scale_x: 0.43
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.03
+    anchor_y: 0.285
+    angle: 0.0
+    scale_x: 0.43
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.03
+    anchor_y: 0.532
+    angle: 0.0
+    scale_x: 0.43
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.03
+    anchor_y: 0.79
+    angle: 0.0
+    scale_x: 0.43
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Our WiFi works today"
+  - "It works in the bathroom too"
+  - "It works from the parking lot"
+  - "It works from space"

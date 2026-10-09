@@ -1,0 +1,37 @@
+name: Be Like Bill
+source: https://imgflip.com/meme/Be-Like-Bill
+description: "Holding up a stick figure with a smug, oblivious smile as a model to imitate. Top line names the behaviour, bottom line is the outcome."
+keywords:
+  - Bill
+  - stick figure
+  - beanie
+  - role model
+  - smile
+  - oblivious
+  - ideal
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.05
+    anchor_y: 0.08
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.05
+    anchor_y: 0.7
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Be like Bill"
+  - "Ignores the bad news and keeps smiling"

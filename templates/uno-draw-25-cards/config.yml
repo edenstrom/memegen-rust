@@ -1,0 +1,26 @@
+name: "UNO Draw 25 Cards"
+source: https://imgflip.com/memetemplate/217743513
+description: "Choosing between a silly or bad option and the dreaded alternative of drawing 25 cards in UNO. The text goes on the blank oval above the printed 'OR draw 25'; the photo on the right is the reaction."
+keywords:
+  - "UNO"
+  - "draw 25"
+  - "card game"
+  - "penalty"
+  - "ultimatum"
+  - "choice"
+  - "board game"
+  - "dilemma"
+text:
+  - style: none
+    color: black
+    font: comic
+    anchor_x: 0.1
+    anchor_y: 0.27
+    angle: 0.0
+    scale_x: 0.36
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Skip your turn"

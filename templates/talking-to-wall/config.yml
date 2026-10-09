@@ -1,0 +1,36 @@
+name: Talking to Wall
+source: https://imgflip.com/meme/304768047/talking-to-wall
+description: Explaining something at length to someone who is not listening, such as a parent or a wall. Top line is the listener, bottom line is what the speaker is explaining.
+keywords:
+  - talking to wall
+  - brick wall
+  - explaining
+  - one-sided conversation
+  - guy talking to wall
+  - me explaining
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.04
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.56
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My parents
+  - Me explaining why video games can't be paused

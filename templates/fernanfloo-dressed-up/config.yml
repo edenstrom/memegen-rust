@@ -1,0 +1,37 @@
+name: "Fernanfloo Dressed Up"
+source: https://imgflip.com/meme/345987437/Pedro-Pascal-crying
+description: "Comparing someone's everyday look with their dressed-up look. Left label is the casual version, right label is the dressed-up one."
+keywords:
+  - "Fernanfloo"
+  - "dressed up"
+  - "before and after"
+  - "casual"
+  - "suit"
+  - "comparison"
+  - "glow up"
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.50
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.50
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.50
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me on a Sunday"
+  - "Me at a wedding"

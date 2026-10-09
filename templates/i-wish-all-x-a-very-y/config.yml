@@ -1,0 +1,36 @@
+name: I Wish All X a Very Y
+source: https://imgflip.com/meme/298196439/I-wish-all-x-a-very-y
+description: "Wishing a group something in a formal, polished way. Top line is the group being wished well, bottom line is the quality wished for them after 'a very'."
+keywords:
+  - Bugs Bunny
+  - tuxedo
+  - i wish all
+  - a very
+  - formal
+  - well wishes
+text:
+  - style: none
+    color: white
+    font: thin
+    anchor_x: 0.0
+    anchor_y: 0.3
+    angle: 0.0
+    scale_x: 0.36
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: white
+    font: thin
+    anchor_x: 0.02
+    anchor_y: 0.72
+    angle: 0.0
+    scale_x: 0.36
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - gamers
+  - pleasant evening

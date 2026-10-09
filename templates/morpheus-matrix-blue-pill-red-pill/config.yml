@@ -1,0 +1,49 @@
+name: Morpheus Matrix Blue Pill Red Pill
+source: https://imgflip.com/meme/183553656/morpheus-matrix-blue-pill-red-pill
+description: Morpheus from The Matrix offering a choice between a blue pill and a red pill. Used when presenting two options, one comfortable and one uncomfortable truth, with the top line as the choice and the lower lines as the pills.
+keywords:
+  - morpheus
+  - matrix
+  - blue pill
+  - red pill
+  - choice
+  - laurence fishburne
+  - truth
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.8
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.08
+    anchor_y: 0.7
+    angle: 0.0
+    scale_x: 0.24
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.68
+    anchor_y: 0.7
+    angle: 0.0
+    scale_x: 0.24
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Choose your path
+  - The painful truth
+  - The blissful ignorance

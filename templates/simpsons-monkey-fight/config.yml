@@ -1,0 +1,37 @@
+name: 'Simpsons Monkey Fight'
+source: https://imgflip.com/meme/145808514/Simpsons-Monkey-Fight
+description: 'Betting on a fight between two sides, as the Simpsons gamblers do on the boat. Top line is the bet, bottom line is the outcome.'
+keywords:
+  - 'simpsons'
+  - 'monkey fight'
+  - 'gambling'
+  - 'betting'
+  - 'cash'
+  - 'fight'
+  - 'chaos'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'I''M PUTTING ALL MY MONEY ON THE TEST SUITE'
+  - 'THE TEST SUITE WON'

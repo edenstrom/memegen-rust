@@ -1,0 +1,36 @@
+name: "In Terms of Money, We Have No Money"
+source: https://imgflip.com/meme/247727404/In-terms-of-money-we-have-no-money
+description: "Gru's deadpan admission that, financially, they have nothing, used to undercut a claim about money or a fancy purchase. Top line is the setup, bottom line is Gru's punchline."
+keywords:
+  - gru
+  - despicable me
+  - minions
+  - in terms of money
+  - broke
+  - finances
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.015
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.135
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My bank account after a minor convenience purchase
+  - "In terms of money, we have no money"

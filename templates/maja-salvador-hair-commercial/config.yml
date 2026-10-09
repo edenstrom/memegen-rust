@@ -1,0 +1,37 @@
+name: Maja Salvador Hair Commercial
+source: https://imgflip.com/meme/527807566/Maja-Salvador-Hair-Commercial
+description: Filipino actress Maja Salvador reacting with exaggerated shock in a hair commercial. Used for hearing juicy gossip while pretending you already knew, with the top line as the gossip and the bottom line as the pretending.
+keywords:
+  - maja salvador
+  - hair commercial
+  - shocked
+  - gossip
+  - surprised
+  - filipina
+  - actress
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.979
+    scale_y: 0.145
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.979
+    scale_y: 0.155
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - WHEN YOU HEAR THE JUICY GOSSIP
+  - BUT YOU HAVE TO PRETEND YOU DON'T KNOW

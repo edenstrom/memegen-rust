@@ -1,0 +1,37 @@
+name: Badass Skeleton
+source: https://imgflip.com/meme/143031762/Badass-Skeleton
+description: "A menacing, intimidating skeleton holding a gun, used for tough-guy or threatening jokes. Top line is the setup, bottom line is the menacing payoff."
+keywords:
+  - skeleton
+  - grim reaper
+  - gun
+  - badass
+  - threat
+  - intimidating
+  - dark humor
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me in the group project"
+  - "Says we're doing it my way"

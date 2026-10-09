@@ -1,0 +1,48 @@
+name: Inside You There Are Two Wolves
+source: https://imgflip.com/meme/175043930/Inside-you-there-are-two-wolves
+description: "The two-wolves parable: two inner urges that want opposite things, with a bottom line that undercuts the conflict. Left and right lines name the two wolves, bottom line is the verdict."
+keywords:
+  - inside you there are two wolves
+  - black wolf
+  - white wolf
+  - parable
+  - inner conflict
+  - tired
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.22
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.75
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.22
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.77
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.22
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - one wants to sleep
+  - the other wants to sleep
+  - you are tired

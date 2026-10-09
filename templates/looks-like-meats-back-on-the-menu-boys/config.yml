@@ -1,0 +1,37 @@
+name: Looks Like Meat's Back on the Menu, Boys
+source: https://imgflip.com/meme/215503300/Looks-like-meats-back-on-the-menu-boys
+description: An orc gleefully spotting something he has been waiting for to return. Top line is the setup, bottom line is the gleeful declaration.
+keywords:
+  - lord of the rings
+  - orc
+  - uruk-hai
+  - meat's back on the menu
+  - gleeful
+  - return
+  - hungry
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When the server comes back online
+  - "Looks like meat's back on the menu, boys!"

@@ -1,0 +1,36 @@
+name: Hypnotize
+source: https://imgflip.com/meme/47204454/Hypnotize
+description: "Using hypnosis-style commands to make a silly demand sound official. Top line is the command, bottom line is the lulling suggestion that goes with it."
+keywords:
+  - hypnotize
+  - spiral
+  - hypnosis
+  - mind control
+  - obey
+  - trance
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.979
+    scale_y: 0.145
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.979
+    scale_y: 0.145
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - YOU WILL BUY ME FOOD
+  - YOU ARE GETTING VERY SLEEPY

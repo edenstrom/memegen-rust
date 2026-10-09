@@ -1,0 +1,37 @@
+name: No - Yes
+source: https://imgflip.com/memetemplate/129315248
+description: Two panels where the top rejects one option and the bottom approves the other, in a Drake-style layout with white side panels. Top line is the rejected option, bottom line is the preferred one.
+keywords:
+  - drake
+  - hotline bling
+  - no yes
+  - dislike like
+  - preference
+  - comparison
+  - two panels
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.392
+    anchor_y: 0.035
+    angle: 0.0
+    scale_x: 0.591
+    scale_y: 0.46
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.392
+    anchor_y: 0.505
+    angle: 0.0
+    scale_x: 0.591
+    scale_y: 0.46
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Doing something the hard way
+  - Doing it the easy way

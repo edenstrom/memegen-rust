@@ -1,0 +1,25 @@
+name: Everywhere I Go, I See His Face
+source: https://imgflip.com/meme/394460955/Gunna-Fire-Writing
+description: Being haunted by a person or thing that turns up everywhere, from the Spider-Man 'Everywhere I go, I see his face' scene. The middle caption is the person or thing; the surrounding wording is baked into the image.
+keywords:
+  - spiderman
+  - everywhere i go
+  - i see his face
+  - tony stark
+  - iron man
+  - marvel
+  - haunted
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.21
+    anchor_y: 0.492
+    angle: 0.0
+    scale_x: 0.506
+    scale_y: 0.398
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - shrek

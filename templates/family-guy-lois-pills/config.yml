@@ -1,0 +1,36 @@
+name: Lois Griffin Pills
+source: https://imgflip.com/meme/408741985/family-guy-louis-pills
+description: Lois Griffin sitting at a table beside an oversized pill bottle, used for an addictive or compulsive habit. Top line is the person, bottom line is the habit.
+keywords:
+  - family guy
+  - lois griffin
+  - pills
+  - pill bottle
+  - addiction
+  - compulsion
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.04
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.75
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me
+  - Checking my phone every 5 minutes

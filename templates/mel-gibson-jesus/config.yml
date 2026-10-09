@@ -1,0 +1,36 @@
+name: Mel Gibson Explaining to Jesus
+source: https://imgflip.com/meme/257865310/Dancing-monkeys
+description: Mel Gibson explaining something to Jesus on the set of The Passion of the Christ, used for over-explaining something to someone who already knows it. Left line is the over-explainer, right line is the one who already knows.
+keywords:
+  - mel gibson
+  - jesus
+  - explaining
+  - passion of the christ
+  - director
+  - over explaining
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.18
+    anchor_y: 0.12
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.24
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.06
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.24
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me explaining my 10-step plan to fix my life
+  - My cat who just wants food

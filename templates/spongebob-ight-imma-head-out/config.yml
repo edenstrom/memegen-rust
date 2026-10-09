@@ -1,0 +1,24 @@
+name: SpongeBob Ight Imma Head Out
+source: https://imgflip.com/meme/Spongebob-Ight-Imma-Head-Out
+description: "Announcing that you are leaving, usually because a situation has become tedious, awkward, or too much. The white text above the image is the reason or situation you are leaving; the line at the bottom is the exit."
+keywords:
+  - SpongeBob
+  - ight imma head out
+  - leaving
+  - heading out
+  - goodbye
+  - bored
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.235
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When the party starts getting political

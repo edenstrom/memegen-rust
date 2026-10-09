@@ -1,0 +1,49 @@
+name: Gus Fring We Are Not the Same
+source: https://imgflip.com/memetemplate/342785297
+description: Drawing a contrast between two things that look alike on the surface, with Gus Fring's deadpan 'we are not the same'. Top line is one motive, middle line is the other, bottom line is the tagline.
+keywords:
+  - gus fring
+  - we are not the same
+  - breaking bad
+  - giancarlo esposito
+  - contrast
+  - comparison
+  - deadpan
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.72
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.87
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.11
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - You play games to have fun
+  - I play games to escape reality
+  - We are not the same

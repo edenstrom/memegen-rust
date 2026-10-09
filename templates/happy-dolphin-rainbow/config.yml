@@ -1,0 +1,37 @@
+name: Happy Dolphin Rainbow
+source: https://imgflip.com/meme/512988872/Happy-dolphin-rainbow
+description: A cheerful, Lisa Frank-style dolphin scene used for oblivious, over-the-top optimism with a menacing twist. Top line is the cheerful statement, bottom line is the dark or inconvenient implication.
+keywords:
+  - dolphin
+  - rainbow
+  - ocean
+  - happy
+  - wholesome
+  - lisa frank
+  - oblivious optimism
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - I AM ALIVE
+  - AND NOW IT'S EVERYONE'S PROBLEM

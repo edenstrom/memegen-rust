@@ -1,0 +1,35 @@
+name: Coffin Dance
+description: A group of pallbearers in matching black suits and sunglasses performing an energetic dance while carrying a coffin, set to the song Astronomia. Top line is the setup, bottom line is the punchline.
+keywords:
+  - coffin dance
+  - astronomia
+  - pallbearers
+  - funeral
+  - dancing
+  - celebration
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.003
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.147
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When someone coughs in 2020
+  - Astronomia starts playing

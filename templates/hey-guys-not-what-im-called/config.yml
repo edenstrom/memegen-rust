@@ -1,0 +1,25 @@
+name: Hey Guys, Not What I'm Called
+source: https://imgflip.com/meme/594100699/Hey-Guys---NOT-WHAT-IM-CALLED
+description: Being called the wrong name or label by a group, with the correction in the other bubble. The dark box is the mislabelled name; the 'hey guys' and 'not what I'm called' bubbles are baked into the image.
+keywords:
+  - hey guys
+  - not what i'm called
+  - comic
+  - drawing
+  - misnomer
+  - nickname
+  - wrong name
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.09
+    anchor_y: 0.19
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - the guy from fortnite

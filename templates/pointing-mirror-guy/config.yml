@@ -1,0 +1,37 @@
+name: "Pointing Mirror Guy"
+source: https://imgflip.com/meme/102165628/Pointing-mirror-guy
+description: "A person pointing at their reflection and blaming the person they see. Top line is the speaker, bottom line is the one being blamed."
+keywords:
+  - "mirror"
+  - "reflection"
+  - "pointing"
+  - "blame"
+  - "self"
+  - "responsible"
+  - "self-blame"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.86
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me"
+  - "The person responsible for all my problems"

@@ -1,0 +1,37 @@
+name: Liam Neeson Taken
+source: https://imgflip.com/meme/Liam-Neeson-Taken
+description: Delivering a calm but menacing threat to someone who has wronged you, from the phone call in Taken. Top line is the denial, bottom line is the threat.
+keywords:
+  - liam neeson
+  - taken
+  - i will find you
+  - threat
+  - phone call
+  - revenge
+  - menacing
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.97
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.97
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - I DON'T KNOW WHO YOU ARE
+  - BUT I WILL FIND YOU AND I WILL KILL YOU

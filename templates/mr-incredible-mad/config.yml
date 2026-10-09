@@ -1,0 +1,145 @@
+name: Mr Incredible Becoming Uncanny
+source: https://imgflip.com/meme/197846899/Mr-incredible-mad
+description: Mr Incredible going from normal to increasingly uncanny across a stack of panels. Used to show someone slowly losing it, with each line being one panel from top to bottom.
+keywords:
+  - mr incredible
+  - uncanny
+  - becoming uncanny
+  - distorted
+  - creepy
+  - comparison
+  - stages
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.115
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.115
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.205
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.085
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.29
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.47
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.08
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.55
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.08
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.63
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.095
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.725
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.095
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.91
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me on the first day of the diet
+  - Feeling fine
+  - Second coffee
+  - Third coffee
+  - Still functioning
+  - Talking to myself
+  - Questioning my life choices
+  - Staring at the wall
+  - Speaking in tongues
+  - Nobody knows what happened
+  - Mr Incredible is gone

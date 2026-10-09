@@ -1,0 +1,48 @@
+name: Hulk Taco
+source: https://imgflip.com/meme/184507495/Hulk-Taco
+description: "Hulk offering a taco as an odd, kind gesture to someone who is having a bad moment. Middle line is the person sitting on the bench, top-left line is Hulk, bottom line is the taco offer."
+keywords:
+  - hulk
+  - taco
+  - scott lang
+  - ant-man
+  - avengers endgame
+  - giving food
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.42
+    anchor_y: 0.24
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.276
+    anchor_y: 0.012
+    angle: 0.0
+    scale_x: 0.168
+    scale_y: 0.486
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.614
+    anchor_y: 0.887
+    angle: 0.0
+    scale_x: 0.14
+    scale_y: 0.111
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me sad after losing my lunch
+  - Hulk
+  - Two tacos

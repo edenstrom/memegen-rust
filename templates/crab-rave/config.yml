@@ -1,0 +1,35 @@
+name: Crab Rave
+description: A dancing crab from the viral Crab Rave video, used when a chaotic celebration keeps escalating. Top line is what just ended, bottom line is what the crab rave intensifies into.
+keywords:
+  - crab rave
+  - crabs
+  - beach
+  - dancing
+  - party
+  - escalation
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.92
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.92
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - OBAMA IS GONE
+  - CRAB RAVE INTENSIFIES

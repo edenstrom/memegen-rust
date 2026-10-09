@@ -1,0 +1,37 @@
+name: Big book small book
+source: https://imgflip.com/meme/237236273/Big-book-small-book
+description: "Contrasting an intimidating, elaborate version of something with a small, simple one. The left label is the big book, the right label is the small book."
+keywords:
+  - books
+  - big
+  - small
+  - comparison
+  - size
+  - simplicity
+  - intimidating
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.0
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.56
+    anchor_y: 0.36
+    angle: 0.0
+    scale_x: 0.4
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "The 1,000-page epic"
+  - "The same plot in a pamphlet"

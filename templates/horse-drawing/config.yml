@@ -1,0 +1,36 @@
+name: Horse Drawing
+source: https://imgflip.com/meme/168840525/Horse-Drawing
+description: "Hyping up an impressive plan or achievement with an epic flaming horse, then undercutting it. Top line is the epic setup, bottom line is the anticlimactic twist."
+keywords:
+  - flaming horse
+  - horse
+  - fire
+  - epic
+  - anticlimax
+  - drawing
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.012
+    anchor_y: 0.003
+    angle: 0.0
+    scale_x: 0.975
+    scale_y: 0.117
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.012
+    anchor_y: 0.87
+    angle: 0.0
+    scale_x: 0.975
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - WHEN YOU WRITE THE PERFECT CODE
+  - BUT IT'S FOR THE WRONG PROJECT

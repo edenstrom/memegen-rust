@@ -1,0 +1,38 @@
+name: "Where Monkey"
+source: https://imgflip.com/memetemplate/316466202
+description: "Three orangutans in a studio staring off-screen at something that is not there. Top line sets up the situation; the second line completes the 'where ___' missing thing."
+keywords:
+  - "orangutan"
+  - "where monkey"
+  - "where banana"
+  - "studio"
+  - "searching"
+  - "missing"
+  - "confused"
+  - "clickbait"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.62
+    anchor_y: 0.25
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "When the recipe promises a 10 minute dinner"
+  - "where dinner"

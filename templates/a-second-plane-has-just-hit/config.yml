@@ -1,0 +1,25 @@
+name: A second plane has just hit
+source: https://imgflip.com/meme/441974336/A-second-plane-has-just-hit
+description: "Passing along shocking news in a calm, quiet way while the listener stays composed. The text is the bad news being whispered."
+keywords:
+  - "9/11"
+  - whisper
+  - bad news
+  - calm
+  - composed
+  - shock
+  - "George W. Bush"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Your cat has eaten the couch"

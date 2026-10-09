@@ -1,0 +1,37 @@
+name: 'Squidward Looking Out Window'
+source: https://imgflip.com/meme/122065530/Spongebob-looking-out-window
+description: 'Watching others have fun without you, looking on wistfully from the sidelines. Top line is the watcher''s thought, bottom line is the fun they are missing.'
+keywords:
+  - 'squidward'
+  - 'spongebob'
+  - 'patrick'
+  - 'window'
+  - 'jealous'
+  - 'left out'
+  - 'watching'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'MY TEAM IS HAVING LUNCH WITHOUT ME'
+  - 'I''M JUST WATCHING THROUGH THE BLINDS'

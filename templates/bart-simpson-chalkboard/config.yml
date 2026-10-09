@@ -1,0 +1,37 @@
+name: Bart Simpson Chalkboard
+source: https://imgflip.com/meme/60777140/Bart-Simpson---chalkboard
+description: "Bart writing lines on the chalkboard as punishment, each line a sentence he has to repeat. Each text box is one line of the sentence."
+keywords:
+  - Bart Simpson
+  - chalkboard
+  - punishment
+  - detention
+  - lines
+  - The Simpsons
+  - school
+text:
+  - style: none
+    color: white
+    font: thin
+    anchor_x: 0.06
+    anchor_y: 0.12
+    angle: 0.0
+    scale_x: 0.72
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: white
+    font: thin
+    anchor_x: 0.06
+    anchor_y: 0.42
+    angle: 0.0
+    scale_x: 0.72
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "I will not throw paper airplanes in class"
+  - "I will not eat the chalk"

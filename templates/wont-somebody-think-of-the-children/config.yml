@@ -1,0 +1,38 @@
+name: "Won't Somebody Think of the Children"
+source: https://imgflip.com/meme/134844307/Wont-somebody-think-of-the-children
+description: "Hand-wringing outrage over a supposed threat to children, often used to mock moral panic. Top line is the threat, bottom line is the exasperated plea."
+keywords:
+  - "Helen Lovejoy"
+  - "The Simpsons"
+  - "moral panic"
+  - "outrage"
+  - "think of the children"
+  - "shocked"
+  - "scandal"
+  - "drama"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Kids these days stay up past 9pm"
+  - "Won't somebody think of the children!"

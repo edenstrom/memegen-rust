@@ -1,0 +1,37 @@
+name: Skeletor Disturbing Facts
+source: https://imgflip.com/meme/338290607/he-man-skeleton-advices
+description: Skeletor delivering a disturbing fact before an ominous sign-off. Top line is the fact, bottom line is the sign-off.
+keywords:
+  - skeletor
+  - he-man
+  - skeletor facts
+  - disturbing facts
+  - villain
+  - sign-off
+  - will return
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.62
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.36
+    scale_y: 0.22
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.5
+    angle: 0.0
+    scale_x: 0.47
+    scale_y: 0.48
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - More disturbing facts next week
+  - Until we meet again!

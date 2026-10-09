@@ -1,0 +1,37 @@
+name: "Okay Grandpa Let's Get You to Bed"
+source: https://imgflip.com/meme/411364406/okay-grandpa-lets-get-you-to-bed
+description: "Humouring an elderly relative's outdated claim by treating them like a child. Top line is the grandpa's old-fashioned claim, bottom line is the patronising reply."
+keywords:
+  - "grandpa"
+  - "old man"
+  - "bed"
+  - "humoring"
+  - "patronizing"
+  - "elderly"
+  - "back in my day"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.86
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Back in my day we owned the games we bought"
+  - "Sure grandpa, let's get you to bed"

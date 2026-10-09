@@ -1,0 +1,37 @@
+name: 'Squidward Drawing'
+source: https://imgflip.com/meme/Squidward
+description: 'A pencil sketch of Squidward from SpongeBob, used to caption a drawing or someone''s self-image. Top line is the title, bottom line is the caption.'
+keywords:
+  - 'squidward'
+  - 'spongebob'
+  - 'drawing'
+  - 'sketch'
+  - 'self image'
+  - 'art'
+  - 'pencil'
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.27
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.52
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.27
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.52
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'MY SELF PORTRAIT AFTER A LONG WEEK'
+  - 'SKETCHED BY A SUPER FAN'

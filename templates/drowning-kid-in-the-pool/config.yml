@@ -1,0 +1,62 @@
+name: Drowning Kid in the Pool
+source: https://imgflip.com/meme/138766447/drowning-kid-in-the-pool
+description: A parent lifting one child out of the pool while another drowns, followed by a skeleton underwater. Used for feeling neglected or overlooked while struggling. Top lines are the parent and favorite child, bottom lines are the struggling person and the skeleton.
+keywords:
+  - drowning kid
+  - skeleton
+  - pool
+  - favorite child
+  - neglected
+  - parent
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.58
+    anchor_y: 0.21
+    angle: 0.0
+    scale_x: 0.34
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.2
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.36
+    angle: 0.0
+    scale_x: 0.42
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.3
+    anchor_y: 0.7
+    angle: 0.0
+    scale_x: 0.45
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Parent
+  - Favorite child
+  - Me struggling
+  - My responsibilities
+aliases:
+  - drowning-kid-skeleton

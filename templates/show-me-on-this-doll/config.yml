@@ -1,0 +1,36 @@
+name: 'Show Me On This Doll'
+source: https://imgflip.com/meme/23940723/Show-me-on-this-doll
+description: 'Asking someone to point out exactly where something happened, usually in an awkward or uncomfortable setting. Top line is the question, bottom line is the answer.'
+keywords:
+  - 'south park'
+  - 'show me on this doll'
+  - 'awkward'
+  - 'doll'
+  - 'question'
+  - 'uncomfortable'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'WHERE DID THE BUG GET INTO PRODUCTION?'
+  - 'RIGHT HERE, IN THE DEPLOY SCRIPT'

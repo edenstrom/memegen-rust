@@ -1,0 +1,38 @@
+name: "You Know, I'm Something of a Scientist Myself"
+source: https://imgflip.com/meme/133946291/You-know-Im-something-of-a-scientist-myself
+description: "A smug, self-assured reply to someone claiming expertise, used to brag about your own knowledge or to act like you know more than you do. Top line sets up the claim, bottom line is the smug reply."
+keywords:
+  - "Willem Dafoe"
+  - "Spider-Man"
+  - "Norman Osborn"
+  - "scientist"
+  - "smug"
+  - "expertise"
+  - "quote"
+  - "brag"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Dude, the Wi-Fi password is on the router"
+  - "You know, I'm something of a scientist myself."

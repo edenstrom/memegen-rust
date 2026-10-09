@@ -2,7 +2,7 @@
 
 A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/memegen), built mainly to run locally as an **MCP server**, with the HTTP API kept as well.
 
-- All 210 upstream templates and fonts, with upstream's text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
+- 537 templates: all 210 upstream ones plus 327 more from [tenequm/memegen-rs](https://github.com/tenequm/memegen-rs), and upstream's fonts and text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
 - PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
@@ -183,4 +183,4 @@ With 64 connections requesting the same meme, `wrk` measured about 17,000 cached
 
 ## Licenses
 
-The code and templates come from memegen (MIT, see `LICENSE-upstream.txt`); fonts carry their own licenses in `fonts/`. Emoji graphics are Twemoji (CC-BY 4.0, see `emoji/LICENSE.md`).
+The code and templates come from memegen (MIT, see `LICENSE-upstream.txt`); templates not in upstream come from tenequm/memegen-rs (MIT, see `LICENSE-tenequm.txt`); fonts carry their own licenses in `fonts/`. Emoji graphics are Twemoji (CC-BY 4.0, see `emoji/LICENSE.md`).

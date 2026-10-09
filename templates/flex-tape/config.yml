@@ -1,0 +1,60 @@
+name: Flex Tape
+description: A quick, flimsy fix slapped onto a serious problem, or responsibilities deliberately ignored in the hope they go away. Top-left is the person, top-right is the problem, bottom-left is the responsibilities, bottom-right is the avoidance.
+keywords:
+  - phil swift
+  - flex tape
+  - leak
+  - temporary fix
+  - procrastination
+  - avoidance
+  - responsibilities
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.14
+    anchor_y: 0.1
+    angle: 0.0
+    scale_x: 0.31
+    scale_y: 0.25
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.65
+    anchor_y: 0.15
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.23
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.15
+    anchor_y: 0.52
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.56
+    anchor_y: 0.65
+    angle: 0.0
+    scale_x: 0.25
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me
+  - A major life problem
+  - My responsibilities
+  - Ignoring them

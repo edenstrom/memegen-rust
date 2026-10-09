@@ -1,0 +1,37 @@
+name: 'Squidward Pointing'
+source: https://imgflip.com/meme/248110290/Squidward-pointing
+description: 'Pointing awkwardly at something while looking nervous or accusing. Top line is the setup, bottom line is what he is pointing at.'
+keywords:
+  - 'squidward'
+  - 'spongebob'
+  - 'pointing'
+  - 'nervous'
+  - 'accusing'
+  - 'awkward'
+  - 'cartoon'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'WHEN SOMEONE SAYS THEY''RE FINE'
+  - 'BUT THE SERVER IS ON FIRE'

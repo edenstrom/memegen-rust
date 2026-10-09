@@ -1,0 +1,25 @@
+name: Summer Camp Island Presentation
+source: https://imgflip.com/meme/139917843/Lisa-Simpsons-Presentation
+description: A presenter with a pointer stands beside a blank spotlit board, and the line written on the board is the point being presented. Used for smug or dismissive statements delivered as if they were a lecture.
+keywords:
+  - presentation
+  - pointer
+  - spotlight
+  - lecture
+  - opinion
+  - summer camp island
+  - lisa simpson
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.014
+    anchor_y: 0.15
+    angle: 0.0
+    scale_x: 0.732
+    scale_y: 0.804
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Your opinion is valid, but mine is louder."

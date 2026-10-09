@@ -1,0 +1,24 @@
+name: Live Reaction
+source: https://imgflip.com/meme/413510303/Live-reaction
+description: Mock breaking-news banner for a dramatic, over-the-top reaction to something. The single line goes in the red banner between LIVE and REACTION.
+keywords:
+  - live reaction
+  - breaking news
+  - news banner
+  - reaction
+  - shock
+  - dramatic
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.21
+    anchor_y: 0.035
+    angle: 0.0
+    scale_x: 0.335
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - SHOCK

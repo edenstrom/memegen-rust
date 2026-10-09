@@ -1,0 +1,36 @@
+name: Evil Toddler
+source: https://imgflip.com/meme/Evil-Toddler
+description: A toddler grinning with a scheming smile, used for a child up to no good or a plan that is clearly being hatched. Top line is the scheme, bottom line is the reveal.
+keywords:
+  - evil toddler
+  - baby
+  - evil grin
+  - plotting
+  - mischievous
+  - scheming
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.24
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.75
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.24
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - I will tell mom
+  - that you did it

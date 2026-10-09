@@ -1,0 +1,25 @@
+name: Ah Shit, Here We Go Again
+source: https://imgflip.com/meme/172883415/Here-we-go-again
+description: Dreading a miserable situation that is about to repeat, using CJ's resigned line from GTA San Andreas. Top line is the situation; the 'Ah shit, here we go again' subtitle is baked into the image.
+keywords:
+  - gta
+  - cj
+  - here we go again
+  - video game
+  - san andreas
+  - dread
+  - monday
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.23
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When you wake up at 6 AM on a Monday

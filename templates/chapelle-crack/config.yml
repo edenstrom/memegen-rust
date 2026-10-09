@@ -1,0 +1,36 @@
+name: Chappelle Crack
+source: https://imgflip.com/meme/57678612/Chapelle-crack
+description: Dave Chappelle in a red beanie giving a serious, deadpan look while making a blunt point. Top line is the setup, bottom line is the blunt punchline.
+keywords:
+  - Dave Chappelle
+  - deadpan
+  - red beanie
+  - serious
+  - blunt
+  - comedy
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Everyone says they love meetings
+  - Nobody loves meetings

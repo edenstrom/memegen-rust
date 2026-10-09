@@ -1,0 +1,37 @@
+name: "Red Pill Blue Pill"
+source: https://imgflip.com/meme/84195720/Red-pill-blue-pill
+description: "Choosing between an uncomfortable truth and comfortable ignorance, from The Matrix. Left line is the red pill, right line is the blue pill."
+keywords:
+  - "The Matrix"
+  - "red pill"
+  - "blue pill"
+  - "Morpheus"
+  - "choice"
+  - "truth"
+  - "ignorance"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.50
+    scale_y: 0.20
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.50
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 0.50
+    scale_y: 0.20
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "The painful truth"
+  - "The blissful ignorance"

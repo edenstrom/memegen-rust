@@ -1,0 +1,25 @@
+name: Hard to Swallow Pills
+source: https://imgflip.com/meme/Hard-To-Swallow-Pills
+description: Delivering an unwelcome truth as a bitter pill to swallow. The bottle label is part of the image; the caption is written on the pills in the hand.
+keywords:
+  - hard to swallow pills
+  - truth
+  - pills
+  - hand
+  - medicine
+  - unwelcome truth
+  - reality
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.12
+    anchor_y: 0.7
+    angle: 0.0
+    scale_x: 0.76
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - You can't make everyone happy

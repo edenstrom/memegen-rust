@@ -1,0 +1,36 @@
+name: Domino Effect
+source: https://imgflip.com/memetemplate/162372564
+description: A tiny domino starting a chain reaction that topples a much larger one, used for a small cause with a huge effect. Top-left line is the huge consequence on the largest domino, bottom line is the tiny starting cause.
+keywords:
+  - domino effect
+  - small domino
+  - large domino
+  - cause and effect
+  - chain reaction
+  - escalation
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.1
+    angle: 0.0
+    scale_x: 0.22
+    scale_y: 0.62
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - World War III
+  - A minor disagreement online

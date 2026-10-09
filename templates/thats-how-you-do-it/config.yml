@@ -1,0 +1,37 @@
+name: That's How You Do It
+source: https://imgflip.com/meme/321927696/Thats-how-you-do-it
+description: Showing someone how a task is done properly, usually with a proud or patronizing tone. Top line is the setup, bottom line is the result.
+keywords:
+  - simpsons
+  - that's how you do it
+  - father
+  - son
+  - teaching
+  - mentor
+  - new hire
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.11
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.88
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.11
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When you show the new hire how to do the job
+  - And they actually get it right

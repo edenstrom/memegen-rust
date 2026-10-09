@@ -1,0 +1,24 @@
+name: This Is Fine (Blank)
+source: https://imgflip.com/meme/91401121/This-is-Fine-Blank
+description: Insisting that everything is fine while a disaster burns around you. This blank two-panel version has an empty speech bubble for your own line.
+keywords:
+  - this is fine
+  - dog
+  - fire
+  - speech bubble
+  - comic
+  - denial
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.615
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.34
+    scale_y: 0.3
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - This is fine.

@@ -1,0 +1,35 @@
+name: Moe Throws Barney
+description: Moe from The Simpsons throwing Barney out of his bar, then dusting off his hands. Used for getting rid of something you no longer want, like deleting an app, with the top line as the thing and the bottom as the person.
+keywords:
+  - moe
+  - simpsons
+  - dusting hands
+  - barney
+  - getting rid of
+  - deleting
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.11
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.88
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.10
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me deleting an app
+  - Me

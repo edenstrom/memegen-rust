@@ -1,0 +1,37 @@
+name: Let Me In
+source: https://imgflip.com/meme/170261505/let-me-in
+description: Desperately begging to be let in or allowed to join something, then falling apart when refused. Top panel is the plea, bottom panel is the outburst after being shut out.
+keywords:
+  - eric andre
+  - let me in
+  - begging
+  - fence
+  - screaming
+  - rejection
+  - desperate
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.52
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Let me be part of the group project
+  - Me when I get left out

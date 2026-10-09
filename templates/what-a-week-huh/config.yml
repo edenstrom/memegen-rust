@@ -1,0 +1,38 @@
+name: "What a Week Huh"
+source: https://imgflip.com/meme/333869421/What-a-week-huh
+description: "Two characters commiserating about an exhausting week. The top bubble is Captain Haddock's line, and the bottom bubble is Tintin's reply."
+keywords:
+  - "Tintin"
+  - "Captain Haddock"
+  - "comic"
+  - "speech bubble"
+  - "exhausted"
+  - "bad week"
+  - "commiserate"
+  - "Snowy"
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.1
+    angle: 0.0
+    scale_x: 0.78
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.29
+    angle: 0.0
+    scale_x: 0.52
+    scale_y: 0.11
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Three meetings, two flights, one dead laptop"
+  - "What a week, huh?"
