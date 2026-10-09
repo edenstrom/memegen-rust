@@ -1,5 +1,7 @@
 //! Unauthenticated MCP server exposing meme generation as tools.
 
+#[cfg(not(target_arch = "wasm32"))]
+pub mod files;
 pub mod stateless;
 
 use std::sync::Arc;
@@ -23,8 +25,9 @@ Animated templates render as GIF/WebP; use `extension` to choose the format.";
 
 #[cfg(not(target_arch = "wasm32"))]
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
-image and a shareable URL (served by `memegen serve`). Optionally saves the image to `save_to`. \
-Inline images over 1 MB are downscaled; the URL and `save_to` file are full size.";
+image plus a shareable URL (served by `memegen serve`) or, over stdio, the local path of a saved \
+copy (`saved_to`). Optionally saves the image to `save_to` instead. Inline images over 1 MB are \
+downscaled; the URL and saved file are full size.";
 #[cfg(target_arch = "wasm32")]
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
 image and a shareable URL. Inline images over 1 MB are downscaled; the URL is full size.";
@@ -61,7 +64,7 @@ pub struct GenerateMemeRequest {
     /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
     #[serde(default)]
     pub font: Option<String>,
-    /// Absolute file path to also write the image to, e.g. "/tmp/meme.png".
+    /// Absolute file path to write the image to, e.g. "/tmp/meme.png".
     #[cfg(not(target_arch = "wasm32"))]
     #[serde(default)]
     pub save_to: Option<String>,
@@ -83,6 +86,16 @@ struct TemplateSummary<'a> {
 pub struct MemegenMcp {
     app: Arc<App>,
     tool_router: ToolRouter<Self>,
+    #[cfg(not(target_arch = "wasm32"))]
+    output: Option<Arc<Output>>,
+}
+
+/// Where memes are saved when the caller doesn't pass `save_to`.
+#[cfg(not(target_arch = "wasm32"))]
+struct Output {
+    dir: std::path::PathBuf,
+    /// Unix seconds of the last sweep for expired files.
+    last_sweep: std::sync::atomic::AtomicU64,
 }
 
 impl MemegenMcp {
@@ -90,7 +103,48 @@ impl MemegenMcp {
         Self {
             app,
             tool_router: Self::tool_router(),
+            #[cfg(not(target_arch = "wasm32"))]
+            output: None,
         }
+    }
+
+    /// Save every meme to `dir` and return its path, deleting saved memes
+    /// older than [`files::MAX_AGE`].
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn with_output_dir(mut self, dir: std::path::PathBuf) -> Self {
+        self.output = Some(Arc::new(Output {
+            dir,
+            last_sweep: Default::default(),
+        }));
+        self
+    }
+
+    /// Delete expired memes in the background, at most once an hour.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn sweep(&self) {
+        use std::sync::atomic::Ordering;
+
+        let Some(output) = self.output.clone() else {
+            return;
+        };
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        let last = output.last_sweep.load(Ordering::Relaxed);
+        if now.saturating_sub(last) < 60 * 60
+            || output
+                .last_sweep
+                .compare_exchange(last, now, Ordering::Relaxed, Ordering::Relaxed)
+                .is_err()
+        {
+            return;
+        }
+        tokio::task::spawn_blocking(move || match files::sweep(&output.dir, files::MAX_AGE) {
+            Ok(0) => {}
+            Ok(removed) => tracing::info!("Deleted {removed} expired memes"),
+            Err(error) => tracing::warn!("Could not clean up {}: {error}", output.dir.display()),
+        });
     }
 }
 
@@ -204,9 +258,25 @@ impl MemegenMcp {
         };
 
         #[cfg(not(target_arch = "wasm32"))]
-        let saved_to = match save(request.save_to, &rendered.bytes).await {
-            Ok(saved_to) => saved_to,
-            Err(message) => return Ok(CallToolResult::error(vec![ContentBlock::text(message)])),
+        let saved_to = {
+            self.sweep();
+            let path = match request.save_to.filter(|path| !path.is_empty()) {
+                Some(path) => Some(std::path::PathBuf::from(path)),
+                None => self.output.as_ref().map(|output| {
+                    output.dir.join(files::file_name(
+                        &template.id,
+                        &request.text,
+                        &font,
+                        &extension,
+                    ))
+                }),
+            };
+            match save(path, &rendered.bytes).await {
+                Ok(saved_to) => saved_to,
+                Err(message) => {
+                    return Ok(CallToolResult::error(vec![ContentBlock::text(message)]));
+                }
+            }
         };
         #[cfg(target_arch = "wasm32")]
         let saved_to: Option<String> = None;
@@ -214,6 +284,11 @@ impl MemegenMcp {
         let (url, _) = self
             .app
             .build_url(&template.id, &request.text, &font, &extension);
+        // Over stdio nothing serves localhost URLs, so return only the file.
+        #[cfg(not(target_arch = "wasm32"))]
+        let url = Some(url).filter(|_| {
+            self.output.is_none() || !self.app.base_url().starts_with("http://localhost:")
+        });
         let content_type = rendered.content_type;
         let bytes = rendered.bytes.len();
         let inline = if request.include_image.unwrap_or(true) {
@@ -251,15 +326,20 @@ impl MemegenMcp {
 
 /// Write the image to `path` if one was given; returns the path written.
 #[cfg(not(target_arch = "wasm32"))]
-async fn save(path: Option<String>, bytes: &[u8]) -> Result<Option<String>, String> {
-    let Some(path) = path.filter(|path| !path.is_empty()) else {
+async fn save(path: Option<std::path::PathBuf>, bytes: &[u8]) -> Result<Option<String>, String> {
+    let Some(path) = path else {
         return Ok(None);
     };
-    let path = std::path::PathBuf::from(path);
     if !path.is_absolute() {
         return Err("`save_to` must be an absolute path".into());
     }
-    if let Err(error) = tokio::fs::write(&path, bytes).await {
+    let written = async {
+        if let Some(dir) = path.parent() {
+            tokio::fs::create_dir_all(dir).await?;
+        }
+        tokio::fs::write(&path, bytes).await
+    };
+    if let Err(error) = written.await {
         return Err(format!(
             "Rendered the meme but could not write {}: {error}",
             path.display()

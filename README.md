@@ -58,7 +58,9 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `list_templates` | Search templates (`filter`, `animated`). Returns ID, name, line count and example text |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
-| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL. Inline images over 1 MB (base64) are downscaled in the same format; the URL and `save_to` stay full size |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size |
+
+Over stdio there is usually no server behind `http://localhost` URLs, so `memegen mcp` saves every meme to a cache directory (`~/Library/Caches/memegen` on macOS, `$XDG_CACHE_HOME/memegen` or `~/.cache/memegen` on Linux) and returns that path instead. Set `--output-dir` or `MEMEGEN_OUTPUT_DIR` to change it. Saved memes older than a week are deleted while the server runs; other files in the directory are left alone. The URL is still returned when `DOMAIN` is set.
 
 ## HTTP API
 
@@ -87,6 +89,7 @@ Text escapes in URLs: `_` → space, `__` → `_`, `--` → `-`, `~q` → `?`, `
 | `DEFAULT_STATIC_EXTENSION` | `png` | Default format for static templates |
 | `DEFAULT_ANIMATED_EXTENSION` | `gif` | Default format for animated templates |
 | `MEMEGEN_ROOT` / `--root` | build directory | Location of the assets |
+| `MEMEGEN_OUTPUT_DIR` / `--output-dir` | user cache directory | Where `memegen mcp` saves memes |
 | `RUST_LOG` | `info` (`warn` for stdio) | Log level (logs go to stderr) |
 
 ## Cloudflare Workers

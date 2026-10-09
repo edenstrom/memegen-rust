@@ -22,7 +22,7 @@ use memegen::api;
 use memegen::app::App;
 use memegen::assets::Directory;
 use memegen::config::Config;
-use memegen::mcp::MemegenMcp;
+use memegen::mcp::{MemegenMcp, files};
 
 #[derive(Parser)]
 #[command(
@@ -41,7 +41,7 @@ enum Command {
     /// Run the HTTP API with an MCP endpoint at /mcp (default).
     Serve(ServeArgs),
     /// Run an MCP server over stdio.
-    Mcp(CommonArgs),
+    Mcp(McpArgs),
     /// Measure wall-clock and CPU time per render, or load-test a running
     /// server (this one, upstream memegen, or memegen-rs) with --url.
     Bench {
@@ -81,6 +81,16 @@ impl CommonArgs {
     fn load(&self, port: u16) -> Result<Arc<App>> {
         App::load(Config::from_env(port), self.directory())
     }
+}
+
+#[derive(Args, Clone)]
+struct McpArgs {
+    #[command(flatten)]
+    common: CommonArgs,
+    /// Directory generated memes are saved to; files older than a week are
+    /// deleted. Defaults to the user cache directory, e.g. ~/Library/Caches/memegen.
+    #[arg(long, env = "MEMEGEN_OUTPUT_DIR")]
+    output_dir: Option<PathBuf>,
 }
 
 #[derive(Args, Clone)]
@@ -134,14 +144,18 @@ async fn main() -> Result<()> {
     }
 }
 
-async fn run_stdio(args: CommonArgs) -> Result<()> {
+async fn run_stdio(args: McpArgs) -> Result<()> {
     init_tracing("warn");
     let port = std::env::var("PORT")
         .ok()
         .and_then(|p| p.parse().ok())
         .unwrap_or(5000);
-    let app = args.load(port)?;
-    let service = MemegenMcp::new(app).serve(rmcp::transport::stdio()).await?;
+    let app = args.common.load(port)?;
+    let output_dir = std::path::absolute(args.output_dir.unwrap_or_else(files::default_dir))?;
+    let service = MemegenMcp::new(app)
+        .with_output_dir(output_dir)
+        .serve(rmcp::transport::stdio())
+        .await?;
     service.waiting().await?;
     Ok(())
 }
