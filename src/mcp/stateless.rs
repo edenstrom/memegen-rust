@@ -235,6 +235,54 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn pages_through_templates() {
+        let router = router(app());
+        let mut ids = Vec::new();
+        let mut offset = Some(0);
+        let mut total = 0;
+        while let Some(next) = offset {
+            let (_, body) = post(
+                &router,
+                request(
+                    1,
+                    "tools/call",
+                    json!({ "name": "list_templates", "arguments": { "offset": next } }),
+                ),
+            )
+            .await;
+            let text = body["result"]["content"][0]["text"].as_str().unwrap();
+            let page: Value = serde_json::from_str(text).unwrap();
+            let templates = page["templates"].as_array().unwrap();
+            assert!(templates.len() <= 100);
+            assert!(text.len() < 50_000, "page is {} bytes", text.len());
+            ids.extend(
+                templates
+                    .iter()
+                    .map(|t| t["id"].as_str().unwrap().to_string()),
+            );
+            total = page["total"].as_u64().unwrap() as usize;
+            offset = page["next_offset"].as_u64();
+        }
+        assert!(total > 100);
+        assert_eq!(ids.len(), total);
+        assert!(ids.windows(2).all(|pair| pair[0] < pair[1]));
+
+        let (_, body) = post(
+            &router,
+            request(
+                2,
+                "tools/call",
+                json!({ "name": "list_templates", "arguments": { "filter": "surprised", "limit": 3 } }),
+            ),
+        )
+        .await;
+        let page: Value =
+            serde_json::from_str(body["result"]["content"][0]["text"].as_str().unwrap()).unwrap();
+        assert_eq!(page["templates"].as_array().unwrap().len(), 3);
+        assert_eq!(page["next_offset"], 3);
+    }
+
+    #[tokio::test]
     async fn falls_back_to_a_supported_version() {
         let router = router(app());
         let (_, body) = post(
