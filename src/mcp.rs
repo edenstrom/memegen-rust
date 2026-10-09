@@ -8,7 +8,12 @@ use std::sync::Arc;
 
 use base64::Engine as _;
 use rmcp::handler::server::{router::tool::ToolRouter, wrapper::Parameters};
-use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerConfig};
+use rmcp::model::{
+    CallToolResult, ContentBlock, ExtensionCapabilities, Implementation, ListResourcesResult,
+    MetaObject, PaginatedRequestParams, ReadResourceRequestParams, ReadResourceResponse,
+    ReadResourceResult, Resource, ResourceContents, ServerCapabilities, ServerConfig,
+};
+use rmcp::service::{RequestContext, RoleServer};
 use rmcp::{ErrorData, ServerHandler, tool, tool_handler, tool_router};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -46,6 +51,25 @@ const GENERATE_MEMES: &str = "Render several memes in one call, e.g. variations 
 Each entry in `memes` takes the same fields as `generate_meme`. Returns, in order, each image \
 and its summary (with `index`), or an `error` for entries that failed. The inline images share \
 the 1 MB limit, so they are downscaled more as the batch grows; URLs are full size.";
+
+/// MCP Apps (SEP-1865): hosts that support it render the meme tools' results
+/// in this HTML view, where the user can edit the text and re-render.
+const APP_EXTENSION: &str = "io.modelcontextprotocol/ui";
+const APP_MIME_TYPE: &str = "text/html;profile=mcp-app";
+const APP_URI: &str = "ui://memegen/meme.html";
+const APP_HTML: &str = include_str!("mcp/app.html");
+
+/// Tool `_meta` linking a tool to the view. `ui/resourceUri` is the older,
+/// flat form some hosts still read.
+fn app_meta() -> MetaObject {
+    let meta = json!({ "ui": { "resourceUri": APP_URI }, "ui/resourceUri": APP_URI });
+    MetaObject(meta.as_object().cloned().unwrap_or_default())
+}
+
+fn app_resource_meta() -> MetaObject {
+    let meta = json!({ "ui": { "prefersBorder": false } });
+    MetaObject(meta.as_object().cloned().unwrap_or_default())
+}
 
 /// Most memes one `generate_memes` call renders.
 const MAX_BATCH: usize = 10;
@@ -278,7 +302,7 @@ impl MemegenMcp {
         json_text(&fonts)
     }
 
-    #[tool(description = GENERATE_MEME)]
+    #[tool(description = GENERATE_MEME, meta = app_meta())]
     async fn generate_meme(
         &self,
         Parameters(request): Parameters<GenerateMemeRequest>,
@@ -289,7 +313,7 @@ impl MemegenMcp {
         }
     }
 
-    #[tool(description = GENERATE_MEMES)]
+    #[tool(description = GENERATE_MEMES, meta = app_meta())]
     async fn generate_memes(
         &self,
         Parameters(request): Parameters<GenerateMemesRequest>,
@@ -482,11 +506,68 @@ async fn save(path: std::path::PathBuf, bytes: &[u8]) -> Result<String, String> 
     Ok(path.display().to_string())
 }
 
+impl MemegenMcp {
+    fn resources(&self) -> ListResourcesResult {
+        let resource = Resource::new(APP_URI, "meme-viewer")
+            .with_title("Meme viewer")
+            .with_description("Shows generated memes and lets the user edit their text.")
+            .with_mime_type(APP_MIME_TYPE)
+            .with_meta(app_resource_meta());
+        ListResourcesResult::with_all_items(vec![resource])
+    }
+
+    fn resource(&self, uri: &str) -> Result<ReadResourceResult, ErrorData> {
+        if uri != APP_URI {
+            return Err(ErrorData::resource_not_found(
+                format!("Resource not found: {uri}"),
+                None,
+            ));
+        }
+        Ok(ReadResourceResult::new(vec![
+            ResourceContents::TextResourceContents {
+                uri: APP_URI.into(),
+                mime_type: Some(APP_MIME_TYPE.into()),
+                text: APP_HTML.into(),
+                meta: Some(app_resource_meta()),
+            },
+        ]))
+    }
+}
+
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for MemegenMcp {
     fn get_info(&self) -> ServerConfig {
-        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
+        let mut extensions = ExtensionCapabilities::new();
+        extensions.insert(
+            APP_EXTENSION.into(),
+            json!({ "mimeTypes": [APP_MIME_TYPE] })
+                .as_object()
+                .cloned()
+                .unwrap_or_default(),
+        );
+        let capabilities = ServerCapabilities::builder()
+            .enable_extensions_with(extensions)
+            .enable_resources()
+            .enable_tools()
+            .build();
+        ServerConfig::new(capabilities)
             .with_server_info(Implementation::new("memegen", env!("CARGO_PKG_VERSION")))
             .with_instructions(INSTRUCTIONS)
+    }
+
+    async fn list_resources(
+        &self,
+        _request: Option<PaginatedRequestParams>,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<ListResourcesResult, ErrorData> {
+        Ok(self.resources())
+    }
+
+    async fn read_resource(
+        &self,
+        request: ReadResourceRequestParams,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<ReadResourceResponse, ErrorData> {
+        self.resource(&request.uri).map(Into::into)
     }
 }

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meme</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: var(--color-background-primary, #fff);
+    --bg-2: var(--color-background-secondary, #f4f4f5);
+    --fg: var(--color-text-primary, #18181b);
+    --fg-2: var(--color-text-secondary, #71717a);
+    --border: var(--color-border-primary, #e4e4e7);
+    --danger: var(--color-text-danger, #b91c1c);
+    --radius: var(--border-radius-md, 8px);
+    --font: var(--font-sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  }
+  :root[data-theme="dark"] {
+    --bg: var(--color-background-primary, #18181b);
+    --bg-2: var(--color-background-secondary, #27272a);
+    --fg: var(--color-text-primary, #fafafa);
+    --fg-2: var(--color-text-secondary, #a1a1aa);
+    --border: var(--color-border-primary, #3f3f46);
+    --danger: var(--color-text-danger, #f87171);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: transparent; color: var(--fg); font: 14px/1.4 var(--font); }
+  #memes { display: grid; gap: 12px; align-items: start; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); padding: 2px; }
+  #memes.single { grid-template-columns: minmax(0, 560px); }
+  .card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); overflow: hidden; display: flex; flex-direction: column; }
+  .frame { background: var(--bg-2); display: flex; align-items: center; justify-content: center; min-height: 120px; }
+  .frame img { display: block; max-width: 100%; max-height: 480px; }
+  .frame.busy img { opacity: .4; }
+  .body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 8px; }
+  .meta { color: var(--fg-2); font-size: 12px; overflow-wrap: anywhere; }
+  .error { color: var(--danger); overflow-wrap: anywhere; }
+  .actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; font-size: 13px; color: var(--fg); background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 10px; cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--fg-2); }
+  button:disabled { opacity: .5; cursor: default; }
+  .editor { display: flex; flex-direction: column; gap: 6px; }
+  input { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 5px 8px; width: 100%; }
+  .status { color: var(--fg-2); padding: 12px 2px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div id="status" class="status">Rendering meme…</div>
+<div id="memes"></div>
+<script>
+"use strict";
+// MCP Apps view (SEP-1865): JSON-RPC 2.0 over postMessage with the host.
+const PROTOCOL_VERSION = "2026-01-26";
+let nextId = 1;
+const pending = new Map();
+let host = { capabilities: {} };
+let input = null;
+
+function send(message) { window.parent.postMessage({ jsonrpc: "2.0", ...message }, "*"); }
+function notify(method, params) { send({ method, params }); }
+function request(method, params) {
+  const id = nextId++;
+  send({ id, method, params });
+  return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+}
+
+window.addEventListener("message", (event) => {
+  if (event.source !== window.parent) return;
+  const message = event.data;
+  if (!message || message.jsonrpc !== "2.0") return;
+  if (message.id !== undefined && !message.method) {
+    const waiter = pending.get(message.id);
+    if (!waiter) return;
+    pending.delete(message.id);
+    if (message.error) waiter.reject(new Error(message.error.message || "Request failed"));
+    else waiter.resolve(message.result);
+    return;
+  }
+  const params = message.params || {};
+  switch (message.method) {
+    case "ui/notifications/tool-input": input = params.arguments || {}; showInput(); break;
+    case "ui/notifications/tool-result": showResult(params); break;
+    case "ui/notifications/tool-cancelled": setStatus("Cancelled."); break;
+    case "ui/notifications/host-context-changed": applyContext(params); break;
+  }
+  if (message.id !== undefined && message.method) {
+    // ping, ui/resource-teardown and anything else: acknowledge.
+    send({ id: message.id, result: {} });
+  }
+});
+
+function applyContext(context) {
+  if (!context) return;
+  if (context.theme) document.documentElement.dataset.theme = context.theme;
+  const variables = context.styles && context.styles.variables;
+  if (variables) {
+    for (const [name, value] of Object.entries(variables)) {
+      if (value) document.documentElement.style.setProperty(name, value);
+    }
+  }
+}
+
+function setStatus(text) {
+  const status = document.getElementById("status");
+  status.textContent = text || "";
+  status.hidden = !text;
+}
+
+// Arguments of meme `index` from the tool input: one meme, or a batch.
+function argumentsFor(index) {
+  if (!input) return {};
+  return Array.isArray(input.memes) ? input.memes[index] || {} : input;
+}
+
+function showInput() {
+  if (document.getElementById("memes").childElementCount) return;
+  const count = Array.isArray(input.memes) ? input.memes.length : 1;
+  setStatus(count > 1 ? `Rendering ${count} memes…` : `Rendering ${input.template_id || "meme"}…`);
+}
+
+// Pair each summary with the image block before it.
+function parseResult(result) {
+  const memes = [];
+  let image = null;
+  for (const block of result.content || []) {
+    if (block.type === "image") { image = block; continue; }
+    if (block.type !== "text") continue;
+    let summary;
+    try { summary = JSON.parse(block.text); } catch { summary = null; }
+    if (!summary || typeof summary !== "object" || Array.isArray(summary)) {
+      memes.push({ error: block.text, image: null, summary: {} });
+    } else {
+      memes.push({ error: summary.error, image, summary });
+    }
+    image = null;
+  }
+  return memes;
+}
+
+function showResult(result) {
+  const memes = parseResult(result);
+  const container = document.getElementById("memes");
+  container.replaceChildren();
+  container.classList.toggle("single", memes.length === 1);
+  if (!memes.length) { setStatus(result.isError ? "Could not render the meme." : "Nothing to show."); return; }
+  setStatus("");
+  memes.forEach((meme, position) => {
+    const index = meme.summary.index ?? position;
+    container.append(card(meme, index, memes.length > 1));
+  });
+}
+
+function el(tag, props, ...children) {
+  const node = document.createElement(tag);
+  Object.assign(node, props);
+  node.append(...children.filter((child) => child != null));
+  return node;
+}
+
+function card(meme, index, inBatch) {
+  const args = argumentsFor(index);
+  const summary = meme.summary;
+  const node = el("div", { className: "card" });
+  if (meme.error) {
+    const label = summary.template_id || args.template_id;
+    node.append(el("div", { className: "body" },
+      el("div", { className: "error", textContent: (label ? `${label}: ` : "") + meme.error })));
+    return node;
+  }
+
+  const img = el("img", { alt: (summary.text || []).join(" / ") });
+  const frame = el("div", { className: "frame" }, img);
+  const meta = el("div", { className: "meta" });
+  const error = el("div", { className: "error", hidden: true });
+  const actions = el("div", { className: "actions" });
+  const form = el("div", { className: "editor", hidden: true });
+  node.append(frame, el("div", { className: "body" }, meta, error, actions, form));
+
+  let current = { meme, args };
+  function update(next) {
+    current = next;
+    const { image, summary } = next.meme;
+    if (image) {
+      img.src = `data:${image.mimeType};base64,${image.data}`;
+      frame.replaceChildren(img);
+    } else {
+      frame.replaceChildren(el("div", { className: "meta", textContent: "Image not included." }));
+    }
+    const parts = [summary.template_id];
+    if (summary.extension) parts.push(summary.extension.toUpperCase());
+    if (summary.saved_to) parts.push(`saved to ${summary.saved_to}`);
+    meta.textContent = parts.filter(Boolean).join(" · ");
+    open.hidden = !summary.url;
+    download.hidden = !(image && host.capabilities.downloadFile);
+  }
+
+  const open = el("button", { type: "button", textContent: "Open full size", onclick: () => {
+    request("ui/open-link", { url: current.meme.summary.url }).catch(showError);
+  } });
+  const download = el("button", { type: "button", textContent: "Download", onclick: () => {
+    const { image, summary } = current.meme;
+    const name = `${summary.template_id || "meme"}.${summary.extension || "png"}`;
+    request("ui/download-file", { contents: [{ type: "resource", resource: {
+      uri: `file:///${name}`, mimeType: image.mimeType, blob: image.data } }] }).catch(showError);
+  } });
+  const edit = el("button", { type: "button", textContent: "Edit text", onclick: () => {
+    form.hidden = !form.hidden;
+    if (!form.hidden) buildForm();
+  } });
+  actions.append(open, download, edit);
+  if (inBatch) {
+    actions.append(el("button", { type: "button", textContent: "Use this one", onclick: () => {
+      const { summary } = current.meme;
+      const text = (summary.text || []).map((line) => JSON.stringify(line)).join(", ");
+      request("ui/message", { role: "user", content: [{ type: "text",
+        text: `I'll go with meme ${index + 1}: ${summary.template_id} with ${text}.` }] }).catch(showError);
+    } }));
+  }
+
+  function showError(err) { error.textContent = err.message || String(err); error.hidden = false; }
+
+  function buildForm() {
+    const lines = current.meme.summary.text || current.args.text || [""];
+    form.replaceChildren(...lines.map((line, i) =>
+      el("input", { value: line, placeholder: `Line ${i + 1}`, name: `line${i}` })));
+    form.append(el("div", { className: "actions" },
+      el("button", { type: "button", textContent: "Render", onclick: render })));
+    form.querySelector("input").focus();
+  }
+
+  // Sandboxed views may not submit forms, so Enter and the button render directly.
+  form.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && event.target.tagName === "INPUT") render();
+  });
+
+  async function render() {
+    const text = [...form.querySelectorAll("input")].map((field) => field.value);
+    const args = { ...current.args, template_id: current.meme.summary.template_id, text,
+      extension: current.meme.summary.extension, include_image: true };
+    delete args.save_to;
+    const button = form.querySelector("button");
+    if (button.disabled) return;
+    button.disabled = true;
+    frame.classList.add("busy");
+    error.hidden = true;
+    try {
+      const result = await request("tools/call", { name: "generate_meme", arguments: args });
+      const [meme] = parseResult(result);
+      if (!meme || meme.error || result.isError) throw new Error((meme && meme.error) || "Could not render the meme.");
+      update({ meme, args });
+      form.hidden = true;
+      if (host.capabilities.updateModelContext) {
+        request("ui/update-model-context", { content: [{ type: "text", text:
+          `The user edited meme ${inBatch ? index + 1 + " " : ""}in the meme viewer. ` +
+          `It now shows ${JSON.stringify(meme.summary)}.` }] }).catch(() => {});
+      }
+    } catch (err) {
+      showError(err);
+    } finally {
+      button.disabled = false;
+      frame.classList.remove("busy");
+    }
+  }
+
+  update(current);
+  return node;
+}
+
+new ResizeObserver(() => {
+  const { width, height } = document.body.getBoundingClientRect();
+  notify("ui/notifications/size-changed", { width: Math.ceil(width), height: Math.ceil(height) });
+}).observe(document.body);
+
+request("ui/initialize", {
+  protocolVersion: PROTOCOL_VERSION,
+  appInfo: { name: "memegen", version: "1" },
+  appCapabilities: {},
+}).then((result) => {
+  host = { capabilities: (result && result.hostCapabilities) || {} };
+  applyContext(result && result.hostContext);
+  notify("ui/notifications/initialized", {});
+}).catch(() => setStatus("This host could not start the meme viewer."));
+</script>
+</body>
+</html>
