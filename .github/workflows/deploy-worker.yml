@@ -1,0 +1,47 @@
+name: Deploy Worker
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-worker-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: worker
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # Pull requests only build the Worker; no Cloudflare credentials needed.
+      - name: Build (dry run)
+        if: github.event_name == 'pull_request'
+        run: npx --yes wrangler@4 deploy --dry-run --outdir dist
+
+      - name: Deploy
+        if: github.event_name != 'pull_request'
+        run: npx --yes wrangler@4 deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

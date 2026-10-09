@@ -110,6 +110,8 @@ npx wrangler deploy   # https://memegen.<account>.workers.dev
 
 The build needs the `wasm32-unknown-unknown` Rust target (`rustup target add wasm32-unknown-unknown`); wrangler installs `worker-build` on first use.
 
+CI (`.github/workflows/deploy-worker.yml`) deploys on every push to `main` and can be run by hand from the Actions tab. Pull requests only build the Worker (`wrangler deploy --dry-run`). Deploying needs two repository secrets: `CLOUDFLARE_API_TOKEN` (an API token from the "Edit Cloudflare Workers" template) and `CLOUDFLARE_ACCOUNT_ID`.
+
 - **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 1.6 MB gzipped.
 - **Startup**: the template catalog is embedded at build time; fonts (5 MB) are fetched on the first request in each isolate.
 - **Caching**: successful `/images/...` responses go into Cloudflare's cache, so a repeated meme isn't rendered again. The Cache API has no effect on `*.workers.dev`, so use a [custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) to get this. Each isolate also keeps small in-memory caches (isolates have 128 MB of memory).
