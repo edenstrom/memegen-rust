@@ -60,8 +60,9 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
 | `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size |
+| `generate_memes` | Render up to 10 memes in one call: `memes` is a list of `generate_meme` arguments, rendered concurrently. Returns each image and its summary (with `index`) in order, or an `error` for entries that failed. The inline images share the 1 MB limit, so each is downscaled further as the batch grows |
 
-Over stdio there is usually no server behind `http://localhost` URLs, so `memegen mcp` saves every meme to a cache directory (`~/Library/Caches/memegen` on macOS, `$XDG_CACHE_HOME/memegen` or `~/.cache/memegen` on Linux) and returns that path instead. Set `--output-dir` or `MEMEGEN_OUTPUT_DIR` to change it. Saved memes older than a week are deleted while the server runs; other files in the directory are left alone. The URL is still returned when `DOMAIN` is set.
+Over stdio there is usually no server behind `http://localhost` URLs, so `memegen mcp` saves every meme to a cache directory (`~/Library/Caches/memegen` on macOS, `$XDG_CACHE_HOME/memegen` or `~/.cache/memegen` on Linux) and returns that path instead. Files are named `{date}_{time}_{template}-{hash}.{ext}` in local time (e.g. `2026-10-09_143012_fry-0123456789abcdef.png`), so they sort by when they were made. Repeating a request returns the file already saved for it, whatever its date. Set `--output-dir` or `MEMEGEN_OUTPUT_DIR` to change it. Saved memes older than a week are deleted while the server runs; other files in the directory are left alone. The URL is still returned when `DOMAIN` is set.
 
 ## HTTP API
 
