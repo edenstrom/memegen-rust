@@ -24,7 +24,8 @@ string per line. Prefer a `filter`: it runs a ranked search over names, keywords
 through every template with a description of what it means and what each line is for; pass \
 `next_offset` back as `offset` to get the next page. \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
-Animated templates render as GIF/WebP; use `extension` to choose the format.";
+Animated templates render as GIF/WebP; use `extension` to choose the format. \
+To render several memes at once, call `generate_memes` with a list of them.";
 
 #[cfg(not(target_arch = "wasm32"))]
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
@@ -35,6 +36,20 @@ downscaled; the URL and saved file are full size.";
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
 image and a shareable URL. Inline images over 1 MB are downscaled; the URL is full size.";
 
+#[cfg(not(target_arch = "wasm32"))]
+const GENERATE_MEMES: &str = "Render several memes in one call, e.g. variations to choose from. \
+Each entry in `memes` takes the same fields as `generate_meme`. Returns, in order, each image \
+and its summary (with `index`), or an `error` for entries that failed. The inline images share \
+the 1 MB limit, so they are downscaled more as the batch grows; URLs and saved files are full size.";
+#[cfg(target_arch = "wasm32")]
+const GENERATE_MEMES: &str = "Render several memes in one call, e.g. variations to choose from. \
+Each entry in `memes` takes the same fields as `generate_meme`. Returns, in order, each image \
+and its summary (with `index`), or an `error` for entries that failed. The inline images share \
+the 1 MB limit, so they are downscaled more as the batch grows; URLs are full size.";
+
+/// Most memes one `generate_memes` call renders.
+const MAX_BATCH: usize = 10;
+
 /// Templates per `list_templates` page with a `filter`, best match first.
 const DEFAULT_MATCHES: usize = 20;
 
@@ -42,7 +57,7 @@ const DEFAULT_MATCHES: usize = 20;
 /// page returns. The full catalog is too large for one tool result.
 const MAX_PAGE: usize = 100;
 
-/// Clients reject tool results with images over 1 MB. Base64 adds a third,
+/// Clients reject tool results over 1 MB. Base64 adds a third,
 /// so this keeps the encoded image under 1,000,000 bytes.
 const MAX_INLINE_IMAGE_BYTES: usize = 750_000;
 
@@ -87,6 +102,12 @@ pub struct GenerateMemeRequest {
     /// Return the image inline in the tool result (default true).
     #[serde(default)]
     pub include_image: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct GenerateMemesRequest {
+    /// Memes to render, 1 to 10.
+    pub memes: Vec<GenerateMemeRequest>,
 }
 
 #[derive(Serialize)]
@@ -262,6 +283,79 @@ impl MemegenMcp {
         &self,
         Parameters(request): Parameters<GenerateMemeRequest>,
     ) -> Result<CallToolResult, ErrorData> {
+        match self.generate(request, MAX_INLINE_IMAGE_BYTES).await {
+            Ok(generated) => Ok(CallToolResult::success(generated.content())),
+            Err(message) => Ok(CallToolResult::error(vec![ContentBlock::text(message)])),
+        }
+    }
+
+    #[tool(description = GENERATE_MEMES)]
+    async fn generate_memes(
+        &self,
+        Parameters(request): Parameters<GenerateMemesRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        let count = request.memes.len();
+        if count == 0 || count > MAX_BATCH {
+            return Ok(CallToolResult::error(vec![ContentBlock::text(format!(
+                "Pass between 1 and {MAX_BATCH} memes; got {count}."
+            ))]));
+        }
+        // The limit applies to the whole result, so the inline images share it.
+        let inline = request
+            .memes
+            .iter()
+            .filter(|meme| meme.include_image.unwrap_or(true))
+            .count();
+        let max_inline = MAX_INLINE_IMAGE_BYTES / inline.max(1);
+        let results = futures::future::join_all(request.memes.into_iter().map(|meme| {
+            let template_id = meme.template_id.clone();
+            async move { (template_id, self.generate(meme, max_inline).await) }
+        }))
+        .await;
+
+        let failed = results.iter().filter(|(_, result)| result.is_err()).count();
+        let mut content = Vec::new();
+        for (index, (template_id, result)) in results.into_iter().enumerate() {
+            match result {
+                Ok(mut generated) => {
+                    generated.summary["index"] = json!(index);
+                    content.extend(generated.content());
+                }
+                Err(error) => content.push(ContentBlock::text(
+                    json!({ "index": index, "template_id": template_id, "error": error })
+                        .to_string(),
+                )),
+            }
+        }
+        Ok(if failed == count {
+            CallToolResult::error(content)
+        } else {
+            CallToolResult::success(content)
+        })
+    }
+}
+
+/// A rendered meme: the inline image, if requested, and a JSON summary.
+struct Generated {
+    image: Option<ContentBlock>,
+    summary: serde_json::Value,
+}
+
+impl Generated {
+    fn content(self) -> Vec<ContentBlock> {
+        let summary = ContentBlock::text(self.summary.to_string());
+        self.image.into_iter().chain([summary]).collect()
+    }
+}
+
+impl MemegenMcp {
+    /// Render, save, and summarize one meme, shrinking the inline image to
+    /// `max_inline` bytes.
+    async fn generate(
+        &self,
+        request: GenerateMemeRequest,
+        max_inline: usize,
+    ) -> Result<Generated, String> {
         let config = self.app.config();
         let template = self
             .app
@@ -269,10 +363,10 @@ impl MemegenMcp {
             .get(&request.template_id)
             .filter(|t| t.valid());
         let Some(template) = template else {
-            return Ok(CallToolResult::error(vec![ContentBlock::text(format!(
+            return Err(format!(
                 "Template not found: {}. Use list_templates to find valid IDs.",
                 request.template_id
-            ))]));
+            ));
         };
         let extension = request
             .extension
@@ -289,7 +383,7 @@ impl MemegenMcp {
             .to_lowercase();
         let font = request.font.unwrap_or_default();
 
-        let rendered = match self
+        let rendered = self
             .app
             .render(MemeRequest {
                 template_id: template.id.clone(),
@@ -298,34 +392,32 @@ impl MemegenMcp {
                 extension: extension.clone(),
             })
             .await
-        {
-            Ok(rendered) => rendered,
-            Err(error) => {
-                return Ok(CallToolResult::error(vec![ContentBlock::text(
-                    error.to_string(),
-                )]));
-            }
-        };
+            .map_err(|error| error.to_string())?;
 
         #[cfg(not(target_arch = "wasm32"))]
         let saved_to = {
             self.sweep();
-            let path = match request.save_to.filter(|path| !path.is_empty()) {
-                Some(path) => Some(std::path::PathBuf::from(path)),
-                None => self.output.as_ref().map(|output| {
-                    output.dir.join(files::file_name(
-                        &template.id,
-                        &request.text,
-                        &font,
-                        &extension,
-                    ))
-                }),
-            };
-            match save(path, &rendered.bytes).await {
-                Ok(saved_to) => saved_to,
-                Err(message) => {
-                    return Ok(CallToolResult::error(vec![ContentBlock::text(message)]));
+            match (
+                request.save_to.filter(|path| !path.is_empty()),
+                &self.output,
+            ) {
+                (Some(path), _) => Some(save(path.into(), &rendered.bytes).await?),
+                (None, Some(output)) => {
+                    let key = files::key(&template.id, &request.text, &font, &extension);
+                    let (dir, existing) = (output.dir.clone(), key.clone());
+                    let reused = tokio::task::spawn_blocking(move || files::reuse(&dir, &existing))
+                        .await
+                        .ok()
+                        .flatten();
+                    Some(match reused {
+                        Some(path) => path.display().to_string(),
+                        None => {
+                            let name = files::file_name(&key, std::time::SystemTime::now());
+                            save(output.dir.join(name), &rendered.bytes).await?
+                        }
+                    })
                 }
+                (None, None) => None,
             }
         };
         #[cfg(target_arch = "wasm32")]
@@ -342,14 +434,12 @@ impl MemegenMcp {
         let content_type = rendered.content_type;
         let bytes = rendered.bytes.len();
         let inline = if request.include_image.unwrap_or(true) {
-            match self.app.fit(rendered, MAX_INLINE_IMAGE_BYTES).await {
-                Ok(inline) => Some(inline),
-                Err(error) => {
-                    return Ok(CallToolResult::error(vec![ContentBlock::text(
-                        error.to_string(),
-                    )]));
-                }
-            }
+            Some(
+                self.app
+                    .fit(rendered, max_inline)
+                    .await
+                    .map_err(|error| error.to_string())?,
+            )
         } else {
             None
         };
@@ -363,23 +453,17 @@ impl MemegenMcp {
             "inline_bytes": inline.as_ref().map(|inline| inline.len()),
             "saved_to": saved_to,
         });
-
-        let mut content = Vec::new();
-        if let Some(inline) = inline {
+        let image = inline.map(|inline| {
             let data = base64::engine::general_purpose::STANDARD.encode(&inline);
-            content.push(ContentBlock::image(data, content_type));
-        }
-        content.push(ContentBlock::text(summary.to_string()));
-        Ok(CallToolResult::success(content))
+            ContentBlock::image(data, content_type)
+        });
+        Ok(Generated { image, summary })
     }
 }
 
-/// Write the image to `path` if one was given; returns the path written.
+/// Write the image to `path`; returns the path written.
 #[cfg(not(target_arch = "wasm32"))]
-async fn save(path: Option<std::path::PathBuf>, bytes: &[u8]) -> Result<Option<String>, String> {
-    let Some(path) = path else {
-        return Ok(None);
-    };
+async fn save(path: std::path::PathBuf, bytes: &[u8]) -> Result<String, String> {
     if !path.is_absolute() {
         return Err("`save_to` must be an absolute path".into());
     }
@@ -395,7 +479,7 @@ async fn save(path: Option<std::path::PathBuf>, bytes: &[u8]) -> Result<Option<S
             path.display()
         ));
     }
-    Ok(Some(path.display().to_string()))
+    Ok(path.display().to_string())
 }
 
 #[tool_handler(router = self.tool_router)]
