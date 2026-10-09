@@ -5,7 +5,7 @@ keywords:
 text:
   - style: default
     color: khaki
-    font: thick
+    font: impact
     anchor_x: 0.0
     anchor_y: 0.2
     angle: 0.0
@@ -16,7 +16,7 @@ text:
     stop: 1.0
   - style: default
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.495
     anchor_y: 0.2
     angle: 0.0
@@ -27,7 +27,7 @@ text:
     stop: 1.0
   - style: default
     color: khaki
-    font: thick
+    font: impact
     anchor_x: 0.0
     anchor_y: 0.535
     angle: 0.0
@@ -38,7 +38,7 @@ text:
     stop: 1.0
   - style: default
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.495
     anchor_y: 0.525
     angle: 0.0
@@ -49,7 +49,7 @@ text:
     stop: 1.0
   - style: upper
     color: khaki
-    font: thick
+    font: impact
     anchor_x: 0.0
     anchor_y: 0.87
     angle: 0.0
@@ -60,7 +60,7 @@ text:
     stop: 1.0
   - style: upper
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.5
     anchor_y: 0.87
     angle: 0.0

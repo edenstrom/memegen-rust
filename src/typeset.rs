@@ -95,9 +95,9 @@ impl<'f> SizedFont<'f> {
         }
     }
 
-    /// Upstream `get_stroke_width`.
+    /// Upstream `get_stroke_width`, widened from `(size / 12).clamp(1, 3)`.
     pub fn stroke_width(&self) -> u32 {
-        (self.size / 12).clamp(1, 3)
+        (self.size / 10).clamp(1, 6)
     }
 
     fn emoji_size(&self) -> f32 {

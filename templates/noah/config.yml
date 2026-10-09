@@ -5,7 +5,7 @@ keywords:
 text:
   - style: default
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.79
     anchor_y: 0.3
     angle: 0.0
@@ -16,7 +16,7 @@ text:
     stop: 1.0
   - style: default
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.68
     anchor_y: 0.7
     angle: 0.0
@@ -27,7 +27,7 @@ text:
     stop: 1.0
   - style: default
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.06
     anchor_y: 0.68
     angle: 0.0

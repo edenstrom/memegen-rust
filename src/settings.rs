@@ -1,6 +1,6 @@
 //! Constants mirrored from the upstream `app/settings.py`.
 
-pub const DEFAULT_FONT: &str = "thick";
+pub const DEFAULT_FONT: &str = "impact";
 pub const MINIMUM_FONT_SIZE: u32 = 7;
 
 pub const ALLOWED_EXTENSIONS: &[&str] = &["gif", "jpg", "jpeg", "png", "webp"];

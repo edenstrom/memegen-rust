@@ -27,7 +27,7 @@ text:
     stop: 1.0
   - style: upper
     color: black
-    font: thick
+    font: impact
     anchor_x: 0.7
     anchor_y: 0.135
     angle: 0.0

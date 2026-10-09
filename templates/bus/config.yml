@@ -5,7 +5,7 @@ keywords:
 text:
   - style: upper
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.0
     anchor_y: 0.25
     angle: 0.0
@@ -16,7 +16,7 @@ text:
     stop: 1.0
   - style: upper
     color: white
-    font: thick
+    font: impact
     anchor_x: 0.5
     anchor_y: 0.16
     angle: 0.0
