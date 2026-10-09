@@ -1,8 +1,14 @@
 name: Genie Rules
 source: https://en.meming.world/wiki/Genie_Rules
+description: Making a wish or request that exploits a loophole or breaks an unstated rule, like asking for something impossible. Single line is the wish itself.
 keywords:
   - wish
   - want
+  - Aladdin
+  - loophole
+  - bending the rules
+  - impossible request
+  - trolling
 text:
   - style: default
     color: black

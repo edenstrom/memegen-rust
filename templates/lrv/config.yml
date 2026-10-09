@@ -1,7 +1,14 @@
 name: Laundry Room Viking
 source: http://knowyourmeme.com/memes/laundry-room-viking
+description: Describing a dreaded chore that was promised to be fun; top line is the assigned task, bottom line is the false promise.
 keywords:
-  -
+  - flood
+  - chores
+  - housework
+  - false promise
+  - misery
+  - sarcasm
+  - basement
 text:
   - style: upper
     color: white

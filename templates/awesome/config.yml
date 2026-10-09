@@ -1,7 +1,14 @@
 name: Socially Awesome Penguin
 source: http://knowyourmeme.com/memes/socially-awesome-penguin
+description: A smooth, socially confident move that went well. Top line is the situation, bottom line is the cool outcome.
 keywords:
-  -
+  - confidence
+  - smooth
+  - social success
+  - charisma
+  - nailed it
+  - quick thinking
+  - recovery
 text:
   - style: upper
     color: white

@@ -1,7 +1,14 @@
 name: See? Nobody Cares
 source: http://knowyourmeme.com/memes/see-nobody-cares
+description: Announcing something to an audience that does not react. First line is the announcement, second line the admission that nobody cares.
 keywords:
   - Jurassic Park
+  - Dodgson
+  - indifference
+  - ignored
+  - attention seeking
+  - self-deprecation
+  - apathy
 text:
   - style: upper
     color: white

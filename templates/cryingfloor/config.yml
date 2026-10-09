@@ -1,7 +1,14 @@
 name: Crying on Floor
 source: http://knowyourmeme.com/photos/1125083-hold-the-door
+description: Exhausted, defeated reaction to a disappointment, such as plans being cancelled. First line offers sympathy, second line is the defeated concession.
 keywords:
-  -
+  - cancelled plans
+  - defeat
+  - exhaustion
+  - heartbreak
+  - sympathy
+  - self-pity
+  - giving up
 text:
   - style: upper
     color: white

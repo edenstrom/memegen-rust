@@ -1,7 +1,14 @@
 name: Woman Holding Dog's Mouth
 source: https://knowyourmeme.com/memes/women-holding-dogs-mouth
+description: Sales overpromising a product that engineering says cannot be built; top line is the pitch, middle the excited customer, bottom the engineering reality.
 keywords:
-  -
+  - sales and engineering
+  - overpromising
+  - unrealistic promise
+  - customer expectations
+  - not technically possible
+  - impossible request
+  - tech industry
 text:
   - style: default
     color: white

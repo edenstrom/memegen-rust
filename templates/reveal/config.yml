@@ -1,7 +1,14 @@
 name: Scooby Doo Reveal
 source: https://knowyourmeme.com/memes/lets-see-who-this-really-is
+description: 'Unmasking the true identity behind a suspicious figure: first two lines set up the suspect, last two reveal who they really are and the reaction.'
 keywords:
-  -
+  - Mystery Inc
+  - Fred Jones
+  - Hanna-Barbera
+  - unmasking
+  - plot twist
+  - true identity
+  - hidden
 text:
   - style: default
     color: white

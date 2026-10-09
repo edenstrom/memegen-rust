@@ -1,7 +1,14 @@
 name: Midwit
 source: https://knowyourmeme.com/memes/iq-bell-curve-midwit
+description: 'Mocks overthinking: the lowest and highest intelligence levels both give the simple answer, while the middle line is the overcomplicating midwit.'
 keywords:
   - IQ Bell Curve / Midwit
+  - galaxy brain
+  - bell curve
+  - overthinking
+  - simple answer
+  - overcomplicating
+  - intelligence
 text:
   - style: default
     color: black

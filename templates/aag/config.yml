@@ -1,7 +1,15 @@
 name: Ancient Aliens Guy
 source: http://knowyourmeme.com/memes/ancient-aliens
+description: Attributing an unexplained event or a clever achievement to aliens; the bottom line is the alien explanation, and the top line sets up the mystery.
 keywords:
   - History Channel
+  - Giorgio Tsoukalos
+  - pseudoscience
+  - conspiracy theory
+  - unexplained mystery
+  - extraterrestrial theory
+  - overexplaining
+  - speculation
 text:
   - style: upper
     color: white

@@ -1,7 +1,14 @@
 name: Schrute Facts
 source: http://knowyourmeme.com/memes/schrute-facts
+description: 'Correcting a claim with a blunt, deadpan rebuttal: the top line states the claim, the bottom line gives the stern, practical correction.'
 keywords:
   - The Office
+  - Dwight
+  - Rainn Wilson
+  - correction
+  - contradiction
+  - survival
+  - deadpan
 text:
   - style: upper
     color: white

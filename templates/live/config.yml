@@ -1,7 +1,13 @@
 name: Do It Live!
 source: http://knowyourmeme.com/memes/bill-oreilly-rant
+description: Urging someone to act immediately without testing, planning, or a backup plan; the bottom line is the shouted exclamation.
 keywords:
-  -
+  - Bill O'Reilly
+  - Inside Edition
+  - yelling
+  - reckless
+  - no backup plan
+  - spontaneity
 text:
   - style: upper
     color: white

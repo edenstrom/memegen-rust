@@ -1,7 +1,14 @@
 name: This is Bull, Shark
 source: https://www.reddit.com/r/funny/comments/3grsfs
+description: Calling something out as nonsense with a deadpan pun on 'bullshit'. Top line sets up the situation, bottom line is the unimpressed reaction.
 keywords:
-  -
+  - bull shark
+  - bullshit
+  - pun
+  - wordplay
+  - deadpan
+  - calling out
+  - skepticism
 text:
   - style: upper
     color: white

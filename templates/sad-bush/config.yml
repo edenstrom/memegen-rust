@@ -1,7 +1,14 @@
 name: Sad George Bush
 source: http://knowyourmeme.com/memes/sad-joe-biden
+description: Quiet, wistful disappointment that something didn't go your way. Top line sets it up, bottom line is the letdown.
 keywords:
-  -
+  - Sad Politicians
+  - George W. Bush
+  - Dubya
+  - politics
+  - melancholy
+  - disappointment
+  - letdown
 text:
   - style: upper
     color: white

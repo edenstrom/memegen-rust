@@ -1,7 +1,14 @@
 name: Unpopular opinion puffin
 source: http://knowyourmeme.com/memes/unpopular-opinion-puffin
+description: Stating an unpopular opinion against something widely loved. Top line is the opinion, bottom line is the emphatic follow-up.
 keywords:
-  -
+  - confession
+  - contrarian
+  - hot take
+  - controversial
+  - disagreeing
+  - dissent
+  - admitting
 text:
   - style: upper
     color: white

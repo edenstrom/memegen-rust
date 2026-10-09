@@ -1,7 +1,13 @@
 name: Kramer, What's Going On In There?
 source: https://knowyourmeme.com/memes/kramer-whats-going-on-in-there
+description: Asking about a strange or alarming thing and getting a mundane, unexpected explanation; top line is the question, bottom line is the answer.
 keywords:
-  -
+  - Seinfeld
+  - Jerry Seinfeld
+  - Michael Richards
+  - neighbor
+  - mundane explanation
+  - awkward question
 text:
   - style: default
     color: khaki

@@ -1,7 +1,14 @@
 name: Donald Trump
 source: https://knowyourmeme.com/memes/people/donald-trump
+description: Boasting that something is the greatest ever, then hedging with a sarcastic qualifier. Top line is the bold claim; bottom line is the hedged afterthought.
 keywords:
-  -
+  - hyperbole
+  - superlatives
+  - bragging
+  - overhyping
+  - boasting
+  - politics
+  - self-praise
 text:
   - style: upper
     color: white

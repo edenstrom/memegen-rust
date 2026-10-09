@@ -1,7 +1,15 @@
 name: Overly Attached Girlfriend
 source: http://knowyourmeme.com/memes/overly-attached-girlfriend
+description: Showing excessive, slightly creepy attachment by revealing you've been monitoring someone; top line is the claim, bottom line is the surveillance behind it.
 keywords:
-  -
+  - creepy
+  - stalking
+  - obsessive
+  - snooping
+  - clingy
+  - monitoring
+  - email
+  - inbox
 text:
   - style: upper
     color: white

@@ -1,7 +1,14 @@
 name: Daily Struggle
 source: https://knowyourmeme.com/memes/daily-struggle
+description: 'Struggling to choose between two appealing or conflicting options: first two lines are the choices, last line is the dilemma.'
 keywords:
-  -
+  - Two Buttons
+  - The Dress
+  - dilemma
+  - indecision
+  - tough choice
+  - conflicting options
+  - sweating
 text:
   - style: none
     color: black

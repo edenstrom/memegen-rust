@@ -1,8 +1,14 @@
 name: What a Country
 source: https://www.youtube.com/watch?v=Q8mD2hsxrhQ
+description: Mocking an absurd or self-contradictory claim, such as a word meaning its own opposite. First line states the oddity, second line is the exasperated dismissal.
 keywords:
   - The Simpsons
   - Dr. Nick
+  - Hank Azaria
+  - absurd logic
+  - contradiction
+  - wordplay
+  - exasperation
 text:
   - style: upper
     color: white

@@ -1,7 +1,14 @@
 name: We Have Food at Home
 source: https://knowyourmeme.com/memes/we-have-food-at-home
+description: Shutting down a food run by insisting there is already food at home; line 1 requests, line 2 deflects, line 3 shows the supposed food.
 keywords:
-  -
+  - mom
+  - parents
+  - refusal
+  - leftovers
+  - pantry
+  - excuses
+  - dismissiveness
 text:
   - style: default
     color: black

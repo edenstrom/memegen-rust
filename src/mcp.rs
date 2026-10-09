@@ -16,8 +16,10 @@ use crate::app::App;
 use crate::render::MemeRequest;
 
 const INSTRUCTIONS: &str = "Generate meme images from 200+ classic templates. \
-Typical flow: call `list_templates` (optionally with a `filter`) to find a template ID and how many \
-text lines it takes, then call `generate_meme` with that ID and one string per line. \
+Typical flow: call `list_templates` to find a template, then call `generate_meme` with its ID and one \
+string per line. Without a `filter`, `list_templates` returns every template with a description of what \
+it means and what each line is for, so you can pick the best fit; with a `filter` it runs a ranked search \
+over names, keywords, and descriptions (e.g. \"drake\", \"surprised\", \"choosing between options\"). \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
 Animated templates render as GIF/WebP; use `extension` to choose the format.";
 
@@ -29,13 +31,16 @@ Inline images over 1 MB are downscaled; the URL and `save_to` file are full size
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
 image and a shareable URL. Inline images over 1 MB are downscaled; the URL is full size.";
 
+/// Most results `list_templates` returns for a `filter`, best match first.
+const MAX_MATCHES: usize = 20;
+
 /// Clients reject tool results with images over 1 MB. Base64 adds a third,
 /// so this keeps the encoded image under 1,000,000 bytes.
 const MAX_INLINE_IMAGE_BYTES: usize = 750_000;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ListTemplatesRequest {
-    /// Case-insensitive text to match against template ID, name, keywords, or example text.
+    /// Words describing the template or the idea to express, e.g. "drake" or "awkward silence". Matched against ID, name, keywords, description, and example text, tolerating typos; best matches first. Omit to list every template.
     #[serde(default)]
     pub filter: Option<String>,
     /// Only animated templates (true) or only static templates (false).
@@ -74,7 +79,10 @@ pub struct GenerateMemeRequest {
 struct TemplateSummary<'a> {
     id: &'a str,
     name: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<&'a str>,
     lines: usize,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     animated: bool,
     example: &'a [String],
 }
@@ -103,26 +111,41 @@ fn json_text(value: &impl Serialize) -> Result<CallToolResult, ErrorData> {
 #[tool_router]
 impl MemegenMcp {
     #[tool(
-        description = "List available meme templates with their ID, name, number of text lines, \
-        whether they are animated, and example text. Use `filter` to search."
+        description = "List meme templates with their ID, name, description (what the meme means \
+        and what each line is for), number of text lines, whether they are animated, and example \
+        text. Without `filter` this returns every template. With `filter` it returns up to 20 \
+        templates ranked by how well they match."
     )]
     async fn list_templates(
         &self,
         Parameters(request): Parameters<ListTemplatesRequest>,
     ) -> Result<CallToolResult, ErrorData> {
         let filter = request.filter.unwrap_or_default();
-        let templates = self.app.catalog().filter(&filter, request.animated);
+        let mut templates = self.app.catalog().filter(&filter, request.animated);
+        if !filter.trim().is_empty() {
+            if templates.is_empty() {
+                return Ok(CallToolResult::success(vec![ContentBlock::text(format!(
+                    "No templates match {filter:?}. Call list_templates without a filter to \
+                    browse every template and its description."
+                ))]));
+            }
+            templates.truncate(MAX_MATCHES);
+        }
         let summaries: Vec<TemplateSummary> = templates
             .iter()
             .map(|template| TemplateSummary {
                 id: &template.id,
                 name: &template.name,
+                description: template.description.as_deref(),
                 lines: template.text.len(),
                 animated: template.is_animated(),
                 example: &template.example,
             })
             .collect();
-        json_text(&summaries)
+        // Compact: the full catalog is the largest result an agent reads.
+        let text = serde_json::to_string(&summaries)
+            .map_err(|error| ErrorData::internal_error(error.to_string(), None))?;
+        Ok(CallToolResult::success(vec![ContentBlock::text(text)]))
     }
 
     #[tool(

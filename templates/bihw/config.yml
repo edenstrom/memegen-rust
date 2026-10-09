@@ -1,7 +1,14 @@
 name: But It's Honest Work
 source: https://knowyourmeme.com/memes/but-its-honest-work
+description: Describing a modest or humble job or situation and defending it with pride; the top line admits it is small, and the bottom line affirms its integrity.
 keywords:
-  -
+  - farming
+  - humble job
+  - modest
+  - blue-collar
+  - self-deprecating
+  - dignity
+  - pride
 text:
   - style: upper
     color: white

@@ -1,7 +1,14 @@
 name: All Your Base Are Belong to Us
 source: https://knowyourmeme.com/memes/all-your-base-are-belong-to-us
+description: A famously garbled English line from an old game intro, used to joke about bad translations or announce a takeover. Single line is the phrase itself.
 keywords:
-  -
+  - Zero Wing
+  - Sega Genesis
+  - bad translation
+  - mistranslation
+  - takeover
+  - video game
+  - garbled English
 text:
   - style: upper
     color: palegoldenrod

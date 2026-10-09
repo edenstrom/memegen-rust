@@ -1,7 +1,14 @@
 name: Roll Safe
 source: http://knowyourmeme.com/memes/roll-safe
+description: 'Smug, faux-logical advice that sounds clever but is absurd: top line is the claim, bottom line the flawed condition behind it.'
 keywords:
-  -
+  - smug logic
+  - faux logic
+  - loophole
+  - ironic advice
+  - sarcasm
+  - big brain
+  - fake wisdom
 text:
   - style: upper
     color: white

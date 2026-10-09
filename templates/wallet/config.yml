@@ -1,7 +1,13 @@
 name: Patrick Star's Wallet
 source: https://knowyourmeme.com/memes/patrick-stars-wallet
+description: Walking through a chain of flawed reasoning about ownership that leads to an absurd conclusion. Each line advances the logic; the last line is the punchline.
 keywords:
-  -
+  - SpongeBob
+  - absurd logic
+  - circular logic
+  - faulty reasoning
+  - ownership
+  - ridiculous argument
 text:
   - style: default
     color: white

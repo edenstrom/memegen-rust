@@ -1,7 +1,15 @@
 name: That Would Be Great
 source: http://knowyourmeme.com/memes/that-would-be-great
+description: Sarcastic, grudging agreement to a request you won't follow through on; top line is the reluctant yeah, bottom line is the pointed sign-off.
 keywords:
-  -
+  - Office Space
+  - Milton
+  - Stephen Root
+  - sarcasm
+  - passive aggression
+  - reluctant agreement
+  - ignoring requests
+  - dismissive
 text:
   - style: upper
     color: white

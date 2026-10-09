@@ -1,7 +1,13 @@
 name: Xzibit Yo Dawg
 source: http://knowyourmeme.com/memes/xzibit-yo-dawg
+description: Teasing someone by pushing their idea into absurd recursion, claiming they like it so much. Top line is the greeting; bottom line is the punchline.
 keywords:
-  -
+  - Pimp My Ride
+  - recursion
+  - nested joke
+  - absurd escalation
+  - playful ribbing
+  - inception
 text:
   - style: upper
     color: white

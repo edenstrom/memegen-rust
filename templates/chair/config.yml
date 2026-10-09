@@ -1,7 +1,14 @@
 name: American Chopper Argument
 source: https://knowyourmeme.com/memes/american-chopper-argument
+description: A circular argument in which each side adopts the other's position, then rejects it once it is labelled, ending in a dispute over the label.
 keywords:
-  -
+  - Orange County Choppers
+  - Paul Teutul Sr.
+  - Paul Teutul Jr.
+  - circular argument
+  - bickering
+  - reversed position
+  - political debate
 text:
   - style: default
     color: khaki

@@ -1,7 +1,13 @@
 name: I Feel Like I'm Taking Crazy Pills
 source: http://knowyourmeme.com/memes/i-feel-like-im-taking-crazy-pills
+description: Exasperated disbelief that everyone else is acting irrationally, leaving the speaker feeling like the only sane one. The single line voices that bewilderment.
 keywords:
-  -
+  - exasperation
+  - disbelief
+  - gaslighting
+  - everyone else is wrong
+  - bewilderment
+  - feeling alone in your opinion
 text:
   - style: upper
     color: white

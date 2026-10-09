@@ -1,7 +1,14 @@
 name: You Know What Really Grinds My Gears?
 source: http://knowyourmeme.com/memes/you-know-what-really-grinds-my-gears
+description: Complaining about a minor pet peeve in a mock-serious, ranting style; top line sets up the rant, bottom line is the specific annoyance.
 keywords:
   - Family Guy
+  - Peter Griffin
+  - pet peeve
+  - annoyance
+  - complaint
+  - rant
+  - petty grievance
 text:
   - style: upper
     color: white

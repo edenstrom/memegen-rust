@@ -1,7 +1,14 @@
 name: So Hot Right Now
 source: https://www.youtube.com/watch?v=QizsJQNIKhc
+description: 'Calling something trendy or fashionable at the moment, usually in a mocking, over-enthusiastic way: the bottom line is the trend claim.'
 keywords:
-  -
+  - Zoolander
+  - Mugatu
+  - Will Ferrell
+  - trendy
+  - fashion
+  - hype
+  - ironic praise
 text:
   - style: upper
     color: white

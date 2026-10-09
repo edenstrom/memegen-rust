@@ -1,7 +1,14 @@
 name: Grumpy Cat
 source: https://imgflip.com/memegenerator/Grumpy-Cat
+description: Responding to adversity or a saying with pessimistic, unamused sarcasm; top line is the saying, bottom line is the grim twist.
 keywords:
-  -
+  - Tardar Sauce
+  - pessimism
+  - unamused
+  - sarcasm
+  - adversity
+  - failure
+  - perseverance
 text:
   - style: upper
     color: white

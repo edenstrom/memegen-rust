@@ -1,8 +1,14 @@
 name: No Soup for You
 source: https://knowyourmeme.com/memes/no-soup-for-you-soup-nazi
+description: 'Flatly denying someone access to something because they broke a rigid rule: the line is the stern, dismissive refusal.'
 keywords:
   - Seinfeld
   - Soup Nazi
+  - Larry Thomas
+  - rigid rules
+  - denial
+  - strict rules
+  - angry refusal
 text:
   - style: upper
     color: white

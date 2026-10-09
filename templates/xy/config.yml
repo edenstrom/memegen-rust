@@ -1,7 +1,14 @@
 name: X all the Y
 source: http://knowyourmeme.com/memes/x-all-the-y
+description: Enthusiastically vowing to do something to everything, in the 'X all the things!' format. Usually the bottom line is '<verb> all the <things>'.
 keywords:
-  -
+  - Hyperbole and a Half
+  - Allie Brosh
+  - all the things
+  - enthusiasm
+  - excess
+  - overdoing it
+  - exaggeration
 text:
   - style: upper
     color: white

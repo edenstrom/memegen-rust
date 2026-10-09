@@ -1,8 +1,14 @@
 name: Principal Skinner
 source: https://knowyourmeme.com/memes/am-i-out-of-touch
+description: Asking if you are the one out of step, then insisting everyone else is wrong. Top line is the question; bottom line is the defensive, self-justifying answer.
 keywords:
   - Am I Out Of Touch?
   - The Simpsons
+  - Seymour Skinner
+  - defensiveness
+  - denial
+  - blaming others
+  - self-justification
 text:
   - style: default
     color: white

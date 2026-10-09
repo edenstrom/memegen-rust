@@ -1,7 +1,14 @@
 name: Drunk Baby
 source: https://knowyourmeme.com/memes/drunk-baby--2
+description: Playfully overstating intoxication or clumsiness and offering an absurd excuse. First line is the sobriety test, second line the excuse.
 keywords:
-  -
+  - beer
+  - intoxication
+  - excuses
+  - sobriety test
+  - slurring
+  - alcohol
+  - absurd excuse
 text:
   - style: upper
     color: white

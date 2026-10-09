@@ -1,7 +1,13 @@
 name: Y U NO Guy
 source: http://knowyourmeme.com/memes/y-u-no-guy
+description: Angrily asking why someone did not do something you expected or wanted from them. Top line is the complaint; bottom line is what they should have done.
 keywords:
-  -
+  - frustration
+  - exasperation
+  - indignation
+  - demanding
+  - rage
+  - why didn't you
 text:
   - style: upper
     color: white

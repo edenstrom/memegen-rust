@@ -1,7 +1,14 @@
 name: Futurama Fry
 source: http://knowyourmeme.com/memes/futurama-fry-not-sure-if
+description: Unable to tell whether someone is trolling or genuinely clueless; the top line is one possibility, the bottom line the other.
 keywords:
   - Philip J. Fry
+  - Billy West
+  - uncertainty
+  - suspicion
+  - trolling
+  - doubt
+  - ambiguity
 text:
   - style: upper
     color: white

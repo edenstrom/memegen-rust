@@ -1,7 +1,14 @@
 name: Galaxy Brain
 source: https://knowyourmeme.com/memes/galaxy-brain
+description: Escalating from a simple idea to increasingly absurd, self-impressed 'enlightened' takes; each line is a more extreme step.
 keywords:
-  -
+  - escalation
+  - overthinking
+  - ironic enlightenment
+  - absurd logic
+  - pretentiousness
+  - pedantry
+  - intellectual posturing
 text:
   - style: none
     color: black

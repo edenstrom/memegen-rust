@@ -1,7 +1,13 @@
 name: Success Kid
 source: http://knowyourmeme.com/memes/success-kid-i-hate-sandcastles
+description: Triumphantly celebrating a lucky or clever break that solves a problem you were stuck on. Top line is the problem; bottom line is the lucky fix.
 keywords:
-  -
+  - fist pump
+  - lucky break
+  - triumph
+  - small victory
+  - good fortune
+  - winning
 text:
   - style: upper
     color: white

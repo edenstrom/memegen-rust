@@ -1,7 +1,15 @@
 name: No Take, Only Throw
 source: https://knowyourmeme.com/memes/no-take-only-throw
+description: Refusing a handed-over item while insisting it be thrown instead; top line is the request, middle the rejection, bottom the demand.
 keywords:
-  -
+  - dog
+  - fetch
+  - picky
+  - demanding
+  - stubborn
+  - rejecting help
+  - unreasonable demands
+  - fussy
 text:
   - style: default
     color: black

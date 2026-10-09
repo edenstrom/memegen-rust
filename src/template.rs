@@ -6,6 +6,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
+use crate::search::{Index, Query};
 use crate::{slug, textbox::TextBox};
 
 const PLACEHOLDER_SUFFIX: &str = "img";
@@ -56,6 +57,8 @@ struct RawTemplate {
     #[serde(default)]
     source: Option<String>,
     #[serde(default)]
+    description: Option<String>,
+    #[serde(default)]
     keywords: Vec<Option<String>>,
     #[serde(default)]
     text: Option<Vec<TextBox>>,
@@ -70,6 +73,8 @@ pub struct Template {
     pub id: String,
     pub name: String,
     pub source: Option<String>,
+    /// What the meme expresses and when to use it.
+    pub description: Option<String>,
     pub keywords: Vec<String>,
     pub text: Vec<TextBox>,
     pub example: Vec<String>,
@@ -80,6 +85,7 @@ pub struct Template {
     pub static_image: Option<String>,
     /// Asset path of the background for animated output (GIF preferred).
     pub animated_image: Option<String>,
+    index: Index,
 }
 
 #[derive(Serialize, schemars::JsonSchema)]
@@ -92,6 +98,7 @@ pub struct Example {
 pub struct TemplateInfo {
     pub id: String,
     pub name: String,
+    pub description: Option<String>,
     pub lines: usize,
     pub overlays: usize,
     pub styles: Vec<String>,
@@ -153,10 +160,11 @@ impl Template {
             .find(|name| ext(name) != "gif")
             .map(|name| path(name));
 
-        Ok(Self {
+        let mut template = Self {
             id: id.to_string(),
             name: raw.name.unwrap_or_default(),
             source: raw.source.filter(|s| !s.is_empty()),
+            description: raw.description.filter(|s| !s.is_empty()),
             keywords: raw.keywords.into_iter().flatten().collect(),
             text: raw.text.unwrap_or_else(|| {
                 vec![
@@ -175,7 +183,16 @@ impl Template {
             styles,
             static_image: still.clone().or_else(|| gif.clone()),
             animated_image: gif.or(still),
-        })
+            index: Index::default(),
+        };
+        template.index = Index::new(
+            &template.id,
+            &template.name,
+            &template.keywords,
+            template.description.as_deref(),
+            &template.example,
+        );
+        Ok(template)
     }
 
     /// Public, renderable template (mirrors upstream `Template.valid`).
@@ -193,25 +210,6 @@ impl Template {
         } else {
             static_ext
         }
-    }
-
-    pub fn matches(&self, query: &str) -> bool {
-        let keywords = self
-            .keywords
-            .iter()
-            .map(|k| k.to_lowercase())
-            .collect::<Vec<_>>()
-            .join(" ");
-        let example = self
-            .example
-            .iter()
-            .map(|k| k.to_lowercase())
-            .collect::<Vec<_>>()
-            .join(" ");
-        self.id.contains(query)
-            || self.name.to_lowercase().contains(query)
-            || keywords.contains(query)
-            || example.contains(query)
     }
 
     /// Lowercase lines where the matching text box style would anyway.
@@ -239,6 +237,7 @@ impl Template {
         TemplateInfo {
             id: self.id.clone(),
             name: self.name.clone(),
+            description: self.description.clone(),
             lines: self.text.len(),
             overlays: if self.styles.is_empty() {
                 0
@@ -313,15 +312,19 @@ impl Catalog {
         self.templates.get(id)
     }
 
-    /// Valid templates sorted by ID, optionally filtered.
+    /// Valid templates sorted by ID or, given a query, by how well they
+    /// match it (see [`crate::search`]).
     pub fn filter(&self, query: &str, animated: Option<bool>) -> Vec<&Arc<Template>> {
-        let query = query.to_lowercase();
-        self.templates
+        let query = Query::new(query);
+        let templates = self
+            .templates
             .values()
             .filter(|template| template.valid())
-            .filter(|template| query.is_empty() || template.matches(&query))
-            .filter(|template| animated.is_none_or(|animated| template.is_animated() == animated))
-            .collect()
+            .filter(|template| animated.is_none_or(|animated| template.is_animated() == animated));
+        if query.is_empty() {
+            return templates.collect();
+        }
+        query.rank(templates.map(|template| (&template.index, template)))
     }
 
     pub fn len(&self) -> usize {

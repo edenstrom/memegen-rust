@@ -1,7 +1,14 @@
 name: Who Killed Hannibal?
 source: https://knowyourmeme.com/memes/who-killed-hannibal
+description: Pointing to a chain of absurd suspects to deflect blame, then questioning the obvious culprit. Top lines are the suspects; bottom line is the sarcastic question.
 keywords:
-  -
+  - Eric Andre
+  - The Eric Andre Show
+  - conspiracy theory
+  - false accusation
+  - unlikely suspects
+  - sarcasm
+  - mock investigation
 text:
   - style: default
     color: white

@@ -1,8 +1,14 @@
 name: Soccer Celebration In A Bar
 source: https://knowyourmeme.com/memes/soccer-celebration-in-a-bar
+description: Wild group celebration when something finally works. First line is the action taken, second line is the result being celebrated.
 keywords:
-  - English football fans
+  - football fans
   - Wales
+  - celebration
+  - victory
+  - tests passing
+  - relief
+  - cheering
 text:
   - style: upper
     color: white

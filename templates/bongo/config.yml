@@ -1,7 +1,14 @@
 name: Bongo Cat
 source: https://knowyourmeme.com/memes/bongo-cat
+description: Contrasting a mild noise while sleeping with a far louder alarm at the worst time; the top line is the annoyance, the bottom the worst case.
 keywords:
-  -
+  - drumming
+  - noise
+  - sleep
+  - alarm clock
+  - annoyance
+  - loud
+  - escalation
 text:
   - style: default
     color: black

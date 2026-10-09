@@ -1,7 +1,14 @@
 name: Confused Gandalf
 source: http://knowyourmeme.com/memes/confused-gandalf
+description: Expressing bewildered confusion at a familiar place or situation and claiming no memory of it; the bottom line is the claim.
 keywords:
   - Lord of the Rings
+  - Ian McKellen
+  - amnesia
+  - forgetting
+  - disorientation
+  - deja vu
+  - lost
 text:
   - style: upper
     color: white

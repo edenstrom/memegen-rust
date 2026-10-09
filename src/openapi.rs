@@ -65,7 +65,7 @@ pub fn spec(base_url: &str) -> Value {
                 "tags": ["Templates"], "summary": "List all templates",
                 "parameters": [
                     query("animated", "boolean", "Limit results to templates supporting animation"),
-                    query("filter", "string", "Part of the name, keyword, or example to match"),
+                    query("filter", "string", "Words to search for in the name, keywords, description, or example; results are ranked best match first"),
                 ],
                 "responses": { "200": json_response("Successfully returned a list of all templates", json!({ "type": "array", "items": { "$ref": "#/components/schemas/Template" } })) }
             } },
@@ -92,7 +92,7 @@ pub fn spec(base_url: &str) -> Value {
                 "get": {
                     "tags": ["Images"], "summary": "List example memes",
                     "parameters": [
-                        query("filter", "string", "Part of the template name or example to match"),
+                        query("filter", "string", "Words to search for in the template name, keywords, description, or example; results are ranked best match first"),
                         query("animated", "boolean", "Limit results to animated templates"),
                     ],
                     "responses": { "200": json_response("Successfully returned a list of example memes", json!({ "type": "array", "items": { "$ref": "#/components/schemas/Example" } })) }
@@ -165,6 +165,7 @@ pub fn spec(base_url: &str) -> Value {
             } },
             "Template": { "type": "object", "properties": {
                 "id": { "type": "string" }, "name": { "type": "string" },
+                "description": { "type": "string", "nullable": true },
                 "lines": { "type": "integer" }, "overlays": { "type": "integer" },
                 "styles": { "type": "array", "items": { "type": "string" } },
                 "blank": { "type": "string" },

@@ -1,7 +1,14 @@
 name: The Worst Day Of Your Life So Far
 source: https://knowyourmeme.com/memes/the-worst-day-of-your-life-so-far
+description: Insisting someone else's bad day is even worse, a sarcastic one-up on a complaint. Top line is the complaint; bottom line is the mocking one-up.
 keywords:
-  -
+  - Bart Simpson
+  - Homer Simpson
+  - The Simpsons
+  - one-upping
+  - dark humor
+  - sarcasm
+  - escalation
 text:
   - style: default
     color: white

@@ -1,7 +1,15 @@
 name: And Then I Said
 source: https://knowyourmeme.com/memes/and-then-i-said
+description: Quoting a naive or unrealistic claim someone made, often one that draws laughter; the top line is the lead-in, and the bottom line is the claim itself.
 keywords:
-  -
+  - laughing
+  - unrealistic expectation
+  - wishful thinking
+  - naive claim
+  - ironic
+  - exam
+  - overconfidence
+  - mocking
 text:
   - style: upper
     color: white

@@ -1,7 +1,15 @@
 name: Tuxedo Winnie the Pooh
 source: https://knowyourmeme.com/memes/tuxedo-winnie-the-pooh
+description: Contrasting a plain option with a pretentious, upscale version of the same thing; top line is the ordinary option, bottom line is the fancy renaming.
 keywords:
-  -
+  - Disney
+  - snobbery
+  - fancy version
+  - rebranding
+  - upscale
+  - pretentious
+  - classy
+  - fine dining
 text:
   - style: default
     color: black

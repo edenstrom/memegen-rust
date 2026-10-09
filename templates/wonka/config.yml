@@ -1,7 +1,14 @@
 name: Condescending Wonka
 source: http://knowyourmeme.com/memes/condescending-wonka-creepy-wonka
+description: Smugly condescending, delivering a patronizing remark with a fake-sweet smile. Top line is the setup; bottom line is the condescending remark.
 keywords:
-  -
+  - Willy
+  - Gene Wilder
+  - Charlie and the Chocolate Factory
+  - smugness
+  - patronizing
+  - sarcasm
+  - snobbery
 text:
   - style: upper
     color: white

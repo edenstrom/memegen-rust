@@ -1,8 +1,15 @@
 name: You Should Feel Bad
 source: http://knowyourmeme.com/memes/your-musics-bad-and-you-should-feel-bad
+description: Scolding someone for weak creative work and telling them to feel ashamed; the top line is the criticism, the bottom line the guilt trip.
 keywords:
   - Futurama
   - Zoidberg
+  - Dr. Zoidberg
+  - criticism
+  - scolding
+  - guilt trip
+  - harsh critique
+  - shaming
 text:
   - style: upper
     color: white

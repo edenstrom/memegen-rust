@@ -1,7 +1,14 @@
 name: Sad Bill Clinton
 source: https://en.wikipedia.org/wiki/Bill_Clinton
+description: Quiet, wistful disappointment that something didn't go your way. Top line sets it up, bottom line is the letdown.
 keywords:
-  -
+  - Sad Politicians
+  - Bill Clinton
+  - politics
+  - melancholy
+  - disappointment
+  - wistful
+  - letdown
 text:
   - style: upper
     color: white

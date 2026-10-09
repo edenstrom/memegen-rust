@@ -1,7 +1,13 @@
 name: Oh, I'm Sorry, I Thought This Was America
 source: http://knowyourmeme.com/memes/oh-im-sorry-i-thought-this-was-america
+description: Sarcastically apologizing for rude or excessive behavior while defying the objection; top line is the fake apology, bottom line the defiant reason.
 keywords:
-  -
+  - South Park
+  - sarcasm
+  - defiance
+  - fake apology
+  - rudeness
+  - unapologetic
 text:
   - style: upper
     color: white

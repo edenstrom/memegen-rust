@@ -1,7 +1,13 @@
 name: Kombucha Girl
 source: https://www.buzzfeed.com/daniellaemanuel/woman-trying-kombucha-meme
+description: Repeating an unpleasant attempt and showing the same disgusted reaction; top line is the first try, bottom line is the second.
 keywords:
-  -
+  - trying again
+  - disgust
+  - grimace
+  - unpleasant taste
+  - disappointment
+  - second attempt
 text:
   - style: default
     color: black

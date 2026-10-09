@@ -1,7 +1,14 @@
 name: Baby Insanity Wolf
 source: http://knowyourmeme.com/memes/baby-insanity-wolf
+description: Harmless, childish behavior framed as wild rebellion, a mild version of Insanity Wolf. Top line is the setup, bottom line is the tame 'insane' act.
 keywords:
-  -
+  - Insanity Wolf
+  - wolf pup
+  - howling
+  - tame rebellion
+  - childish
+  - mild extremes
+  - absurd behavior
 text:
   - style: upper
     color: white

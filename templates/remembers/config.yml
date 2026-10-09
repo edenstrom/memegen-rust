@@ -1,7 +1,14 @@
 name: Pepperidge Farm Remembers
 source: http://knowyourmeme.com/memes/pepperidge-farm-remembers
+description: 'Nostalgic callback to an old meme or ad everyone recalls: top line asks if you remember it, bottom line is the reply.'
 keywords:
-  -
+  - Family Guy
+  - Grandpa
+  - bread commercial
+  - nostalgia
+  - reminiscing
+  - throwback
+  - old memories
 text:
   - style: upper
     color: white
