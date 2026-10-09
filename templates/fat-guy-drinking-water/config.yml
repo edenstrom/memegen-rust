@@ -1,0 +1,48 @@
+name: Rich Man Drinking From a Pipe
+source: https://imgflip.com/meme/282648262/fat-guy-drinking-water
+description: A rich man greedily drinking from a leaking pipe while the working class gets only drips, used for wealth inequality and trickle-down economics. Top line is the pipe, the lower-left line is the working class and the lower-right line is the billionaire.
+keywords:
+  - water pipe
+  - leak
+  - rich man
+  - poor man
+  - inequality
+  - trickle down economics
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.43
+    anchor_y: 0.172
+    angle: 0.0
+    scale_x: 0.43
+    scale_y: 0.346
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.5
+    angle: 0.0
+    scale_x: 0.28
+    scale_y: 0.47
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.45
+    anchor_y: 0.55
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.41
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - massive government bailouts
+  - working class
+  - billionaires

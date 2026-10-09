@@ -1,0 +1,24 @@
+name: The Scroll of Truth
+source: https://imgflip.com/memetemplate/123999232
+description: Revealing a supposedly ancient truth or wisdom written on a scroll, usually a sarcastic or obvious one. The text goes on the blank scroll in the bottom left panel.
+keywords:
+  - scroll of truth
+  - comic
+  - robotatertot
+  - truth
+  - scroll
+  - nyehhh
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.175
+    anchor_y: 0.565
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.32
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - You don't need to buy every game on sale

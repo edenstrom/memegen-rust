@@ -1,0 +1,36 @@
+name: Black Guy Stopping
+source: https://imgflip.com/meme/169798464/black-guy-stopping
+description: Stopping someone from walking away, or blocking a person who is trying to leave a situation. Top panel is the person walking off, bottom panel is the person stopping them. Top line is the setup, bottom line is the attempt to stop them.
+keywords:
+  - stopping
+  - walking away
+  - blocking
+  - intervention
+  - hold on
+  - reaction
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.52
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me trying to leave the party
+  - Hold on, you're not going anywhere

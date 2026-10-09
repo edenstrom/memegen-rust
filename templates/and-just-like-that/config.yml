@@ -1,0 +1,37 @@
+name: And Just Like That
+source: https://imgflip.com/meme/And-Just-Like-That
+description: "Something ends or changes abruptly and casually, delivered with a shrug. Top line is the setup, bottom line is the sudden ending."
+keywords:
+  - sudden change
+  - abrupt ending
+  - anticlimax
+  - shrug
+  - casual
+  - dismissive
+  - anticlimactic
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "I spent all year planning the wedding"
+  - "And just like that, it's over."

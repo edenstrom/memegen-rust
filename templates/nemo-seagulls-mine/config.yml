@@ -1,0 +1,39 @@
+name: Nemo Seagulls Mine
+source: https://imgflip.com/meme/10996607/Nemo-Seagulls-Mine
+description: The seagulls from Finding Nemo chanting Mine as they swarm something loose. Used for claiming something that is not yours, with the top line as setup and the bottom line as the claim.
+keywords:
+  - finding nemo
+  - seagulls
+  - mine
+  - birds
+  - disney
+  - pixar
+  - greedy
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.002
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.148
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When you open a pack of gum in class
+  - Is that for me?
+aliases:
+  - finding-nemo-seagulls

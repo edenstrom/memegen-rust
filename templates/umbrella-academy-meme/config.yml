@@ -1,0 +1,37 @@
+name: Umbrella Academy Meme
+source: https://imgflip.com/meme/260506960/umbrella-academy-meme
+description: Staring in shock at someone who has just appeared and ruined a good moment. Top line is the good moment, bottom line is the person who ruins it.
+keywords:
+  - umbrella academy
+  - vanya and five
+  - car
+  - passing by
+  - staring
+  - shocked
+  - ruined moment
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.52
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me enjoying my day off
+  - My boss driving past

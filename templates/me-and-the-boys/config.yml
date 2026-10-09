@@ -1,0 +1,25 @@
+name: Me and the Boys
+source: https://imgflip.com/meme/Me-And-The-Boys
+description: A group of Spider-Man villains, such as Rhino, Vulture, Electro and Green Goblin, standing together as a gang. Used for a plan you do with your friends, usually a questionable one.
+keywords:
+  - me and the boys
+  - spider-man villains
+  - rhino
+  - vulture
+  - electro
+  - green goblin
+  - friends
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.978
+    scale_y: 0.22
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me and the boys at 3am looking for beans

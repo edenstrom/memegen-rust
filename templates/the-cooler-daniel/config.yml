@@ -1,0 +1,36 @@
+name: The Cooler Daniel
+source: https://imgflip.com/meme/113387478/The-Cooler-Daniel
+description: Comparing a plain, ordinary version of something with a cooler, more stylish version. The left photo is the plain version, the right photo is the cool one.
+keywords:
+  - daniel
+  - the cooler daniel
+  - yearbook
+  - sunglasses
+  - comparison
+  - cool
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.14
+    anchor_y: 0.17
+    angle: 0.0
+    scale_x: 0.32
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.53
+    anchor_y: 0.17
+    angle: 0.0
+    scale_x: 0.32
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Your product
+  - The product they told you not to worry about

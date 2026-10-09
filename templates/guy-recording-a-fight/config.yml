@@ -1,0 +1,49 @@
+name: Guy Recording a Fight
+source: https://imgflip.com/meme/176409418/Guy-recording-a-fight
+description: A bystander filming a fight instead of stepping in, neglecting his own problems while watching someone else's drama. Top-right line is the bystander's engagement, left line is the responsibilities being neglected, bottom-right line is the mental health taking the hit.
+keywords:
+  - guy recording a fight
+  - fight
+  - recording
+  - bystander
+  - worldstar
+  - neglect
+  - mental health
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.58
+    anchor_y: 0.265
+    angle: 0.0
+    scale_x: 0.4
+    scale_y: 0.305
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.45
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.41
+    anchor_y: 0.63
+    angle: 0.0
+    scale_x: 0.58
+    scale_y: 0.3
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me watching the drama unfold
+  - My responsibilities
+  - My mental health

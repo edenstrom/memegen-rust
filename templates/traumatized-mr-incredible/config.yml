@@ -1,0 +1,35 @@
+name: Traumatized Mr. Incredible
+source: https://imgflip.com/meme/340157305/Traumatized-Mr-Incredible
+description: Showing the difference between people who do not know something and people who do, with the uncanny Mr Incredible on the right. Left panel is people who don't know, right panel is people who know.
+keywords:
+  - traumatized mr incredible
+  - uncanny mr incredible
+  - people who know
+  - people who don't know
+  - uncanny valley
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.47
+    scale_y: 0.19
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.47
+    scale_y: 0.19
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - People who don't know
+  - People who know

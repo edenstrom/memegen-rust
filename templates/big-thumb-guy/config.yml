@@ -1,0 +1,37 @@
+name: Big thumb guy
+source: https://imgflip.com/meme/373007204/Big-thumb-guy
+description: "A stick-figure comic with an oversized thumbs-up gesture, used for exaggerated or sarcastic approval. Top line is the setup, bottom line is the reaction."
+keywords:
+  - stick figure
+  - thumbs up
+  - approval
+  - sarcasm
+  - drawing
+  - comic
+  - exaggerated
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.05
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.05
+    anchor_y: 0.9
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "My code compiled first try"
+  - "Gives a big thumbs up"

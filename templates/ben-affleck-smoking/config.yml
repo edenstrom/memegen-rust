@@ -1,0 +1,37 @@
+name: Ben Affleck Smoking
+source: https://imgflip.com/meme/166152128/Ben-affleck-smoking
+description: "Ben Affleck standing outside and smoking with a weary, defeated expression, used for sad, tired or regretful reactions. Top line is the setup, bottom line is the reaction."
+keywords:
+  - Ben Affleck
+  - smoking
+  - cigarette
+  - weary
+  - defeated
+  - sad
+  - regret
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "My ex texts me back"
+  - "Lights a cigarette in silence"

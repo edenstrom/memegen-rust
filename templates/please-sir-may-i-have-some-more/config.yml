@@ -1,0 +1,37 @@
+name: "Please Sir May I Have Some More"
+source: https://imgflip.com/meme/39351202/Please-sir-may-I-have-some-more
+description: "Begging for more of something, from the Oliver Twist scene where an orphan asks for another bowl of gruel. Top line is the request, bottom line is the thing being asked for."
+keywords:
+  - "Oliver Twist"
+  - "Dickens"
+  - "orphan"
+  - "begging"
+  - "gruel"
+  - "asking for more"
+  - "Please sir"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.20
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.80
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.20
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Please sir, may I have some more?"
+  - "Free WiFi"

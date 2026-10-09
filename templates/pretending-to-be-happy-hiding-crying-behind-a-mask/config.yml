@@ -1,0 +1,37 @@
+name: "Pretending To Be Happy, Hiding Crying Behind A Mask"
+source: https://imgflip.com/meme/99924861/Pretending-To-Be-Happy-Hiding-Crying-Behind-A-Mask
+description: "A drawn face wearing a fake smile over tears. Top line is the public face, bottom line is the hidden feeling."
+keywords:
+  - "mask"
+  - "pretending"
+  - "hiding"
+  - "sad"
+  - "fake smile"
+  - "crying inside"
+  - "drawing"
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.56
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me crying inside"
+  - "My social media posts"

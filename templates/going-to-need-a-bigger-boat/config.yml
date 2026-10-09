@@ -1,0 +1,37 @@
+name: Going to Need a Bigger Boat
+source: https://imgflip.com/meme/37256418/Going-to-need-a-bigger-boat
+description: Realizing a problem is far bigger than anyone planned for, from the Jaws line. Top line sets up the realization, bottom line is the 'bigger boat' payoff.
+keywords:
+  - jaws
+  - roy scheider
+  - bigger boat
+  - shark
+  - underestimating
+  - scope
+  - realization
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.003
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.147
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.155
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When you realize the scope of the project
+  - You're gonna need a bigger boat

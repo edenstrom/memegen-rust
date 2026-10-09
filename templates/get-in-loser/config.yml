@@ -1,0 +1,37 @@
+name: Get In Loser
+source: https://imgflip.com/meme/28926942/Get-In-Loser
+description: An enthusiastic invitation to an outing that the speaker is sure is better than whatever you were doing. Top line is the invitation, bottom line is the plan.
+keywords:
+  - mean girls
+  - regina george
+  - get in loser
+  - car
+  - we are going shopping
+  - invitation
+  - shopping
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.09
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - GET IN LOSER
+  - WE'RE GOING SHOPPING

@@ -1,0 +1,37 @@
+name: "Patrick Smart Dumb"
+source: https://imgflip.com/meme/183221332/PAtrick-Smart-Dumb
+description: "Patrick as a clever scientist, then as a hopelessly dumb builder. Top line is the smart version, bottom line is the dumb one."
+keywords:
+  - "SpongeBob"
+  - "Patrick Star"
+  - "smart"
+  - "dumb"
+  - "scientist"
+  - "intelligence"
+  - "contrast"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.50
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Explains the lore of my favorite game"
+  - "Calculates a tip in public"

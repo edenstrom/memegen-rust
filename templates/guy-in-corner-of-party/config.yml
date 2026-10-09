@@ -1,0 +1,25 @@
+name: Guy in Corner of Party
+source: https://imgflip.com/meme/296034307/Guy-in-corner-of-party
+description: A quiet person at a party secretly believing he is far more impressive than everyone around him. The caption is his private, smug thought.
+keywords:
+  - they don't know
+  - party
+  - corner
+  - wojak
+  - introvert
+  - secret
+  - smug
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.22
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - They don't know I'm the top contributor on GitHub

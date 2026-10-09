@@ -1,0 +1,24 @@
+name: I Think I Might Miss My Wife
+source: https://imgflip.com/meme/552930213/I-think-i-might-miss-my-wife-blank
+description: "Omni-Man's understated, wistful line about missing home, often used ironically right after something dramatic or violent. One speech bubble holds the line."
+keywords:
+  - omni-man
+  - invincible
+  - nolan grayson
+  - speech bubble
+  - homesick
+  - missing someone
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.042
+    anchor_y: 0.445
+    angle: 0.0
+    scale_x: 0.224
+    scale_y: 0.327
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - I think I might miss my wife.

@@ -1,0 +1,48 @@
+name: Brain Before Sleep
+source: https://imgflip.com/meme/189601074/Brain-Before-Sleep
+description: Anxious or intrusive thoughts that suddenly start up when you are trying to fall asleep. The pink panels show the brain speaking, the grey panels show the sleeper reacting.
+keywords:
+  - brain
+  - sleep
+  - insomnia
+  - anxiety
+  - overthinking
+  - bedtime
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.1
+    anchor_y: 0.05
+    angle: 0.0
+    scale_x: 0.37
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.53
+    anchor_y: 0.05
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.05
+    anchor_y: 0.52
+    angle: 0.0
+    scale_x: 0.42
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Did you ever reply to that email from 2019
+  - Remember that thing you said in 2011
+  - Why is your heart beating like that

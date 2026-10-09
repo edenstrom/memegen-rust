@@ -1,0 +1,25 @@
+name: Maybe I Am A
+source: https://imgflip.com/meme/335384304/Bee-Movie-Lawyer-Tantrum
+description: "Finishing the phrase 'Maybe I am a...' with a self-deprecating or absurd identity. The text goes in the blacked-out blank after 'Maybe I am a'."
+keywords:
+  - Vision
+  - Marvel
+  - Maybe I am a
+  - "self-deprecation"
+  - identity
+  - fill in the blank
+  - Avengers
+text:
+  - style: none
+    color: white
+    font: thick
+    anchor_x: 0.56
+    anchor_y: 0.89
+    angle: 0.0
+    scale_x: 0.14
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "a sentient toaster"

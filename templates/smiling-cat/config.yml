@@ -1,0 +1,37 @@
+name: 'Smiling Cat'
+source: https://imgflip.com/meme/Smiling-Cat
+description: 'A smug or unsettling smile that reads as pleased, creepy, or knowing. Top line is the setup, bottom line is the reaction.'
+keywords:
+  - 'smiling cat'
+  - 'cat'
+  - 'smug'
+  - 'creepy'
+  - 'knowing'
+  - 'animal'
+  - 'smile'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'WHEN YOU SAY YOU''LL BE QUICK'
+  - 'AND THEN STAY FOR AN HOUR'

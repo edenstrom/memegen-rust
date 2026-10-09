@@ -1,0 +1,38 @@
+name: "Who Would Win?"
+source: https://imgflip.com/meme/Who-Would-Win
+description: "Comparing two opponents in a hypothetical fight to see who would win. The left and right lines are the two contenders; the title is fixed."
+keywords:
+  - "who would win"
+  - "hypothetical"
+  - "versus"
+  - "fight"
+  - "debate"
+  - "comparison"
+  - "battle"
+  - "argument"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.04
+    anchor_y: 0.24
+    angle: 0.0
+    scale_x: 0.44
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.52
+    anchor_y: 0.24
+    angle: 0.0
+    scale_x: 0.44
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "A goose with a grudge"
+  - "A toddler on a sugar high"

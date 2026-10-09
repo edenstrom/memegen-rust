@@ -1,0 +1,25 @@
+name: 'Sun Tzu'
+source: https://imgflip.com/meme/84898556/Sun-Tzu
+description: 'Quoting Sun Tzu''s old maxims on strategy and war, shown beside his statue on a black background. The text is a strategic or wise-sounding saying.'
+keywords:
+  - 'sun tzu'
+  - 'art of war'
+  - 'strategy'
+  - 'wisdom'
+  - 'quote'
+  - 'ancient china'
+  - 'general'
+text:
+  - style: upper
+    color: white
+    font: thin
+    anchor_x: 0.42
+    anchor_y: 0.2
+    angle: 0.0
+    scale_x: 0.52
+    scale_y: 0.6
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'I READ ONE CHAPTER OF THE ART OF WAR AND NOW I''M A STRATEGIST'

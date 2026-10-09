@@ -1,0 +1,37 @@
+name: Floating Boy Chasing Running Boy
+source: https://imgflip.com/meme/160187182/floating-boy-chasing-running-boy
+description: Running from a problem that glides after you effortlessly and cannot be outrun. Top line is the floating problem, such as responsibilities, bottom line is the person running away.
+keywords:
+  - floating boy
+  - running boy
+  - responsibilities
+  - chase
+  - procrastination
+  - inevitable
+  - hallway
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.12
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.54
+    anchor_y: 0.268
+    angle: 0.0
+    scale_x: 0.19
+    scale_y: 0.232
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My responsibilities
+  - Me

@@ -1,0 +1,36 @@
+name: "Silence X, a Y Is Talking"
+source: https://imgflip.com/meme/534143336/Silence-X-a-Y-is-talking
+description: "Shushing a crowd so a particular kind of person can speak, usually to set up a punchline or mock the speaker. Top line is the group being silenced, bottom line is the one who is talking."
+keywords:
+  - silence
+  - is talking
+  - King Baldwin
+  - Kingdom of Heaven
+  - shushing
+  - authority
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.62
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.36
+    scale_y: 0.095
+    align: left
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: white
+    font: thick
+    anchor_x: 0.13
+    anchor_y: 0.9
+    angle: 0.0
+    scale_x: 0.38
+    scale_y: 0.085
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - meeting
+  - senior engineer

@@ -1,0 +1,38 @@
+name: "Woman Shouting Knives"
+source: https://imgflip.com/meme/245389734/Woman-Shouting-Knives
+description: "A furious woman shouting at a man who has been stabbed by knives, used for a dramatic, over-the-top argument. Top line is her shout, bottom line is his bleak reply."
+keywords:
+  - "knives"
+  - "shouting"
+  - "angry woman"
+  - "stabbed"
+  - "argument"
+  - "drama"
+  - "illustration"
+  - "rage"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.52
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Did you really think you could cheat on me?!"
+  - "...ow"

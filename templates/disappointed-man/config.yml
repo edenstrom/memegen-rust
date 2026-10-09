@@ -1,0 +1,36 @@
+name: Disappointed Cricket Fan
+source: https://imgflip.com/meme/219315380/Disappointed-Man
+description: A cricket fan with his hands on his hips, visibly disappointed by the game, used for a letdown after you hoped for better. Top line is the expectation, bottom line is the letdown.
+keywords:
+  - disappointed
+  - cricket fan
+  - hands on hips
+  - annoyed
+  - letdown
+  - pakistan
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.002
+    angle: 0.0
+    scale_x: 0.97
+    scale_y: 0.148
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.97
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me watching my code fail after making a 'simple' change
+  - It worked perfectly on my machine

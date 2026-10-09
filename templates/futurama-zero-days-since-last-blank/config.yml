@@ -1,0 +1,25 @@
+name: Futurama Zero Days Since Last Accident
+source: https://imgflip.com/meme/448742875/Futurama-Zero-Days-Since-Last-Blank
+description: A Futurama road sign counting the days since the last accident, used when something goes wrong again right after a good streak. The sign's 'Days Since Last' wording is part of the image; the line is the thing being counted, written in the box below it.
+keywords:
+  - futurama
+  - zero days since last
+  - days since last
+  - streak
+  - accident
+  - sign
+  - bad luck
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.546
+    angle: 0.0
+    scale_x: 0.648
+    scale_y: 0.202
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Production outage

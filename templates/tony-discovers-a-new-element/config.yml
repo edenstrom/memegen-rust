@@ -1,0 +1,37 @@
+name: Tony Discovers a New Element
+source: https://imgflip.com/meme/347580183/Tony-discovers-a-new-element
+description: Torn between two options and reading both with wide-eyed, cross-eyed uncertainty. Left page is the first option, right page is the second.
+keywords:
+  - spongebob
+  - book
+  - cross-eyed
+  - choice
+  - decision
+  - two options
+  - indecision
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.738
+    angle: 0.0
+    scale_x: 0.488
+    scale_y: 0.262
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.504
+    anchor_y: 0.748
+    angle: 0.0
+    scale_x: 0.486
+    scale_y: 0.252
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Going to bed early
+  - Staying up until 4 AM

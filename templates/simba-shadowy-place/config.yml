@@ -1,0 +1,49 @@
+name: 'Simba Shadowy Place'
+source: https://imgflip.com/meme/Simba-Shadowy-Place
+description: 'A warning to stay away from a dangerous or forbidden place, and the reaction to it, from The Lion King. Top panel is the warning, middle panel is the hesitation, bottom panel is the response.'
+keywords:
+  - 'lion king'
+  - 'simba'
+  - 'mufasa'
+  - 'shadowy place'
+  - 'warning'
+  - 'danger'
+  - 'forbidden'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.35
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.68
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'DON''T GO TO THE SHADOWY PLACE'
+  - 'I''M NOT GOING TO THE SHADOWY PLACE'
+  - 'THE SHADOWY PLACE HAS WIFI'

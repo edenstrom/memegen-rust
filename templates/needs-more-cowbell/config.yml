@@ -1,0 +1,36 @@
+name: Needs More Cowbell
+source: https://imgflip.com/meme/24165732/Needs-More-Cowbell
+description: Christopher Walken as the SNL producer insisting the song needs more cowbell. Used for a dramatic pitch that one thing would fix everything, with the problem on top and the solution below.
+keywords:
+  - christopher walken
+  - saturday night live
+  - snl
+  - cowbell
+  - more cowbell
+  - fever
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.195
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.19
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - I GOT A FEVER
+  - AND THE ONLY PRESCRIPTION IS MORE COWBELL

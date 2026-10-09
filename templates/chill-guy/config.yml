@@ -1,0 +1,35 @@
+name: Chill Guy
+description: A laid-back, unbothered dog character who stays calm no matter how chaotic things get. Top line is the chaos, bottom line is the calm response.
+keywords:
+  - chill guy
+  - dog
+  - relaxed
+  - unbothered
+  - calm
+  - sweater
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.003
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.147
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.145
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My whole life is falling apart
+  - But I'm just a chill guy

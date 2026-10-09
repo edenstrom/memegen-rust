@@ -1,0 +1,49 @@
+name: Soldier Protecting Sleeping Child
+source: https://imgflip.com/meme/143535109/the-silent-protector
+description: Shielding someone else from trouble while they sleep peacefully, often a parent doing all the work. Top line is the problems, middle line is the protector, bottom line is the one sleeping.
+keywords:
+  - soldier
+  - sleeping
+  - protecting
+  - shielding
+  - penguin
+  - silent protector
+  - soldier protecting sleeping child
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.25
+    angle: 0.0
+    scale_x: 0.24
+    scale_y: 0.43
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.29
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.21
+    scale_y: 0.27
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Life's problems
+  - My parents
+  - Me sleeping peacefully

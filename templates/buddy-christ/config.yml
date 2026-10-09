@@ -1,0 +1,36 @@
+name: Buddy Christ
+source: https://imgflip.com/meme/Buddy-Christ
+description: Giving a wink, a thumbs up, and a friendly point to reassure someone, usually with an ironic or cheerful twist. Top line is the setup, bottom line is the reassurance. From the Buddy Christ statue in the film Dogma.
+keywords:
+  - Buddy Christ
+  - Dogma
+  - reassurance
+  - thumbs up
+  - wink
+  - irony
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Your code compiles on the first try
+  - Buddy Christ, you're fine

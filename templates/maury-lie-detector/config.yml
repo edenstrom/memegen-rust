@@ -1,0 +1,36 @@
+name: Maury Lie Detector
+source: https://imgflip.com/meme/Maury-Lie-Detector
+description: Maury Povich's lie detector reveal from his talk show, used when someone has been caught in a lie. Top line is the claim, bottom line is the verdict.
+keywords:
+  - maury
+  - maury povich
+  - lie detector
+  - determined that was a lie
+  - tv show
+  - caught lying
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.002
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.198
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.19
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - You said you would only eat one slice of pizza
+  - The lie detector determined that was a lie

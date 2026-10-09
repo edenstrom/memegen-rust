@@ -1,0 +1,37 @@
+name: 'Squid Game Doll Turning'
+source: https://imgflip.com/meme/558880671/Squid-Game
+description: 'Freezing or getting caught in the act when the doll turns around in Squid Game''s red light, green light game. Top panel is the moment before the turn, bottom panel is the reveal.'
+keywords:
+  - 'squid game'
+  - 'doll'
+  - 'red light green light'
+  - 'caught'
+  - 'freeze'
+  - 'turning'
+  - 'tension'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'ME SNEAKING A SNACK AT WORK'
+  - 'THE LEAD DEVELOPER TURNS AROUND'

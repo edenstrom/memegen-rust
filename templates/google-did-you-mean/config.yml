@@ -1,0 +1,37 @@
+name: Google Did You Mean
+source: https://imgflip.com/meme/641445912/Higuruma
+description: A Google search screenshot where the 'Did you mean' suggestion is replaced with a joke correction. Top line is the search query, bottom line is the 'did you mean' suggestion.
+keywords:
+  - google
+  - search
+  - did you mean
+  - typo
+  - correction
+  - search bar
+  - autocorrect
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.185
+    anchor_y: 0.26
+    angle: 0.0
+    scale_x: 0.675
+    scale_y: 0.135
+    align: left
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.335
+    anchor_y: 0.745
+    angle: 0.0
+    scale_x: 0.6
+    scale_y: 0.07
+    align: left
+    start: 0.0
+    stop: 1.0
+example:
+  - how to be happy
+  - how to sleep 12 hours

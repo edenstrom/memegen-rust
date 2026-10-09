@@ -1,0 +1,49 @@
+name: Greedy Pipe Man
+source: https://imgflip.com/meme/388681963/Greedy-Pipe-Man
+description: A greedy figure guzzling a flow of resources while others go without, used to mock how budgets are allocated. Left figure is the government supplying the pipe, the small figure is what gets neglected, and the big figure is what takes it all.
+keywords:
+  - greedy pipe man
+  - team fortress 2
+  - budget
+  - government spending
+  - education funding
+  - military spending
+  - priorities
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.27
+    angle: 0.0
+    scale_x: 0.24
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.32
+    anchor_y: 0.72
+    angle: 0.0
+    scale_x: 0.22
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.6
+    anchor_y: 0.61
+    angle: 0.0
+    scale_x: 0.26
+    scale_y: 0.3
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - The government
+  - Education funding
+  - Military budget

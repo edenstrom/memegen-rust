@@ -1,0 +1,37 @@
+name: "Pepe the Frog"
+source: https://imgflip.com/meme/36383069/Pepe-the-Frog
+description: "A frog with a sad or smug expression, used to show a feeling about a situation. Top line sets up the situation, bottom line is the feeling."
+keywords:
+  - "Pepe"
+  - "Pepe the Frog"
+  - "frog"
+  - "feels bad"
+  - "feels good"
+  - "sad"
+  - "reaction"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.80
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "WHEN YOU FIND THE PERFECT MEME TEMPLATE"
+  - "FEELS GOOD MAN"

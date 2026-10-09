@@ -1,0 +1,36 @@
+name: Charlie Day Conspiracy
+source: https://imgflip.com/meme/92459171/Charlie-Day
+description: Charlie Day from It's Always Sunny in Philadelphia obsessively connecting clues on a conspiracy board. Top line is the wild theory, bottom line is the conclusion he has reached.
+keywords:
+  - Charlie Day
+  - It's Always Sunny
+  - conspiracy
+  - string board
+  - obsession
+  - theory
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Why did the ketchup bottle move?
+  - It's all connected

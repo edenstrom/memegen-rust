@@ -1,0 +1,36 @@
+name: Cat Looks Inside
+source: https://imgflip.com/meme/453425234/Cat-looks-inside
+description: A cat staring straight into the camera with wide, intense eyes, used for suspicious stares, sudden realizations, or an awkward silence. Top line is the setup, bottom line is the cat's reaction.
+keywords:
+  - cat
+  - stare
+  - suspicious
+  - awkward
+  - silence
+  - wide eyes
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When the group chat goes silent
+  - Yes, I can hear you

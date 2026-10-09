@@ -1,0 +1,36 @@
+name: Community Fire Pizza Meme
+source: https://imgflip.com/meme/235571786/Community-Fire-Pizza-Meme
+description: A pizza delivery arriving into a situation that quickly turns into chaos or an explosion, from the TV show Community. Top line is the setup, bottom line is the chaos.
+keywords:
+  - Community
+  - pizza
+  - fire
+  - chaos
+  - delivery
+  - disaster
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me opening the pizza box
+  - Fire everywhere

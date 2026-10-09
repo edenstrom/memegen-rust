@@ -1,0 +1,36 @@
+name: That's My Secret
+source: https://imgflip.com/meme/7031312/Thats-my-secret
+description: Deflecting a question with a deadpan answer that hides an obvious truth. Top line is the deadpan deflection, bottom line is the real secret.
+keywords:
+  - bruce banner
+  - hulk
+  - avengers
+  - always angry
+  - marvel
+  - deadpan
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - That's my secret, Cap
+  - I'm always angry

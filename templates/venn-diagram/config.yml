@@ -1,0 +1,50 @@
+name: "Venn Diagram"
+source: https://imgflip.com/meme/248316705/venn-diagram
+description: "Comparing two things by what they share and what is unique to each. The left and right circles hold what is unique to each one, and the overlap in the middle is what they have in common."
+keywords:
+  - "venn diagram"
+  - "comparison"
+  - "overlap"
+  - "shared traits"
+  - "two things"
+  - "diagram"
+  - "intersection"
+  - "chart"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.1
+    anchor_y: 0.36
+    angle: 0.0
+    scale_x: 0.22
+    scale_y: 0.28
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.41
+    anchor_y: 0.36
+    angle: 0.0
+    scale_x: 0.18
+    scale_y: 0.28
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.68
+    anchor_y: 0.36
+    angle: 0.0
+    scale_x: 0.22
+    scale_y: 0.28
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Work emails"
+  - "Dread"
+  - "Vacation days"

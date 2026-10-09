@@ -1,0 +1,36 @@
+name: Trump Bill Signing
+source: https://imgflip.com/memetemplate/91545132
+description: Presenting a signed bill or decree with a self-satisfied air to announce what is now allowed or banned. Left page is the subject, right page is the verdict.
+keywords:
+  - donald trump
+  - executive order
+  - bill signing
+  - holding sign
+  - document
+  - decree
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.381
+    anchor_y: 0.348
+    angle: 0.0
+    scale_x: 0.271
+    scale_y: 0.44
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.664
+    anchor_y: 0.348
+    angle: 0.0
+    scale_x: 0.28
+    scale_y: 0.434
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - anime is now
+  - illegal

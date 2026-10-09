@@ -1,0 +1,60 @@
+name: Boardroom Meeting Suggestion
+source: https://imgflip.com/memetemplate/1035805
+description: Pitching an outlandish or self-serving suggestion in a meeting, then watching the room react with bewilderment or indifference. Top bubble is the suggestion, the three bubbles in the middle panel are the responses from the people at the table.
+keywords:
+  - boardroom
+  - meeting
+  - suggestion
+  - office
+  - bad idea
+  - reactions
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.3
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.6
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.05
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.06
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.33
+    anchor_y: 0.39
+    angle: 0.0
+    scale_x: 0.16
+    scale_y: 0.06
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.6
+    anchor_y: 0.4
+    angle: 0.0
+    scale_x: 0.28
+    scale_y: 0.08
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - We should replace the whole team with interns
+  - Ok
+  - Sounds great
+  - Nah

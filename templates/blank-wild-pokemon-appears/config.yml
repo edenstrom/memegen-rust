@@ -1,0 +1,24 @@
+name: Blank Wild Pokemon Appears
+source: https://imgflip.com/meme/216036135/Blank-Wild-Pokemon-Appears
+description: "Introducing a surprise encounter in the style of Pokemon battle text. The text fills the gap in 'Wild ___ appeared!' with whatever showed up."
+keywords:
+  - Pokemon
+  - wild pokemon
+  - appeared
+  - Game Boy
+  - retro
+  - encounter
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.27
+    anchor_y: 0.765
+    angle: 0.0
+    scale_x: 0.68
+    scale_y: 0.07
+    align: left
+    start: 0.0
+    stop: 1.0
+example:
+  - Responsibility

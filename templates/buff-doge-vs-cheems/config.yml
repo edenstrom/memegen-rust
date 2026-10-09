@@ -1,0 +1,36 @@
+name: Buff Doge vs. Cheems
+source: https://imgflip.com/memetemplate/247375501
+description: Comparing a confident, muscular Doge against a sad Cheems to contrast strength and sadness. Left line is the buff option, right line is the sad one.
+keywords:
+  - doge
+  - cheems
+  - buff
+  - comparison
+  - sad
+  - muscles
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.38
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.56
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.38
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Doing my taxes early
+  - Doing my taxes at 11:59 pm

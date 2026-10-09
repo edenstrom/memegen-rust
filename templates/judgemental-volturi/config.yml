@@ -1,0 +1,24 @@
+name: Judgemental Volturi
+source: https://imgflip.com/meme/316853891/Judgemental-Volturi
+description: "Aro from Twilight looking down on someone with silent judgement, usually at a friend's bad decisions. The white band at the top holds the line describing what is being judged."
+keywords:
+  - judgemental volturi
+  - twilight
+  - michael sheen
+  - aro
+  - looking down
+  - disgusted
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.262
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me watching my friends make bad life decisions

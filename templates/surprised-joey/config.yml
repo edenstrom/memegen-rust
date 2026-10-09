@@ -1,0 +1,37 @@
+name: 'Surprised Joey'
+source: https://imgflip.com/meme/231948831/Surprised-Joey
+description: 'Pretending to be fine or smug about something, then being secretly shocked by the reality. Top label is the calm face, bottom label is the alarmed reaction.'
+keywords:
+  - 'joey'
+  - 'friends'
+  - 'surprised'
+  - 'shocked'
+  - 'smug'
+  - 'pretending'
+  - 'reaction'
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.12
+    angle: 0.0
+    scale_x: 0.44
+    scale_y: 0.3
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.62
+    angle: 0.0
+    scale_x: 0.44
+    scale_y: 0.3
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'I''M TOTALLY FINE WITH THE DEADLINE'
+  - 'UNTIL I SEE IT''S TOMORROW'

@@ -1,0 +1,38 @@
+name: "Why Can't I Hold All These Limes"
+source: https://imgflip.com/meme/Why-Cant-I-Hold-All-These-Limes
+description: "Struggling to juggle too many things at once. Top line is the complaint, 'Why can't I hold all these', and the bottom line is the thing being juggled."
+keywords:
+  - "limes"
+  - "juggling"
+  - "too many things"
+  - "overwhelmed"
+  - "struggling"
+  - "multitasking"
+  - "poster"
+  - "lime"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.13
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Why can't I hold all these"
+  - "tabs I have open"

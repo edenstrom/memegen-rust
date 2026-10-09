@@ -1,0 +1,26 @@
+name: "Wolverine Remember"
+source: https://imgflip.com/meme/47169131/Wolverine-Remember
+description: "Wolverine recalling a memory from a photo, usually nostalgic or bittersweet. The picture frame is the memory being recalled, and the text goes inside it."
+keywords:
+  - "Wolverine"
+  - "X-Men"
+  - "nostalgia"
+  - "memories"
+  - "photo"
+  - "picture frame"
+  - "reminiscing"
+  - "bittersweet"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.29
+    anchor_y: 0.56
+    angle: 0.0
+    scale_x: 0.4
+    scale_y: 0.25
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Remember when we used to talk every day?"

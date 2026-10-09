@@ -1,0 +1,24 @@
+name: Kermit Window
+source: https://imgflip.com/meme/36698509/kermit-window
+description: "Kermit staring out at the rain, wistful or melancholy about something that has gone wrong. The white band at the top holds the caption describing what is making him sad."
+keywords:
+  - kermit
+  - window
+  - rain
+  - sad
+  - muppet
+  - melancholy
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.97
+    scale_y: 0.155
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - When you forgot to cancel the free trial

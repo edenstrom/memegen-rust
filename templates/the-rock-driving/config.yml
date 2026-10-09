@@ -1,0 +1,36 @@
+name: The Rock Driving
+source: https://imgflip.com/memetemplate/21735
+description: Asking a passenger a worrying question and getting a reckless or absurd answer. Top line is the question, bottom line is the answer.
+keywords:
+  - the rock driving
+  - dwayne johnson
+  - race to witch mountain
+  - speech bubble
+  - car
+  - reckless
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.5
+    anchor_y: 0.74
+    angle: 0.0
+    scale_x: 0.48
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Hey, where are we going?
+  - To the front page of Reddit!

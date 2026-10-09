@@ -1,0 +1,38 @@
+name: "Yes Honey"
+source: https://imgflip.com/meme/245901889/Yes-Honey
+description: "A passive, resigned 'yes, dear' moment: the composed woman on the left says one thing while the sad wojak face on the right thinks another. Left line is hers, right line is his."
+keywords:
+  - "yes honey"
+  - "wojak"
+  - "relationship"
+  - "couple"
+  - "passive aggressive"
+  - "resignation"
+  - "agreeing"
+  - "sad"
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.02
+    anchor_y: 0.68
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.5
+    anchor_y: 0.64
+    angle: 0.0
+    scale_x: 0.48
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Yes, honey."
+  - "*internally: no idea what she just said*"

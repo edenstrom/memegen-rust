@@ -1,0 +1,37 @@
+name: Aragorn Black Gate for Frodo
+source: https://imgflip.com/meme/73966654/Aragorn-Black-Gate-for-Frodo
+description: "Drawing attention away to give someone else time to act, as a deliberate distraction. Top line is the plan, bottom line is the distraction."
+keywords:
+  - Lord of the Rings
+  - Aragorn
+  - Black Gate
+  - distraction
+  - diversion
+  - sacrifice
+  - Frodo
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.55
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Frodo, go ahead to Mordor"
+  - "I'll keep the orcs busy"

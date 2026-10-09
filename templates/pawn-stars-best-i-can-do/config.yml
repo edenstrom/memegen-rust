@@ -1,0 +1,37 @@
+name: "Pawn Stars Best I Can Do"
+source: https://imgflip.com/memetemplate/77045868
+description: "Rick Harrison of Pawn Stars making a lowball offer on something valuable. Top line is what the item is worth, bottom line is the offer."
+keywords:
+  - "Pawn Stars"
+  - "Rick Harrison"
+  - "History Channel"
+  - "pawn shop"
+  - "lowball offer"
+  - "haggling"
+  - "reality TV"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "A rare historical artifact worth millions"
+  - "Best I can do is five dollars"

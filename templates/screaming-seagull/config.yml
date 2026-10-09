@@ -1,0 +1,36 @@
+name: 'Screaming Seagull'
+source: https://imgflip.com/meme/142945023/screaming-seagull
+description: 'Screaming in an over-the-top, unhinged way at something outrageous. Top line is the setup, bottom line is the scream.'
+keywords:
+  - 'screaming seagull'
+  - 'seagull'
+  - 'bird'
+  - 'scream'
+  - 'outrage'
+  - 'yelling'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.07
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.92
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.07
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'WHEN THE PRICE OF EGGS GOES UP'
+  - 'AAAAAAAAAAAAA'

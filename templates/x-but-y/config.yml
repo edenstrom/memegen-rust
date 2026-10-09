@@ -1,0 +1,38 @@
+name: "X, But Y"
+source: https://imgflip.com/meme/257142842/X-but-Y
+description: "Pitching a twist on a familiar idea with the 'X, but Y' formula, presented on an easel. The top line on the board is the original idea; the bottom line is the twist."
+keywords:
+  - "Don Draper"
+  - "Mad Men"
+  - "pitch"
+  - "presentation"
+  - "easel"
+  - "twist"
+  - "remix"
+  - "marketing"
+text:
+  - style: none
+    color: black
+    font: comic
+    anchor_x: 0.575
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.18
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: comic
+    anchor_x: 0.575
+    anchor_y: 0.62
+    angle: 0.0
+    scale_x: 0.18
+    scale_y: 0.24
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Working from home"
+  - "Working from home, but in a submarine"

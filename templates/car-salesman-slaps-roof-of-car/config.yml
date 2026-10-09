@@ -1,0 +1,36 @@
+name: Car Salesman Slaps Roof of Car
+source: https://imgflip.com/meme/Car-Salesman-Slaps-Roof-Of-Car
+description: A car salesman enthusiastically slapping the roof of a car while making an over-the-top pitch. Top line is the salesman's pitch, bottom line is the punchline.
+keywords:
+  - car salesman
+  - pitch
+  - sales
+  - car
+  - roof
+  - hard sell
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.86
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - This car can fit the whole family
+  - And the roof is impenetrable

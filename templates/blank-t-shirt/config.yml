@@ -1,0 +1,36 @@
+name: Blank T-Shirt
+source: https://imgflip.com/meme/46798201/Blank-T-Shirt
+description: A plain black T-shirt used to print a message on the chest, often a slogan or a joke that reads like a shirt someone is wearing. Top line is the first line of text on the shirt, bottom line is the second.
+keywords:
+  - t-shirt
+  - shirt
+  - slogan
+  - clothing
+  - merch
+  - chest
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.25
+    anchor_y: 0.25
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.25
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - I'm not arguing
+  - I'm just explaining

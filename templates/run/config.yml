@@ -1,0 +1,37 @@
+name: "Run!"
+source: https://imgflip.com/meme/253352546/Run
+description: "Someone running away from something chasing them, like an orangutan on a tricycle. Top line is the thing chasing, bottom line is the person running."
+keywords:
+  - "run"
+  - "orangutan"
+  - "chase"
+  - "running away"
+  - "tricycle"
+  - "escape"
+  - "responsibilities"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.86
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "My responsibilities"
+  - "Me"

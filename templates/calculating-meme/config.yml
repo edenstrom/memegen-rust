@@ -1,0 +1,60 @@
+name: Calculating Meme
+source: https://imgflip.com/meme/92828109/Calculating-meme
+description: Intensely lost in thought while working out a problem, or pretending to calculate something in your head. Each quadrant is one caption, read top-left to bottom-right.
+keywords:
+  - calculating
+  - math
+  - thinking
+  - formulas
+  - focus
+  - confusion
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.2
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.52
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.52
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Trying to split the bill
+  - Multiplying by the tip
+  - Carrying the one
+  - Ok, I'm going to pay for everyone

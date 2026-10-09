@@ -1,0 +1,48 @@
+name: Bike Fall
+source: https://imgflip.com/memetemplate/79132341
+description: Making a bad decision that predictably ends badly, then asking why anyone would do it. Top panel is the decision, middle panel is the action, bottom panel is the fallout.
+keywords:
+  - bicycle
+  - bad decision
+  - fall
+  - self-sabotage
+  - blame
+  - comic
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.4
+    angle: 0.0
+    scale_x: 0.45
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.42
+    anchor_y: 0.7
+    angle: 0.0
+    scale_x: 0.55
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me making a bad decision
+  - The bad decision
+  - Why would society do this?

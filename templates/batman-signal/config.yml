@@ -1,0 +1,25 @@
+name: Batman Signal
+source: https://imgflip.com/meme/22138211/batman-signal
+description: "Calling for a hero or someone to solve a problem, like the Bat-Signal lighting up the sky. The text is the request being signalled."
+keywords:
+  - Batman
+  - "Bat-Signal"
+  - Gotham
+  - help
+  - hero
+  - call for help
+  - urgent
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.42
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.56
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Batman, I'm out of snacks"

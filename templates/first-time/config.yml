@@ -1,0 +1,37 @@
+name: First Time?
+source: https://imgflip.com/meme/277489984/First-time
+description: Contrasting someone overreacting to a minor inconvenience with someone who has been through far worse and is unfazed. Top line is the overreaction, bottom line labels the veteran who has seen it all.
+keywords:
+  - first time
+  - james franco
+  - ballad of buster scruggs
+  - noose
+  - veteran
+  - minor inconvenience
+  - overreacting
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.2
+    anchor_y: 0.28
+    angle: 0.0
+    scale_x: 0.33
+    scale_y: 0.21
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.3
+    anchor_y: 0.55
+    angle: 0.0
+    scale_x: 0.45
+    scale_y: 0.44
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me crying over a minor inconvenience
+  - Experienced person

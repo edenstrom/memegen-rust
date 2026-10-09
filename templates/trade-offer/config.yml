@@ -1,0 +1,38 @@
+name: Trade Offer
+source: https://imgflip.com/memetemplate/309868304
+description: Proposing a lopsided trade that is clearly in your favor. Left label is what you receive, right label is what the other person receives.
+keywords:
+  - trade offer
+  - i receive
+  - you receive
+  - tiktok
+  - deal
+  - bargain
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.03
+    anchor_y: 0.215
+    angle: 0.0
+    scale_x: 0.44
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.53
+    anchor_y: 0.215
+    angle: 0.0
+    scale_x: 0.44
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 3 treats
+  - You let me sleep
+aliases:
+  - i-receive-you-receive

@@ -1,0 +1,37 @@
+name: "Rick and Carl"
+source: https://imgflip.com/meme/Rick-and-Carl
+description: "A two-panel Walking Dead scene where Rick and Carl share an awkward joke. Top line is what is said in the first panel, bottom line is the reply in the second."
+keywords:
+  - "The Walking Dead"
+  - "Rick Grimes"
+  - "Carl Grimes"
+  - "dad joke"
+  - "pun"
+  - "awkward"
+  - "two panel"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.40
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.10
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.90
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.10
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Hey Carl, what do you call a fake noodle?"
+  - "An impasta, Carl! An impasta!"

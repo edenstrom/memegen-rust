@@ -1,0 +1,24 @@
+name: Marked Safe From
+source: https://imgflip.com/memetemplate/161865971
+description: "Parodying Facebook's Safety Check by announcing that you were marked safe from something mundane or absurd, as if it were a disaster. The text in the gap is the thing you were marked safe from; 'Today' is already in the image."
+keywords:
+  - Facebook
+  - safety check
+  - marked safe
+  - flag
+  - news
+  - disaster
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.05
+    anchor_y: 0.555
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.09
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - the new office policy

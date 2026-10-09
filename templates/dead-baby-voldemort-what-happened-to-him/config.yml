@@ -1,0 +1,48 @@
+name: Dead Baby Voldemort
+source: https://imgflip.com/meme/221506353/Dead-Baby-Voldemort--What-Happened-To-Him
+description: A grim figure found dead, the question 'What happened to him?', and the answer. Top line is the setup, middle line is the question, bottom line is the answer.
+keywords:
+  - harry potter
+  - voldemort
+  - what happened to him
+  - three panels
+  - dead
+  - aftermath
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.36
+    angle: 0.0
+    scale_x: 0.8
+    scale_y: 0.07
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.1
+    anchor_y: 0.9
+    angle: 0.0
+    scale_x: 0.8
+    scale_y: 0.08
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - My sleep schedule
+  - What happened to him?
+  - He tried to fix a bug in production on a Friday afternoon.

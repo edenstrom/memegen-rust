@@ -1,0 +1,36 @@
+name: Aquamarine Whispering
+source: https://imgflip.com/meme/330341559/Car-drives-off-of-cliffimproved
+description: Whispering a secret to a friend who reacts with a shocked, open-mouthed stare. Top line is the whispered secret, bottom line is the shocked reaction. From the film Aquamarine.
+keywords:
+  - Aquamarine
+  - whisper
+  - gossip
+  - shock
+  - secret
+  - reaction
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Your crush just texted you back
+  - Oh my god

@@ -1,0 +1,36 @@
+name: Laughing Leo
+source: https://imgflip.com/memetemplate/259237855
+description: "Leonardo DiCaprio's smug, mocking laugh at something only he finds funny, often a joke he has to explain. Top line is the setup, bottom line is the joke only he finds funny."
+keywords:
+  - leonardo dicaprio
+  - django unchained
+  - laughing
+  - smug
+  - drinking
+  - explaining a joke
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.23
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.75
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.23
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - ME EXPLAINING A JOKE
+  - THAT ONLY I FIND FUNNY

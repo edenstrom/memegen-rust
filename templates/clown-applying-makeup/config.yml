@@ -1,0 +1,60 @@
+name: Clown Applying Makeup
+source: https://imgflip.com/memetemplate/195515965
+description: A four-step transformation from a bare face into a fully made-up clown. Each caption is one stage, from the plain face at the top to the finished clown at the bottom.
+keywords:
+  - clown
+  - makeup
+  - transformation
+  - progression
+  - stages
+  - wig
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.08
+    angle: 0.0
+    scale_x: 0.56
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.33
+    angle: 0.0
+    scale_x: 0.56
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.58
+    angle: 0.0
+    scale_x: 0.56
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.56
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me getting ready for the party
+  - Me trying to look normal
+  - Me after one drink
+  - Me at the party

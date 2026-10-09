@@ -1,0 +1,38 @@
+name: "Yhorm the Giant"
+source: https://imgflip.com/meme/171457391/Yhorm-Dark-Souls
+description: "A towering, overpowering foe facing a tiny challenger. Top line is the big threat, bottom line is the small challenger's reply."
+keywords:
+  - "Yhorm"
+  - "Dark Souls"
+  - "boss"
+  - "giant"
+  - "overpowered"
+  - "challenge"
+  - "fantasy"
+  - "video game"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "My to-do list on Monday morning"
+  - "Me with one cup of coffee"

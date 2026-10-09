@@ -1,0 +1,37 @@
+name: 'Say it Again, Dexter'
+source: https://imgflip.com/meme/Say-it-Again-Dexter
+description: 'A flustered moment of flattery or surprise, where the listener is asked to repeat what was just said. Top panel is the setup, bottom panel is the reaction.'
+keywords:
+  - 'dexter''s laboratory'
+  - 'dexter'
+  - 'dee dee'
+  - 'cartoon'
+  - 'flustered'
+  - 'say it again'
+  - 'flattery'
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.92
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.04
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.92
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'WHEN SOMEONE CALLS YOUR CODE CLEAN'
+  - 'SAY IT AGAIN, DEXTER'

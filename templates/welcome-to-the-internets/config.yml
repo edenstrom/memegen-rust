@@ -1,0 +1,38 @@
+name: "Welcome to the Internets"
+source: https://imgflip.com/meme/Welcome-To-The-Internets
+description: "A sarcastic welcome to something absurd, baffling, or typically internet. Top line describes the absurd scene, bottom line is the 'welcome' punchline."
+keywords:
+  - "internet"
+  - "unicorn"
+  - "cat"
+  - "rainbow"
+  - "absurd"
+  - "internet culture"
+  - "chaos"
+  - "nonsense"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "A cat riding a unicorn with a gun"
+  - "Welcome to the internet"

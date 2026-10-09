@@ -1,0 +1,38 @@
+name: "Yelling Beaver"
+source: https://imgflip.com/meme/308128486/Yelling-Beaver
+description: "An old man in a top hat yelling and jabbing a finger, used for furious lecturing, indignant rants, or lodging a complaint. Top line is the setup, bottom line is the rant."
+keywords:
+  - "yelling"
+  - "angry old man"
+  - "top hat"
+  - "pointing"
+  - "lecture"
+  - "rant"
+  - "outrage"
+  - "grumpy"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.01
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.98
+    scale_y: 0.19
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "When someone parks in my spot"
+  - "I've been parking here since 1962!"

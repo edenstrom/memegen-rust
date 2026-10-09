@@ -1,0 +1,36 @@
+name: "Rage Table Flip"
+description: "A stick figure flipping a table in rage after something goes wrong or is unfair. Top line is the trigger, bottom line is the reaction."
+keywords:
+  - "rage comic"
+  - "table flip"
+  - "stick figure"
+  - "anger"
+  - "frustration"
+  - "flip"
+  - "angry"
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "WHEN THE CODE DOESN'T WORK"
+  - "AND YOU DON'T KNOW WHY"

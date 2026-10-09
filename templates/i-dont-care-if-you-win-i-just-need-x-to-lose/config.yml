@@ -1,0 +1,36 @@
+name: "I Don't Care If You Win, I Just Need X to Lose"
+source: https://imgflip.com/meme/295089902/I-dont-care-if-you-win-I-just-need-X-to-lose
+description: "Not caring whether someone wins a competition, only that a specific rival loses. Top panel is 'I don't care if you win', bottom panel is 'I just need X to lose', where X is the rival."
+keywords:
+  - general hux
+  - star wars
+  - rivalry
+  - competition
+  - i don't care if you win
+  - i just need him to lose
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.38
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.88
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - I don't care if you win
+  - I just need him to lose

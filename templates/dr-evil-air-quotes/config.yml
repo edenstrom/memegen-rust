@@ -1,0 +1,25 @@
+name: "Dr. Evil Air Quotes"
+source: https://imgflip.com/meme/373996592/Bateman-walking
+description: "Using air quotes to signal that a word or phrase is being used sarcastically or doubtfully. The text is the quoted word or phrase."
+keywords:
+  - "Dr. Evil"
+  - Austin Powers
+  - air quotes
+  - sarcasm
+  - scare quotes
+  - doubt
+  - villain
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.05
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.9
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Quarterly 'synergy' meeting"

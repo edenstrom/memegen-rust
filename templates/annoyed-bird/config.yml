@@ -1,0 +1,49 @@
+name: Annoyed Bird
+source: https://imgflip.com/meme/142098540/annoyed-bird
+description: "A small bird's friendly remark gets a rude reply, and the bird stews in quiet annoyance. The top bubble is the remark, the middle bubble is the rude reply, and the bottom bubble is the bird's annoyed comeback."
+keywords:
+  - annoyed
+  - bird
+  - comic
+  - rude reply
+  - passive aggressive
+  - irritation
+  - sarcasm
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.04
+    anchor_y: 0.03
+    angle: 0.0
+    scale_x: 0.26
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.18
+    anchor_y: 0.5
+    angle: 0.0
+    scale_x: 0.3
+    scale_y: 0.12
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.6
+    anchor_y: 0.5
+    angle: 0.0
+    scale_x: 0.34
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Nice feathers today!"
+  - "Nobody asked you."
+  - "Ugh. Fine."

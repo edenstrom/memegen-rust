@@ -1,0 +1,25 @@
+name: "Now That's What I Call"
+source: https://imgflip.com/meme/133459494/Now-Thats-What-I-Call
+description: "A compilation album cover with a blank tracklist. The line goes in the empty tracklist as a joke about what songs or playlist the album holds."
+keywords:
+  - "Now That's What I Call Music"
+  - "compilation"
+  - "album"
+  - "tracklist"
+  - "playlist"
+  - "music"
+  - "greatest hits"
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.18
+    anchor_y: 0.66
+    angle: 0.0
+    scale_x: 0.62
+    scale_y: 0.22
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Songs my roommate plays at 7am"

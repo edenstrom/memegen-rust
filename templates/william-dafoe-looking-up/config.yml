@@ -1,0 +1,38 @@
+name: "Willem Dafoe Looking Up"
+source: https://imgflip.com/meme/367782046/William-Dafoe-looking-up
+description: "Gazing upward in dread, awe, or disbelief, usually at something unseen. Top line is the setup, bottom line is what he is looking up at."
+keywords:
+  - "Willem Dafoe"
+  - "looking up"
+  - "dread"
+  - "awe"
+  - "staring"
+  - "actor"
+  - "reaction"
+  - "blue tint"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "When your boss says 'quick call'"
+  - "Looks up at the ceiling in silent dread"

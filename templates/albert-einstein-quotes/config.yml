@@ -1,0 +1,25 @@
+name: Albert Einstein Quotes
+source: https://imgflip.com/meme/117614675/albert-einstein-quotes
+description: "Attributing a quote to Albert Einstein, usually one he never actually said, to lend it wisdom. The text is the quote on the right side."
+keywords:
+  - Albert Einstein
+  - quote
+  - wisdom
+  - physics
+  - misattributed
+  - genius
+  - inspirational
+text:
+  - style: default
+    color: white
+    font: thin
+    anchor_x: 0.52
+    anchor_y: 0.2
+    angle: 0.0
+    scale_x: 0.44
+    scale_y: 0.6
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "The definition of insanity is trusting a quote from the internet."

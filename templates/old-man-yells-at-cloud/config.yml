@@ -1,0 +1,25 @@
+name: "Old Man Yells at Cloud"
+source: https://imgflip.com/meme/54522231/Old-man-yells-at-cloud
+description: "An old man angrily shouting at something that cannot answer back, like a cloud or modern technology. The line is the rant."
+keywords:
+  - "Abe Simpson"
+  - "The Simpsons"
+  - "old man"
+  - "grumpy"
+  - "yelling"
+  - "complaining"
+  - "get off my lawn"
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.00
+    anchor_y: 0.00
+    angle: 0.0
+    scale_x: 1.00
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Kids these days and their phones"

@@ -1,0 +1,24 @@
+name: Blank Red MAGA Hat
+source: https://imgflip.com/meme/95813521/blank-red-MAGA-hat
+description: Putting a slogan or punchline on a plain red cap as a joke. The caption goes across the front of the hat.
+keywords:
+  - hat
+  - slogan
+  - cap
+  - politics
+  - red hat
+  - merchandise
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.15
+    anchor_y: 0.25
+    angle: 0.0
+    scale_x: 0.7
+    scale_y: 0.35
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Make memes great again
