@@ -162,7 +162,11 @@ mod tests {
         ] {
             let lines = vec![line.to_string()];
             assert_eq!(decode(&encode(&lines)), lines, "{line:?}");
-            assert_eq!(normalize(&encode(&lines)), (encode(&lines), false), "{line:?}");
+            assert_eq!(
+                normalize(&encode(&lines)),
+                (encode(&lines), false),
+                "{line:?}"
+            );
         }
     }
 

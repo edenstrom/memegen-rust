@@ -17,11 +17,12 @@ use serde_json::json;
 use crate::app::App;
 use crate::render::MemeRequest;
 
-const INSTRUCTIONS: &str = "Generate meme images from 200+ classic templates. \
+const INSTRUCTIONS: &str = "Generate meme images from 500+ classic templates. \
 Typical flow: call `list_templates` to find a template, then call `generate_meme` with its ID and one \
-string per line. Without a `filter`, `list_templates` returns every template with a description of what \
-it means and what each line is for, so you can pick the best fit; with a `filter` it runs a ranked search \
-over names, keywords, and descriptions (e.g. \"drake\", \"surprised\", \"choosing between options\"). \
+string per line. Prefer a `filter`: it runs a ranked search over names, keywords, and descriptions \
+(e.g. \"drake\", \"surprised\", \"choosing between options\"). Without one, `list_templates` pages \
+through every template with a description of what it means and what each line is for; pass \
+`next_offset` back as `offset` to get the next page. \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
 Animated templates render as GIF/WebP; use `extension` to choose the format.";
 
@@ -34,8 +35,12 @@ downscaled; the URL and saved file are full size.";
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
 image and a shareable URL. Inline images over 1 MB are downscaled; the URL is full size.";
 
-/// Most results `list_templates` returns for a `filter`, best match first.
-const MAX_MATCHES: usize = 20;
+/// Templates per `list_templates` page with a `filter`, best match first.
+const DEFAULT_MATCHES: usize = 20;
+
+/// Templates per `list_templates` page without a `filter`, and the most any
+/// page returns. The full catalog is too large for one tool result.
+const MAX_PAGE: usize = 100;
 
 /// Clients reject tool results with images over 1 MB. Base64 adds a third,
 /// so this keeps the encoded image under 1,000,000 bytes.
@@ -49,6 +54,12 @@ pub struct ListTemplatesRequest {
     /// Only animated templates (true) or only static templates (false).
     #[serde(default)]
     pub animated: Option<bool>,
+    /// Number of templates to skip: the `next_offset` of the previous page.
+    #[serde(default)]
+    pub offset: Option<usize>,
+    /// Templates per page, at most 100. Defaults to 20 with a `filter` and 100 without.
+    #[serde(default)]
+    pub limit: Option<usize>,
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -88,6 +99,14 @@ struct TemplateSummary<'a> {
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     animated: bool,
     example: &'a [String],
+}
+
+#[derive(Serialize)]
+struct TemplatePage<'a> {
+    templates: Vec<TemplateSummary<'a>>,
+    total: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    next_offset: Option<usize>,
 }
 
 #[derive(Clone)]
@@ -167,37 +186,45 @@ impl MemegenMcp {
     #[tool(
         description = "List meme templates with their ID, name, description (what the meme means \
         and what each line is for), number of text lines, whether they are animated, and example \
-        text. Without `filter` this returns every template. With `filter` it returns up to 20 \
-        templates ranked by how well they match."
+        text. With `filter` it returns the 20 templates that match best. Without `filter` it pages \
+        through every template, 100 at a time. Pass `next_offset` back as `offset` for the next \
+        page; it is omitted on the last one."
     )]
     async fn list_templates(
         &self,
         Parameters(request): Parameters<ListTemplatesRequest>,
     ) -> Result<CallToolResult, ErrorData> {
         let filter = request.filter.unwrap_or_default();
-        let mut templates = self.app.catalog().filter(&filter, request.animated);
-        if !filter.trim().is_empty() {
-            if templates.is_empty() {
-                return Ok(CallToolResult::success(vec![ContentBlock::text(format!(
-                    "No templates match {filter:?}. Call list_templates without a filter to \
-                    browse every template and its description."
-                ))]));
-            }
-            templates.truncate(MAX_MATCHES);
+        let templates = self.app.catalog().filter(&filter, request.animated);
+        let searching = !filter.trim().is_empty();
+        if searching && templates.is_empty() {
+            return Ok(CallToolResult::success(vec![ContentBlock::text(format!(
+                "No templates match {filter:?}. Call list_templates without a filter to \
+                browse every template and its description."
+            ))]));
         }
-        let summaries: Vec<TemplateSummary> = templates
-            .iter()
-            .map(|template| TemplateSummary {
-                id: &template.id,
-                name: &template.name,
-                description: template.description.as_deref(),
-                lines: template.text.len(),
-                animated: template.is_animated(),
-                example: &template.example,
-            })
-            .collect();
-        // Compact: the full catalog is the largest result an agent reads.
-        let text = serde_json::to_string(&summaries)
+        let default_limit = if searching { DEFAULT_MATCHES } else { MAX_PAGE };
+        let limit = request.limit.unwrap_or(default_limit).clamp(1, MAX_PAGE);
+        let total = templates.len();
+        let start = request.offset.unwrap_or(0).min(total);
+        let end = start.saturating_add(limit).min(total);
+        let page = TemplatePage {
+            templates: templates[start..end]
+                .iter()
+                .map(|template| TemplateSummary {
+                    id: &template.id,
+                    name: &template.name,
+                    description: template.description.as_deref(),
+                    lines: template.text.len(),
+                    animated: template.is_animated(),
+                    example: &template.example,
+                })
+                .collect(),
+            total,
+            next_offset: Some(end).filter(|&end| end < total),
+        };
+        // Compact: catalog pages are the largest results an agent reads.
+        let text = serde_json::to_string(&page)
             .map_err(|error| ErrorData::internal_error(error.to_string(), None))?;
         Ok(CallToolResult::success(vec![ContentBlock::text(text)]))
     }
