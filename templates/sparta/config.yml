@@ -1,7 +1,14 @@
 name: This is Sparta!
 source: https://www.youtube.com/watch?v=QkWS9PiXekE
+description: 'Fierce battle cry for an intense or overblown moment: the top line sets it up, the bottom line is the shout.'
 keywords:
-  -
+  - '300'
+  - Leonidas
+  - Gerard Butler
+  - battle cry
+  - intensity
+  - overdramatic
+  - war cry
 text:
   - style: upper
     color: white

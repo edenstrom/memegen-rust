@@ -1,7 +1,14 @@
 name: Captain Hindsight
 source: http://knowyourmeme.com/memes/captain-hindsight
+description: Offering smug hindsight advice about what someone should have done. First line is the goal, second line is the obvious fix, said after the fact.
 keywords:
-  -
+  - South Park
+  - unsolicited advice
+  - smugness
+  - obvious in retrospect
+  - dating advice
+  - friend zone
+  - superhero
 text:
   - style: upper
     color: white

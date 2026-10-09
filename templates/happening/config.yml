@@ -1,7 +1,13 @@
 name: It's Happening
 source: http://knowyourmeme.com/memes/doom-paul-its-happening
+description: Announcing that something big or exciting is finally happening; the top line is an optional setup and the bottom line is the announcement.
 keywords:
-  -
+  - Ron Paul
+  - Doom Paul
+  - excitement
+  - anticipation
+  - big news
+  - hype
 text:
   - style: upper
     color: white

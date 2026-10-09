@@ -1,7 +1,15 @@
 name: You Were the Chosen One!
 source: http://knowyourmeme.com/memes/you-were-the-chosen-one
+description: Anguished disappointment at someone or something that was supposed to be the savior but turned bad. The bottom line is the accusation.
 keywords:
-  -
+  - Star Wars
+  - Obi-Wan Kenobi
+  - Ewan McGregor
+  - Anakin Skywalker
+  - Revenge of the Sith
+  - betrayal
+  - disappointment
+  - fallen hero
 text:
   - style: upper
     color: white

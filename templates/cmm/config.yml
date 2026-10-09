@@ -1,8 +1,15 @@
 name: Change My Mind
 source: 
   https://knowyourmeme.com/memes/steven-crowders-change-my-mind-campus-sign
+description: Stating a contrarian opinion as a challenge to debate. The single line is the claim the speaker invites others to argue against.
 keywords:
-  -
+  - Steven Crowder
+  - Louder with Crowder
+  - debate
+  - contrarian opinion
+  - hot take
+  - invitation to argue
+  - challenge
 text:
   - style: upper
     color: black

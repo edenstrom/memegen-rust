@@ -1,7 +1,14 @@
 name: Mocking Spongebob
 source: http://knowyourmeme.com/memes/mocking-spongebob
+description: Sarcastically mocking someone by repeating their words in alternating case. Top line is what the other person said; bottom line is the mocking repeat.
 keywords:
-  -
+  - SquarePants
+  - sarcasm
+  - ridicule
+  - alternating case
+  - mimicking
+  - teasing
+  - repeating what someone said
 text:
   - style: default
     color: white

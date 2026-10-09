@@ -1,7 +1,15 @@
 name: Stonks
 source: https://knowyourmeme.com/memes/stonks
+description: Sarcastically praising a dubious or irrational decision that happens to be paying off. Single caption line is the praise.
 keywords:
-  -
+  - Meme Man
+  - stock market
+  - investing
+  - irony
+  - dubious success
+  - bad investment
+  - sarcasm
+  - finance
 text:
   - style: upper
     color: white

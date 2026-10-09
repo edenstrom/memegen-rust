@@ -1,7 +1,14 @@
 name: Skeptical Snake
 source: https://www.reddit.com/r/JoeRogan/comments/5kga5k/skeptical_snake/
+description: 'Wary, suspicious reaction when something you thought was handled turns out to still be a threat: the bottom line is the twist.'
 keywords:
-  -
+  - suspicion
+  - distrust
+  - paranoia
+  - wary
+  - false alarm
+  - lingering doubt
+  - unresolved
 text:
   - style: upper
     color: white

@@ -1,7 +1,14 @@
 name: X, X Everywhere
 source: https://imgflip.com/memetemplate/X-Everywhere
+description: Remarking that something has become ubiquitous or overwhelming. First line names the thing, second line says it is spreading everywhere.
 keywords:
-  -
+  - Toy Story
+  - Woody
+  - Buzz Lightyear
+  - Pixar
+  - ubiquity
+  - overabundance
+  - saturation
 text:
   - style: upper
     color: white

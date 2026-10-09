@@ -1,7 +1,14 @@
 name: Feels Good
 source: https://knowyourmeme.com/memes/feels-good
+description: Expressing smug, self-satisfied contentment at a situation that went one's way; the bottom line is the feeling.
 keywords:
-  -
+  - Wojak
+  - smug
+  - satisfaction
+  - contentment
+  - self-satisfaction
+  - bliss
+  - relief
 text:
   - style: upper
     color: white

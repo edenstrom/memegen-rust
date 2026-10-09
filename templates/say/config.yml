@@ -1,8 +1,13 @@
 name: Say the Line, Bart!
 source: https://knowyourmeme.com/memes/say-the-line-bart
+description: 'Demanding a specific catchphrase or expected answer from someone: the top line is the demand, the bottom line is the reply they''re waiting for.'
 keywords:
   - The Simpsons
   - Bart Simpson
+  - call and response
+  - catchphrase
+  - crowd demand
+  - expected answer
 text:
   - style: default
     color: white

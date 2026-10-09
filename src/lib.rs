@@ -14,6 +14,7 @@ pub mod openapi;
 pub mod png;
 pub mod quantize;
 pub mod render;
+pub mod search;
 pub mod settings;
 pub mod slug;
 pub mod template;

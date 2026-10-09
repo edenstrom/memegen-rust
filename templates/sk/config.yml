@@ -1,7 +1,14 @@
 name: Skeptical Third World Kid
 source: http://knowyourmeme.com/memes/third-world-success
+description: 'Doubtful, sarcastic pushback on a claim that seems suspiciously obvious: top line is the claim, bottom line is the skeptical reply.'
 keywords:
-  -
+  - side-eye
+  - doubt
+  - suspicion
+  - rhetorical question
+  - sarcasm
+  - obvious answer
+  - incredulity
 text:
   - style: upper
     color: white

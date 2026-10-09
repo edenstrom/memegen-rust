@@ -1,7 +1,13 @@
 name: Karate Kyle
 source: https://knowyourmeme.com/memes/karate-kyle
+description: Escalating a petty grievance into extreme violent retaliation; top line is the minor complaint, bottom line is the extreme response.
 keywords:
-  -
+  - overreaction
+  - revenge
+  - escalation
+  - petty grievance
+  - violent retaliation
+  - martial arts
 text:
   - style: upper
     color: white

@@ -1,7 +1,13 @@
 name: I Made This
 source: https://knowyourmeme.com/memes/i-made-this
+description: Claiming credit for something found or shared online; top lines name the source and audience, then the claim, the doubt, and the reclaim.
 keywords:
-  -
+  - credit
+  - taking credit
+  - reposting
+  - online content
+  - original creator
+  - attribution
 text:
   - style: upper
     color: white

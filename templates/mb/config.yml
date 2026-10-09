@@ -1,7 +1,13 @@
 name: Member Berries
 source: http://knowyourmeme.com/memes/member-berries
+description: Nostalgic recall of something from the past, usually a half-remembered pop-culture item; top line is the recall, bottom line is the item.
 keywords:
-  -
+  - South Park
+  - nostalgia
+  - reminiscing
+  - pop culture
+  - forgotten memories
+  - Star Wars
 text:
   - style: upper
     color: white

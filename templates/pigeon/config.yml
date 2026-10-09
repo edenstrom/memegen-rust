@@ -1,7 +1,15 @@
 name: Is This a Pigeon?
 source: https://knowyourmeme.com/memes/is-this-a-pigeon
+description: Confidently misidentifying something as an obviously wrong thing; top line is the observer, middle line is the object, bottom line is the mistaken label.
 keywords:
-  -
+  - butterfly
+  - misidentification
+  - mistaken identity
+  - confidently wrong
+  - anime
+  - overconfidence
+  - wrong guess
+  - obvious error
 text:
   - style: default
     color: white

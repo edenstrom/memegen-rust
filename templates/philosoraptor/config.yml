@@ -1,7 +1,15 @@
 name: Philosoraptor
 source: http://knowyourmeme.com/memes/philosoraptor
+description: Pondering a clever-sounding but flawed deduction, usually built on wordplay; top line is the premise, bottom line is the twisted conclusion.
 keywords:
-  -
+  - logic
+  - wordplay
+  - pun
+  - deep thoughts
+  - shower thoughts
+  - pseudo-intellectual
+  - faulty logic
+  - philosophy
 text:
   - style: upper
     color: white

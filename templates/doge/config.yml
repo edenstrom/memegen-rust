@@ -1,7 +1,14 @@
 name: Doge
 source: http://knowyourmeme.com/memes/doge
+description: Short, broken-English Doge exclamations in the 'such X, very Y, wow' style; each line is one exclamation.
 keywords:
-  -
+  - Shiba Inu
+  - Kabosu
+  - Dogecoin
+  - such wow
+  - much amaze
+  - broken English
+  - wholesome
 text:
   - style: upper
     color: white

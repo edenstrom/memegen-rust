@@ -1,7 +1,14 @@
 name: Spider-Man Pointing at Spider-Man
 source: https://knowyourmeme.com/memes/spider-man-pointing-at-spider-man
+description: 'Two people each accusing the other of the same thing: the first line is one side, the second line is the mirror-image accusation.'
 keywords:
-  -
+  - blame
+  - mutual accusation
+  - hypocrisy
+  - tit for tat
+  - projection
+  - reciprocal blame
+  - you too
 text:
   - style: upper
     color: white

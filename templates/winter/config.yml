@@ -1,8 +1,15 @@
 name: Winter is coming
 source: 
   http://knowyourmeme.com/memes/imminent-ned-brace-yourselves-winter-is-coming
+description: Warning someone to brace for an inevitable, ominous event that is coming. Top line is the setup; bottom line is the grim warning.
 keywords:
-  -
+  - Ned Stark
+  - Game of Thrones
+  - Imminent Ned
+  - foreboding
+  - ominous warning
+  - impending doom
+  - dramatic warning
 text:
   - style: upper
     color: white

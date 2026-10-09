@@ -1,7 +1,13 @@
 name: Vince McMahon Reaction
 source: https://knowyourmeme.com/memes/vince-mcmahon-reaction
+description: Escalating shock or disbelief, with each stacked line showing a stronger stage. The top line is the mild version; the bottom line is full astonishment.
 keywords:
-  -
+  - WWE
+  - escalating shock
+  - mounting disbelief
+  - astonishment
+  - overwhelmed
+  - wild response
 text:
   - style: default
     color: black

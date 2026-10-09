@@ -1,7 +1,14 @@
 name: Types of Headaches
 source: https://knowyourmeme.com/memes/types-of-headaches
+description: Ranking a problem by how severe a headache it causes, with the fully red head as the worst case; the one line names the problem.
 keywords:
-  -
+  - migraine
+  - hypertension
+  - stress
+  - production outage
+  - worst case
+  - severity ranking
+  - severe problem
 text:
   - style: default
     color: black

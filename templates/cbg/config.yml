@@ -1,7 +1,13 @@
 name: Comic Book Guy
 source: http://simpsons.wikia.com/wiki/Jeffrey_Albertson
+description: Delivering a disdainful, sarcastic verdict that something is terrible. The bottom line is the verdict, and the top line is the setup.
 keywords:
-  -
+  - The Simpsons
+  - Kevin Smith
+  - disdain
+  - criticism
+  - snobbery
+  - hot take
 text:
   - style: upper
     color: white

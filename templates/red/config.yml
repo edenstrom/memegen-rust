@@ -1,7 +1,15 @@
 name: Oh, Is That What We're Going to Do Today?
 source: https://www.imdb.com/title/tt0720046/
+description: Calmly responding to a perceived challenge by asking if you want a fight; top line is the rhetorical question, bottom line is the escalation.
 keywords:
-  -
+  - That '70s Show
+  - Red Forman
+  - Kurtwood Smith
+  - stern dad
+  - confrontation
+  - threat
+  - challenge
+  - provocation
 text:
   - style: upper
     color: white

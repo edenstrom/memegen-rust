@@ -1,7 +1,13 @@
 name: Insanity Wolf
 source: http://knowyourmeme.com/memes/insanity-wolf
+description: Extreme, reckless behavior taken to an insane conclusion. Top line is the setup, bottom line is the unhinged action.
 keywords:
-  -
+  - reckless
+  - extreme
+  - risky behavior
+  - bad idea
+  - unhinged
+  - testing in production
 text:
   - style: upper
     color: white

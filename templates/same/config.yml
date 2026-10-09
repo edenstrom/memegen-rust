@@ -1,7 +1,14 @@
 name: They're The Same Picture
 source: https://knowyourmeme.com/memes/theyre-the-same-picture
+description: 'Calling out two supposedly different things as identical: first two lines are the pair, the last line is the deadpan verdict.'
 keywords:
-  -
+  - The Office
+  - Pam Beesly
+  - Jenna Fischer
+  - deadpan
+  - false difference
+  - no real difference
+  - identical
 text:
   - style: none
     color: black

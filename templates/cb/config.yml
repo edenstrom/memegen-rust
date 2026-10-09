@@ -1,7 +1,13 @@
 name: Confession Bear
 source: http://knowyourmeme.com/memes/confession-bear
+description: Sheepishly confessing to a small, playful wrongdoing. The first line states the confession, the second names what was taken or done.
 keywords:
-  -
+  - Yogi Bear
+  - guilt
+  - sheepish confession
+  - petty theft
+  - admitting a crime
+  - picnic
 text:
   - style: upper
     color: white

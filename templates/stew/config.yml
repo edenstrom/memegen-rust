@@ -1,7 +1,13 @@
 name: Baby, You've Got a Stew Going
 source: https://www.youtube.com/watch?v=Sr2PlqXw03Y
+description: Playfully remarking that something is brewing or cooking up, usually a messy or suspicious situation. Top line is empty; bottom line is the remark.
 keywords:
-  -
+  - brewing trouble
+  - something cooking
+  - suspicious situation
+  - playful remark
+  - sarcastic compliment
+  - flirting
 text:
   - style: upper
     color: white

@@ -1,7 +1,13 @@
 name: The Rent Is Too Damn High
 source: http://knowyourmeme.com/memes/the-rent-is-too-damn-high-jimmy-mcmillan
+description: Complaining that something, usually rent or a price, is too expensive. The two lines are one complaint split across the top and bottom.
 keywords:
-  -
+  - Jimmy McMillan
+  - housing costs
+  - expensive
+  - cost of living
+  - complaining
+  - political outrage
 text:
   - style: upper
     color: white

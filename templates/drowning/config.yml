@@ -1,7 +1,14 @@
 name: Drowning High Five
 source: https://knowyourmeme.com/memes/drowning-high-five
+description: Asking for help and getting a sympathetic but useless reply. First line is the plea, second the commenter, third the empty 'me too' response.
 keywords:
-  -
+  - me too
+  - unhelpful advice
+  - sympathy
+  - online comments
+  - relatable
+  - no help
+  - pointless response
 text:
   - style: default
     color: white

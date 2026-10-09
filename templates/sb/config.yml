@@ -1,7 +1,14 @@
 name: Scumbag Brain
 source: http://knowyourmeme.com/memes/scumbag-brain
+description: 'Annoying memory lapse where the mind does part of a task right and then fails the important part: the bottom line is the letdown.'
 keywords:
-  -
+  - forgetfulness
+  - memory lapse
+  - tip of the tongue
+  - self-sabotage
+  - betrayal
+  - inconvenience
+  - forgetting names
 text:
   - style: upper
     color: white

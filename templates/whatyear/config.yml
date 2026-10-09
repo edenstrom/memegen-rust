@@ -1,7 +1,13 @@
 name: What Year Is It?
 source: http://knowyourmeme.com/memes/what-year-is-it
+description: Reacting to something outdated or absurd with bemused disbelief, as if it belongs to another era. Top line is empty; bottom line is the bemused question.
 keywords:
-  -
+  - outdated
+  - behind the times
+  - bemused
+  - disbelief
+  - absurd question
+  - anachronism
 text:
   - style: upper
     color: white

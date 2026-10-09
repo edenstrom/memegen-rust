@@ -1,7 +1,14 @@
 name: Sarcastic Bear
 source: http://knowyourmeme.com/memes/sarcastic-bear
+description: 'A snarky, fake apology for not knowing a common internet reference: the bottom line is the sarcastic excuse.'
 keywords:
-  -
+  - internet culture
+  - fake apology
+  - snark
+  - unfamiliar reference
+  - meme literacy
+  - deadpan
+  - clueless
 text:
   - style: upper
     color: white

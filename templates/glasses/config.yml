@@ -1,8 +1,14 @@
 name: Peter Parker's Glasses
 source: https://knowyourmeme.com/memes/peter-parkers-glasses
+description: Contrasting a flattering rationalization or self-image with a blunt, self-deprecating truth; top line is the flattering view, bottom the truth.
 keywords:
   - Spider Man
   - Peter Parker
+  - Tobey Maguire
+  - self-deprecation
+  - rationalization
+  - self-image
+  - insecurity
 text:
   - style: default
     color: black

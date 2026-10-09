@@ -1,8 +1,15 @@
 name: It's A Trap!
 source: http://knowyourmeme.com/memes/its-a-trap
+description: Warning that a plan is a trap or set-up; the bottom line is the warning, the top line what seems safe or appealing.
 keywords:
-  - Star Wards
+  - Star Wars
   - Admiral Ackbar
+  - Return of the Jedi
+  - warning
+  - suspicion
+  - ambush
+  - set-up
+  - danger ahead
 text:
   - style: upper
     color: white

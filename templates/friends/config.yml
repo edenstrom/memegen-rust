@@ -1,7 +1,14 @@
 name: Are You Two Friends?
 source: https://knowyourmeme.com/memes/are-you-two-friends
+description: 'Asking whether two parties are allies and getting a split answer: the first line names the pair, then the ''No'' and ''Yes'' replies.'
 keywords:
   - Star Trek
+  - frenemies
+  - rivalry
+  - political divide
+  - alliance
+  - disagreement
+  - loyalty
 text:
   - style: upper
     color: white

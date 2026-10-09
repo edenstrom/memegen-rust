@@ -1,7 +1,14 @@
 name: Panik Kalm Panik
 source: https://knowyourmeme.com/memes/panik-kalm
+description: Panic, then calm, then panic again once the reassurance proves false; line one is the scare, line two the relief, line three the realization.
 keywords:
-  -
+  - anxiety
+  - false reassurance
+  - false alarm
+  - overreaction
+  - relief
+  - realization
+  - scared
 text:
   - style: default
     color: black

@@ -1,7 +1,14 @@
 name: Super Cool Ski Instructor
 source: http://knowyourmeme.com/memes/super-cool-ski-instructor
+description: 'Ominous, wry warning that someone is about to have a bad time: the top line sets the scene, the bottom line is the grim prediction.'
 keywords:
-  -
+  - South Park
+  - Trey Parker
+  - warning
+  - foreshadowing
+  - ominous
+  - bad time
+  - sarcastic prediction
 text:
   - style: upper
     color: white

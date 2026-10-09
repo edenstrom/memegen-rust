@@ -1,7 +1,13 @@
 name: Conspiracy Keanu
 source: http://knowyourmeme.com/memes/conspiracy-keanu
+description: Presenting a far-fetched conspiracy theory as a suspicious question; top line is the outlandish claim, bottom line is the hidden motive.
 keywords:
-  -
+  - Reeves
+  - far-fetched theory
+  - paranoia
+  - speculation
+  - suspicion
+  - hidden motive
 text:
   - style: upper
     color: white

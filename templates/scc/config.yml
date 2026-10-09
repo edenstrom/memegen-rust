@@ -1,7 +1,14 @@
 name: Sudden Clarity Clarence
 source: http://knowyourmeme.com/memes/sudden-clarity-clarence
+description: 'Sudden, shocked realization that something harmless-seeming was actually something else: the top line is the reaction, the bottom line is the revelation.'
 keywords:
-  -
+  - epiphany
+  - dawning realization
+  - shocked
+  - revelation
+  - startled
+  - discovery
+  - oh no
 text:
   - style: upper
     color: white

@@ -4,6 +4,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 
 - All 210 upstream templates and fonts, with upstream's text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
+- Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
 - PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
@@ -55,7 +56,7 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 
 | Tool | Description |
 |---|---|
-| `list_templates` | Search templates (`filter`, `animated`). Returns ID, name, line count and example text |
+| `list_templates` | Without `filter`, every template with its ID, name, description (what it means and what each line is for), line count and example text. With `filter`, a ranked search (word order doesn't matter, typos are tolerated) returning the top 20. `animated` limits to animated or static templates |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
 | `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL. Inline images over 1 MB (base64) are downscaled in the same format; the URL and `save_to` stay full size |
@@ -70,7 +71,7 @@ Start the server with `memegen serve` (or just `memegen`). Swagger docs are at `
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
 | `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, redirect}` (JSON or form) |
-| `GET /templates/`, `GET /templates/{id}` | Template catalog (`?filter=`, `?animated=`) |
+| `GET /templates/`, `GET /templates/{id}` | Template catalog (`?filter=` for a ranked search, `?animated=`) |
 | `POST /templates/{id}` | Build a meme URL for a template |
 | `GET /fonts/`, `GET /fonts/{id}` | Fonts |
 

@@ -1,7 +1,15 @@
 name: One Does Not Simply Walk into Mordor
 source: http://knowyourmeme.com/memes/one-does-not-simply-walk-into-mordor
+description: Warning that a seemingly easy plan or task is far harder than it looks; top line is the premise, bottom line is the hard part.
 keywords:
-  -
+  - Boromir
+  - Lord of the Rings
+  - underestimating difficulty
+  - overconfidence
+  - impossible task
+  - hard to do
+  - naive plan
+  - warning
 text:
   - style: upper
     color: white

@@ -1,7 +1,13 @@
 name: Disaster Girl
 source: http://knowyourmeme.com/memes/disaster-girl
+description: Smug, self-satisfied reaction to a disaster you caused or foresaw. The bottom line is the smirk-worthy admission that it went exactly to plan.
 keywords:
-  -
+  - smug
+  - schadenfreude
+  - mischief
+  - success through chaos
+  - satisfaction
+  - gleeful
 text:
   - style: upper
     color: white

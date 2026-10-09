@@ -1,7 +1,14 @@
 name: Left Exit 12 Off Ramp
 source: https://knowyourmeme.com/memes/left-exit-12-off-ramp
+description: Veering off the intended path into a reckless or disastrous alternative; lines name the intended goal, the mishap, and the cause.
 keywords:
-  -
+  - Bowling
+  - drifting
+  - swerving
+  - reckless
+  - missing the target
+  - unintended outcome
+  - bad decisions
 text:
   - style: default
     color: '#BBBBBB'

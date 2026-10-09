@@ -1,7 +1,13 @@
 name: Hipster Barista
 source: http://knowyourmeme.com/memes/hipster-barista
+description: Sneering at people for using something you offered or promoted; top line is the offer, bottom line is the eye-roll when someone takes it.
 keywords:
-  -
+  - Groupon
+  - coffee shop
+  - snobbery
+  - condescension
+  - eye roll
+  - hypocrisy
 text:
   - style: upper
     color: white

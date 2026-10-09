@@ -1,7 +1,14 @@
 name: Awkward Moment Seal
 source: https://knowyourmeme.com/memes/awkward-moment-seal
+description: Describing an embarrassing moment of being caught at a bad time; the top line sets up the everyday scene, and the bottom line is the interruption.
 keywords:
-  -
+  - embarrassment
+  - cringe
+  - getting caught
+  - bad timing
+  - uncomfortable
+  - interruption
+  - parents
 text:
   - style: upper
     color: white

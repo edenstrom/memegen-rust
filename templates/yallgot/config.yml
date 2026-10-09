@@ -1,7 +1,13 @@
 name: Y'all Got Any More of Them
 source: http://knowyourmeme.com/memes/yall-got-anymore-of
+description: Asking for more of something you enjoyed, playfully craving more. Top line is the request; bottom line is the thing being requested.
 keywords:
-  -
+  - Dave Chappelle
+  - Chappelle's Show
+  - asking for more
+  - craving
+  - playful request
+  - more please
 text:
   - style: upper
     color: white

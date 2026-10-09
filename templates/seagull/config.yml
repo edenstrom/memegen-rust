@@ -1,7 +1,14 @@
 name: Inhaling Seagull
 source: https://knowyourmeme.com/memes/inhaling-seagull
+description: 'Overreacting with loud, panicked outrage to something minor: the top line is the setup, the bottom line is the dramatic outburst.'
 keywords:
-  -
+  - screaming
+  - outrage
+  - overreaction
+  - dramatic
+  - yelling
+  - panic
+  - freakout
 text:
   - style: none
     color: white

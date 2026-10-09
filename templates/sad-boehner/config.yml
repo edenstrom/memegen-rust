@@ -1,7 +1,14 @@
 name: Sad John Boehner
 source: https://en.wikipedia.org/wiki/John_Boehner
+description: Quiet, wistful disappointment that something didn't go your way. Top line sets it up, bottom line is the letdown.
 keywords:
-  -
+  - Sad Politicians
+  - John Boehner
+  - politics
+  - melancholy
+  - disappointment
+  - wistful
+  - letdown
 text:
   - style: upper
     color: white

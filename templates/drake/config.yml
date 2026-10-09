@@ -1,7 +1,14 @@
 name: Drakeposting
 source: http://knowyourmeme.com/memes/drakeposting
+description: Rejecting one option and preferring another. Top line is the rejected option, bottom line is the preferred one.
 keywords:
-  -
+  - Drake
+  - Hotline Bling
+  - preference
+  - choice
+  - rejection
+  - approval
+  - comparison
 text:
   - style: upper
     color: white

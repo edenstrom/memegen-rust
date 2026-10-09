@@ -1,7 +1,14 @@
 name: 10 Guy
 source: http://knowyourmeme.com/memes/10-guy
+description: Spacey, stoned-sounding logic or a dazed non sequitur. Top line is the situation, bottom line is the hazy conclusion.
 keywords:
-  -
+  - Really High Guy
+  - stoned
+  - high
+  - dazed
+  - spaced out
+  - non sequitur
+  - absent-minded
 text:
   - style: upper
     color: white
