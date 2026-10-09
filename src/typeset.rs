@@ -95,9 +95,9 @@ impl<'f> SizedFont<'f> {
         }
     }
 
-    /// Upstream `get_stroke_width`.
+    /// Upstream `get_stroke_width`, widened from `(size / 12).clamp(1, 3)`.
     pub fn stroke_width(&self) -> u32 {
-        (self.size / 12).clamp(1, 3)
+        (self.size / 10).clamp(1, 6)
     }
 
     fn emoji_size(&self) -> f32 {
@@ -273,7 +273,8 @@ pub fn text_offset(text: &str, font: &SizedFont, max_size: (u32, u32), align: &s
 
     let lines: Vec<&str> = text.split('\n').collect();
     let rows = lines.len();
-    let y_adjust = if rows >= 3 || (rows == 2 && font.font.is_impact()) {
+    let last = lines.last().copied().unwrap_or("");
+    let y_adjust = if rows >= 3 {
         1.1
     } else {
         1.0 + (3 - rows) as f32 * 0.25
@@ -282,9 +283,24 @@ pub fn text_offset(text: &str, font: &SizedFont, max_size: (u32, u32), align: &s
     if align != "left" {
         x_offset -= (max_size.0 as f32 - text_width) / 2.0;
     }
+
+    // Upstream's `y_adjust` makes up for the empty ascender space above
+    // Titillium's capitals. Impact's capitals fill the ascent, so the same
+    // nudge sets text low; center the stroked ink instead. Render draws with
+    // `spacing = -y_offset / (rows * 2)`, so solve for the origin `y` where
+    // ink top + ink bottom = box height.
+    if font.font.is_impact() {
+        let rows = rows as f32;
+        let ink_top = font.bbox(lines[0]).y0 - stroke;
+        let ink_bottom = font.bbox(last).y1 + stroke;
+        let line_spacing = font.line_spacing(0.0, stroke);
+        let y = (max_size.1 as f32 - ink_top - ink_bottom - (rows - 1.0) * line_spacing)
+            / (2.0 + (rows - 1.0) / (2.0 * rows));
+        return (x_offset, -y);
+    }
+
     y_offset -= (max_size.1 as f32 - text_height / y_adjust) / 2.0;
 
-    let last = lines.last().copied().unwrap_or("");
     if last.chars().any(|c| "gjpqy".contains(c)) {
         y_offset += (text_height / 20.0).floor();
     }

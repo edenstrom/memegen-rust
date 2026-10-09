@@ -3,6 +3,7 @@
 A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/memegen), built mainly to run locally as an **MCP server**, with the HTTP API kept as well.
 
 - All 210 upstream templates and fonts, with upstream's text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
+- Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
