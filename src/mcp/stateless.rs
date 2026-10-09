@@ -87,6 +87,12 @@ impl MemegenMcp {
             ClientRequest::ListToolsRequest(_) => Ok(ServerResult::ListToolsResult(
                 ListToolsResult::with_all_items(self.tool_router.list_all()),
             )),
+            ClientRequest::ListResourcesRequest(_) => {
+                Ok(ServerResult::ListResourcesResult(self.resources()))
+            }
+            ClientRequest::ReadResourceRequest(request) => self
+                .resource(&request.params.uri)
+                .map(ServerResult::ReadResourceResult),
             ClientRequest::CallToolRequest(request) => self
                 .call(request.params)
                 .await
@@ -227,7 +233,7 @@ mod tests {
         .await;
         assert_eq!(body["error"]["code"], -32602);
 
-        let (_, body) = post(&router, request(3, "resources/list", json!({}))).await;
+        let (_, body) = post(&router, request(3, "prompts/list", json!({}))).await;
         assert_eq!(body["error"]["code"], -32601);
 
         let (status, body) = post(&router, json!("not json-rpc")).await;
@@ -326,6 +332,69 @@ mod tests {
             serde_json::from_str(body["result"]["content"][0]["text"].as_str().unwrap()).unwrap();
         assert_eq!(page["templates"].as_array().unwrap().len(), 3);
         assert_eq!(page["next_offset"], 3);
+    }
+
+    #[tokio::test]
+    async fn serves_the_meme_app() {
+        let router = router(app());
+        let (_, body) = post(
+            &router,
+            request(
+                1,
+                "initialize",
+                json!({
+                    "protocolVersion": "2025-06-18",
+                    "capabilities": {},
+                    "clientInfo": { "name": "test", "version": "1" }
+                }),
+            ),
+        )
+        .await;
+        let capabilities = &body["result"]["capabilities"];
+        assert!(capabilities["resources"].is_object(), "{capabilities}");
+        assert_eq!(
+            capabilities["extensions"]["io.modelcontextprotocol/ui"]["mimeTypes"],
+            json!(["text/html;profile=mcp-app"])
+        );
+
+        let (_, body) = post(&router, request(2, "tools/list", json!({}))).await;
+        for tool in body["result"]["tools"].as_array().unwrap() {
+            let uri = &tool["_meta"]["ui"]["resourceUri"];
+            if tool["name"].as_str().unwrap().starts_with("generate_meme") {
+                assert_eq!(uri, "ui://memegen/meme.html", "{tool}");
+                assert_eq!(tool["_meta"]["ui/resourceUri"], *uri);
+            } else {
+                assert!(uri.is_null(), "{tool}");
+            }
+        }
+
+        let (_, body) = post(&router, request(3, "resources/list", json!({}))).await;
+        let resources = body["result"]["resources"].as_array().unwrap();
+        assert_eq!(resources.len(), 1);
+        assert_eq!(resources[0]["uri"], "ui://memegen/meme.html");
+        assert_eq!(resources[0]["mimeType"], "text/html;profile=mcp-app");
+
+        let (_, body) = post(
+            &router,
+            request(
+                4,
+                "resources/read",
+                json!({ "uri": "ui://memegen/meme.html" }),
+            ),
+        )
+        .await;
+        let contents = &body["result"]["contents"][0];
+        assert_eq!(contents["mimeType"], "text/html;profile=mcp-app");
+        let html = contents["text"].as_str().unwrap();
+        assert!(html.starts_with("<!doctype html>"));
+        assert!(html.contains("ui/initialize"));
+
+        let (_, body) = post(
+            &router,
+            request(5, "resources/read", json!({ "uri": "ui://memegen/nope" })),
+        )
+        .await;
+        assert_eq!(body["error"]["code"], -32002);
     }
 
     #[tokio::test]
