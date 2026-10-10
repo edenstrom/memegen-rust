@@ -6,7 +6,7 @@ use std::sync::{Arc, OnceLock};
 
 use axum::Router;
 use axum::body::Body;
-use axum::http::{Method, Response, StatusCode};
+use axum::http::{Method, Response, StatusCode, header};
 use futures_util::future::join_all;
 use memegen::app::App;
 use memegen::assets::{Assets, BoxFuture, Files};
@@ -83,29 +83,35 @@ async fn router(env: &Env, request: &HttpRequest) -> worker::Result<Router> {
 }
 
 #[event(fetch)]
-async fn fetch(request: HttpRequest, env: Env, context: Context) -> worker::Result<Response<Body>> {
+async fn fetch(
+    mut request: HttpRequest,
+    env: Env,
+    context: Context,
+) -> worker::Result<worker::Response> {
     console_error_panic_hook::set_once();
     let mut router = router(&env, &request).await?;
 
     // Memes are deterministic, so keep successful renders in Cloudflare's
-    // cache to skip re-rendering them in other isolates.
+    // cache to skip re-rendering them in other isolates. The cache holds
+    // whole bodies; a `Range` is served from them here.
     let cache_key = (request.method() == Method::GET
         && request.uri().path().starts_with("/images/"))
     .then(|| request.uri().to_string());
-    if let Some(key) = &cache_key
-        && let Some(cached) = Cache::default().get(key, false).await?
-    {
-        return Ok(cached.into());
+    let Some(key) = cache_key else {
+        return router.call(request).await?.try_into();
+    };
+    let range = request.headers_mut().remove(header::RANGE);
+    if let Some(cached) = Cache::default().get(key.as_str(), false).await? {
+        let response: Response<Body> = cached.into();
+        let (parts, bytes) = buffer(response).await?;
+        return fixed(api::byte_range(range.as_ref(), parts, bytes)).await;
     }
 
     let response = router.call(request).await?;
-    let Some(key) = cache_key.filter(|_| response.status() == StatusCode::OK) else {
-        return Ok(response);
-    };
-    let (parts, body) = response.into_parts();
-    let bytes = axum::body::to_bytes(body, usize::MAX)
-        .await
-        .map_err(|error| worker::Error::RustError(error.to_string()))?;
+    if response.status() != StatusCode::OK {
+        return response.try_into();
+    }
+    let (parts, bytes) = buffer(response).await?;
     let cached =
         worker::Response::from_bytes(bytes.to_vec())?.with_headers((&parts.headers).into());
     context.wait_until(async move {
@@ -113,5 +119,24 @@ async fn fetch(request: HttpRequest, env: Env, context: Context) -> worker::Resu
             worker::console_warn!("Caching failed: {error}");
         }
     });
-    Ok(Response::from_parts(parts, Body::from(bytes)))
+    fixed(api::byte_range(range.as_ref(), parts, bytes)).await
+}
+
+/// A response with its body in one piece, so it has a `Content-Length`
+/// rather than being streamed in chunks (Safari wants it for video).
+async fn fixed(response: Response<Body>) -> worker::Result<worker::Response> {
+    let (parts, bytes) = buffer(response).await?;
+    Ok(worker::Response::from_bytes(bytes.to_vec())?
+        .with_status(parts.status.as_u16())
+        .with_headers((&parts.headers).into()))
+}
+
+async fn buffer(
+    response: Response<Body>,
+) -> worker::Result<(axum::http::response::Parts, axum::body::Bytes)> {
+    let (parts, body) = response.into_parts();
+    let bytes = axum::body::to_bytes(body, usize::MAX)
+        .await
+        .map_err(|error| worker::Error::RustError(error.to_string()))?;
+    Ok((parts, bytes))
 }
