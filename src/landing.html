@@ -254,6 +254,31 @@
   .escapes kbd { min-width: 34px; text-align: center; font-weight: 700; color: var(--ink); background: var(--card); border: 1.5px solid var(--ink); border-radius: 6px; padding: 3px 6px; box-shadow: 0 3px 0 var(--ink); }
   .api-links { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 34px; }
 
+  /* Speed */
+  #speed h2 { color: #fff; }
+  #speed .head .scribble { color: var(--yellow); }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 44px; }
+  .stat { background: var(--night-2); border: 2px solid var(--night-line); border-radius: 14px; padding: 20px 20px 18px; transform: rotate(-1deg); }
+  .stat:nth-child(even) { transform: rotate(1deg); }
+  .stat b { display: block; font: 400 clamp(42px, 4.6vw, 62px)/1 var(--meme); color: var(--yellow); }
+  .stat span { display: block; margin-top: 8px; font-size: 14px; color: var(--night-fg-2); }
+  .bench { background: var(--night-2); border: 2px solid var(--night-line); border-radius: 18px; padding: 26px; }
+  .bench-desc { color: var(--night-fg-2); font-size: 15px; margin: 18px 0 0; }
+  .bench-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 14px; color: var(--night-fg-2); margin: 14px 0 12px; }
+  .bench-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+  .cases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
+  .case { padding: 16px 0; border-top: 1px solid var(--night-line); }
+  .case-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; font-size: 14px; }
+  .case-head b { color: var(--night-fg); font-weight: 600; }
+  .case-head span { font: 700 12px var(--sans); color: var(--ink); background: var(--yellow); border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+  .bar { display: flex; align-items: center; gap: 8px; height: 16px; margin-top: 2px; font: 12px var(--mono); color: var(--night-fg-2); font-variant-numeric: tabular-nums; cursor: default; }
+  .bar i { height: 12px; min-width: 3px; border-radius: 0 4px 4px 0; flex: none; }
+  .bar.lead { color: var(--night-fg); font-weight: 700; }
+  .bench-foot { margin: 18px 0 0; font-size: 13px; color: var(--night-fg-2); }
+  .bench-foot code { color: var(--night-fg); }
+  .tip { position: fixed; z-index: 30; pointer-events: none; background: var(--card); color: var(--ink); border: 2px solid var(--ink); border-radius: 8px; padding: 6px 10px; font-size: 13px; box-shadow: 3px 3px 0 var(--yellow); white-space: nowrap; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
   /* Gallery */
   #templates { padding-top: 40px; }
   .gallery-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 36px; }
@@ -305,6 +330,9 @@
     .returns { margin-top: 24px; }
     .returns .arr { display: inline-block; transform: rotate(90deg); }
     .legend { display: flex; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cases { grid-template-columns: minmax(0, 1fr); }
+    .bench { padding: 20px; }
   }
   @media (max-width: 600px) {
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
@@ -315,6 +343,10 @@
     td code { white-space: normal; overflow-wrap: anywhere; }
     .endpoint span { display: none; }
     .panel { padding: 18px; }
+    .stats { gap: 12px; }
+    .stat { padding: 16px 14px 14px; }
+    .stat b { font-size: 34px; }
+    .bench { padding: 16px; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -331,6 +363,7 @@
       <a href="#playground">Playground</a>
       <a href="#mcp">MCP</a>
       <a href="#api">API</a>
+      <a href="#speed">Speed</a>
       <a href="#templates">Templates</a>
       <a class="gh" href="https://github.com/edenstrom/memegen-rust"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.580 0 8c0 3.54 2.29 6.53 5.47 7.590.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.920.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
     </div>
@@ -544,6 +577,36 @@ curl {{BASE_URL}}/images/ \
   </div>
 </section>
 
+<section id="speed" class="dark">
+  <div class="wrap">
+    <div class="head">
+      <h2>Done before<br>you blink</h2>
+      <p class="scribble"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M50 8c-14 2-30 12-34 34"/><path d="M8 34l8 10 9-8"/></svg><span>a blink: ~100 ms.<br>a new meme: about 1</span></p>
+    </div>
+    <p class="sub">Every chart below renders a new meme, never a cache hit, measured against upstream memegen and memegen-rs on the same machine.</p>
+    <div class="stats">
+      <div class="stat"><b>0.5 ms</b><span>to render a new static meme</span></div>
+      <div class="stat"><b>10,000/s</b><span>new memes over HTTP from one machine</span></div>
+      <div class="stat"><b>100×+</b><span>faster than the Python original, in every case</span></div>
+      <div class="stat"><b>1 µs</b><span>to serve a meme that's already cached</span></div>
+    </div>
+    <div class="bench">
+      <div class="tabs" role="tablist" aria-label="Benchmark">
+        <button role="tab" aria-selected="true" aria-controls="bench-chart" data-bench="latency">HTTP latency</button>
+        <button role="tab" aria-selected="false" aria-controls="bench-chart" data-bench="throughput">HTTP throughput</button>
+        <button role="tab" aria-selected="false" aria-controls="bench-chart" data-bench="render">Render time</button>
+      </div>
+      <div id="bench-chart" role="tabpanel">
+        <p class="bench-desc" id="bench-desc"></p>
+        <div class="bench-legend" id="bench-legend"></div>
+        <div class="cases" id="bench-cases"></div>
+      </div>
+      <p class="bench-foot">Medians on an 18-core Apple M5 Pro; bars are scaled within each row. memegen-rs renders at the template's own size, so it draws fewer pixels. ¹ No color emoji: draws <code>:fire:</code> as text. ² No animated WebP: returns a single still frame. Run <code>memegen bench --url &lt;server&gt;</code> to reproduce, or read <a href="https://github.com/edenstrom/memegen-rust#performance">how it was measured</a>.</p>
+    </div>
+  </div>
+</section>
+<div class="tip" id="tip" hidden></div>
+
 <section id="templates">
   <div class="wrap">
     <div class="gallery-head">
@@ -638,13 +701,81 @@ for (const track of document.querySelectorAll(".track")) track.innerHTML += trac
 $("#r-date").textContent = new Date().toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
 
 // MCP tabs.
-const tabs = [...document.querySelectorAll('[role="tab"]')];
+const tabs = [...document.querySelectorAll('#mcp [role="tab"]')];
 tabs.forEach((tab) => tab.addEventListener("click", () => {
   tabs.forEach((other) => {
     other.setAttribute("aria-selected", String(other === tab));
     $("#" + other.getAttribute("aria-controls")).hidden = other !== tab;
   });
 }));
+
+// Benchmarks: the numbers from the README tables (docs/charts.py draws the same ones).
+const CASES = ["static png, 2 lines", "static jpg, wrapped text", "static png, 3 lines rotated", "static png, emoji", "animated gif, 24 frames", "animated webp, 24 frames"];
+const SERIES = {
+  rust: { name: "memegen-rust", fill: "var(--yellow)" },
+  rust1: { name: "memegen-rust, 1 thread", fill: "repeating-linear-gradient(135deg, var(--yellow) 0 2px, rgba(255, 212, 0, .3) 2px 5px)" },
+  rs: { name: "memegen-rs", fill: "#ff4a26" },
+  py: { name: "Upstream Python", fill: "#5b8def" },
+};
+const BENCH = {
+  latency: {
+    desc: "One connection, median time to get a new meme back. Lower is better.",
+    unit: "ms", lower: true,
+    data: { rust: [0.80, 1.2, 0.96, 0.74, 12.7, 15.2], rs: [9.3, 9.3, 11.6, 8.5, 1555, 10.2], py: [90, 129, 531, 521, 1567, 2088] },
+  },
+  throughput: {
+    desc: "64 connections, new memes per second. Higher is better.",
+    unit: "req/s", lower: false,
+    data: { rust: [9964, 5665, 2838, 10192, 190, 94], rs: [1342, 1498, 1120, 1384, 6.9, 1228], py: [137, 73, 62, 88, 8.4, 5.8] },
+    p99: { rust: [9.5, 18, 68, 9.0, 666, 1853], rs: [65, 53, 75, 68, 9866, 65], py: [767, 1529, 3390, 1322, 7605, 10965] },
+  },
+  render: {
+    desc: "Render time inside the process, with no HTTP: all cores, and pinned to one. Lower is better.",
+    unit: "ms", lower: true,
+    data: { rust: [0.50, 1.05, 0.71, 0.55, 12.2, 13.9], rust1: [0.87, 2.0, 2.6, 0.70, 59, 131], py: [43.4, 77.9, 423, 130, 761, 1057] },
+  },
+};
+const FLAGS = { rs: ["", "", "", "¹", "", "²"] };
+function fmtNum(v) {
+  if (v >= 1000) return v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  if (v >= 100) return v.toFixed(0);
+  return String(Number(v.toFixed(v >= 10 ? 1 : 2)));
+}
+const times = (r) => `${r >= 10 ? Math.round(r).toLocaleString("en-US") : Number(r.toFixed(1))}×`;
+function renderBench(key) {
+  const bench = BENCH[key], keys = Object.keys(bench.data);
+  // Speedup over another series: above 1 means memegen-rust is faster.
+  const speedup = (k, i) => bench.lower ? bench.data[k][i] / bench.data.rust[i] : bench.data.rust[i] / bench.data[k][i];
+  $("#bench-desc").textContent = bench.desc;
+  $("#bench-legend").innerHTML = keys.map((k) => `<span><i style="background:${SERIES[k].fill}"></i>${SERIES[k].name}</span>`).join("");
+  $("#bench-cases").innerHTML = CASES.map((name, i) => {
+    const max = Math.max(...keys.map((k) => bench.data[k][i]));
+    const bars = keys.map((k) => {
+      const value = bench.data[k][i], label = `${fmtNum(value)} ${bench.unit}${FLAGS[k]?.[i] ?? ""}`;
+      let tip = `${SERIES[k].name}: ${label}`;
+      if (bench.p99) tip += ` · p99 ${fmtNum(bench.p99[k][i])} ms`;
+      if (k !== "rust") { const r = speedup(k, i); tip += r >= 1 ? ` · ${times(r)} slower` : ` · ${times(1 / r)} faster`; }
+      return `<div class="bar${k === "rust" ? " lead" : ""}" data-tip="${escapeHtml(tip)}"><i style="width:calc((100% - 110px) * ${value / max});background:${SERIES[k].fill}"></i><span class="sr">${SERIES[k].name}:</span>${label}</div>`;
+    }).join("");
+    return `<div class="case"><div class="case-head"><b>${name}</b><span>${times(speedup("py", i))} ${bench.lower ? "faster than Python" : "Python's throughput"}</span></div>${bars}</div>`;
+  }).join("");
+}
+const benchTabs = [...document.querySelectorAll("[data-bench]")];
+benchTabs.forEach((tab) => tab.addEventListener("click", () => {
+  benchTabs.forEach((other) => other.setAttribute("aria-selected", String(other === tab)));
+  renderBench(tab.dataset.bench);
+}));
+renderBench("latency");
+const tip = $("#tip");
+$("#bench-cases").addEventListener("pointermove", (event) => {
+  const bar = event.target.closest(".bar");
+  tip.hidden = !bar;
+  if (!bar) return;
+  tip.textContent = bar.dataset.tip;
+  tip.style.left = `${Math.min(event.clientX + 14, innerWidth - tip.offsetWidth - 8)}px`;
+  tip.style.top = `${event.clientY + 16}px`;
+});
+$("#bench-cases").addEventListener("pointerleave", () => { tip.hidden = true; });
 
 // Hero: a fake chat cycling through prompts and real renders.
 const SCENES = [
