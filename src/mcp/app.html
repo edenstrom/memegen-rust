@@ -185,7 +185,9 @@ function card(meme, index, inBatch) {
       img.src = `data:${image.mimeType};base64,${image.data}`;
       frame.replaceChildren(img);
     } else {
-      frame.replaceChildren(el("div", { className: "meta", textContent: "Image not included." }));
+      const video = (summary.content_type || "").startsWith("video/");
+      frame.replaceChildren(el("div", { className: "meta",
+        textContent: video ? "Videos aren't shown inline. Open it full size to play it." : "Image not included." }));
     }
     const parts = [summary.template_id];
     if (summary.extension) parts.push(summary.extension.toUpperCase());

@@ -5,7 +5,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - 568 templates: all 210 upstream ones plus 358 more from [tenequm/memegen-rs](https://github.com/tenequm/memegen-rs) and [imgflip](https://imgflip.com/memetemplates), and upstream's fonts and text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
-- PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
+- PNG, JPG, GIF, WebP and MP4 output, including animated GIF/WebP/MP4 templates
 - Animated text: the text types out one character at a time, then holds the finished meme for 3 seconds before looping, on static and animated templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
@@ -60,7 +60,7 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `list_templates` | Templates with their ID, name, description (what it means and what each line is for), line count and example text. With `filter`, a ranked search (word order doesn't matter, typos are tolerated) returning the top 20. Without it, every template, 100 per page. Returns `{templates, total, next_offset}`; pass `next_offset` back as `offset` for the next page (`limit` sets the page size, up to 100). `animated` limits to animated or static templates |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
-| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (type the text out; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (type the text out; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size. MP4 isn't returned inline (MCP has no video content) |
 | `generate_memes` | Render up to 10 memes in one call: `memes` is a list of `generate_meme` arguments, rendered concurrently. Returns each image and its summary (with `index`) in order, or an `error` for entries that failed. The inline images share the 1 MB limit, so each is downscaled further as the batch grows |
 
 ### MCP Apps
@@ -75,7 +75,7 @@ Start the server with `memegen serve` (or just `memegen`). `/` is a landing page
 
 | Route | Description |
 |---|---|
-| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out (gif/webp only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
 | `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, redirect}` (JSON or form) |
@@ -88,6 +88,10 @@ Text escapes in URLs: `_` → space, `__` → `_`, `--` → `-`, `~q` → `?`, `
 ### Animated text
 
 With `animate_text`, the lines are typed out in order, one mark at a time (letters and emoji; spaces don't take a step), then the finished meme holds for 3 seconds before the GIF loops. The layout is the finished meme's, so text doesn't shift as it appears. On a static template each mark takes 60 ms and the last frame holds; on an animated template the text types at the same speed over the template's frames, which keep playing through the hold. Long text types several marks per frame to stay within 60 typing frames (24 on Workers). Text boxes' `start`/`stop` timing is ignored.
+
+### MP4
+
+`.mp4` renders the same frames and timing as `.gif`, as H.264 video, and is much smaller: `oprah` is 262 KB instead of 1.7 MB, and `fry` with animated text 128 KB instead of 2.8 MB. It's encoded with [rusty_h264](https://crates.io/crates/rusty_h264-encoder), a pure-Rust encoder, so it's the same on Workers. A video doesn't loop by itself and has no transparency, so embed it with `<video autoplay loop muted playsinline>`. An odd width or height loses its last pixel column or row (4:2:0 chroma needs even dimensions). Encoding is single-threaded, so an MP4 takes longer to render than a GIF (see [Performance](#performance)).
 
 ## Configuration
 
@@ -115,10 +119,10 @@ npx wrangler deploy   # https://memegen.<account>.workers.dev
 
 Wrangler builds with `worker/build.sh`, which adds the `wasm32-unknown-unknown` Rust target and installs `worker-build`. If `cargo` isn't on the `PATH` (as in Cloudflare's Workers Builds), it installs Rust with rustup first. In Workers Builds it keeps the toolchain, `worker-build` and the target directory under `~/.npm`, which the [build cache](https://developers.cloudflare.com/workers/ci-cd/builds/build-caching/) saves between builds (`worker/package.json` exists only so the cache detects npm).
 
-- **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 1.6 MB gzipped.
+- **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 2 MB gzipped.
 - **Startup**: the template catalog is embedded at build time; fonts (5 MB) are fetched on the first request in each isolate.
 - **Caching**: successful `/images/...` responses go into Cloudflare's cache, so a repeated meme isn't rendered again. The Cache API has no effect on `*.workers.dev`, so use a [custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) to get this. Each isolate also keeps small in-memory caches (isolates have 128 MB of memory).
-- **CPU time**: rendering needs the Workers Paid plan. In local `wrangler dev`, a new static meme took 8–17 ms and an animated GIF about 85 ms, so most renders exceed the Free plan's 10 ms CPU limit. `wrangler.toml` sets a 30 s limit.
+- **CPU time**: rendering needs the Workers Paid plan. In local `wrangler dev`, a new static meme took 8–17 ms, an animated GIF about 85 ms and an animated MP4 a few hundred ms, so most renders exceed the Free plan's 10 ms CPU limit. `wrangler.toml` sets a 30 s limit.
 - **Differences from the native server**: WebP is lossless, because libwebp (C) doesn't build for `wasm32-unknown-unknown`. Animated WebP keeps 20 frames instead of 80 and is large (about 5.6 MB for `oprah`), so use GIF for animations. `generate_meme` has no `save_to`. The `/mcp` endpoint has no Host/Origin checks; it's meant to be public. Set `DOMAIN` in `wrangler.toml` to use a custom host in returned URLs (by default, URLs use the host of the first request each isolate serves).
 
 ### Remote MCP
@@ -148,6 +152,8 @@ Run `memegen bench` to reproduce (set `RAYON_NUM_THREADS=1` for single-core numb
 | static png, emoji | 130 / 47 ms (Twemoji download) | 0.70 / 0.70 ms | 0.55 ms |
 | animated gif, 24 frames | 761 / 759 ms | 59 / 59 ms | 12.2 ms |
 | animated webp, 24 frames | 1,057 / 1,053 ms | 131 / 131 ms | 13.9 ms |
+
+Animated MP4 (not in upstream, so not in the table) takes 48 ms warm on 1 thread and 40 ms on 18, for a 63 KB file instead of the GIF's 1.4 MB: the H.264 encoder is single-threaded, so only the frame rendering runs in parallel.
 
 A repeated meme comes from the in-memory cache in about 1 µs. Starting `memegen mcp` takes about 13 ms to the `initialize` response.
 

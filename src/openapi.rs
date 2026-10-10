@@ -39,7 +39,8 @@ fn json_response(description: &str, schema: Value) -> Value {
 }
 
 fn image_response(description: &str) -> Value {
-    json!({ "description": description, "content": { "image/*": { "schema": { "type": "string", "format": "binary" } } } })
+    let binary = json!({ "schema": { "type": "string", "format": "binary" } });
+    json!({ "description": description, "content": { "image/*": binary, "video/mp4": binary } })
 }
 
 pub fn spec(base_url: &str) -> Value {
@@ -61,7 +62,7 @@ pub fn spec(base_url: &str) -> Value {
     let animate_text = query(
         "animate_text",
         "boolean",
-        "Type the text out one character at a time, then hold the finished meme (gif and webp only)",
+        "Type the text out one character at a time, then hold the finished meme (gif, webp and mp4 only)",
     );
 
     json!({
@@ -133,7 +134,7 @@ pub fn spec(base_url: &str) -> Value {
                 "description": "Lines are separated by `/`. Escapes: `_` space, `__` underscore, `--` dash, `~q` ?, `~a` &, `~p` %, `~h` #, `~s` /, `~b` \\, `~l` <, `~g` >, `~n` newline, `''` double quote. Use `:alias:` for emoji.",
                 "parameters": [
                     path("template_id", "ID of a meme template"),
-                    path("text_filepath", "Lines of text and image extension: `<line1>/<line2>.<png|jpg|gif|webp>`"),
+                    path("text_filepath", "Lines of text and image extension: `<line1>/<line2>.<png|jpg|gif|webp|mp4>`"),
                     font,
                     animate_text,
                 ],
@@ -165,7 +166,7 @@ pub fn spec(base_url: &str) -> Value {
             "MemeTemplateRequest": { "type": "object", "properties": {
                 "text": { "type": "array", "items": { "type": "string" }, "description": "Lines of text (raw, not escape-encoded)" },
                 "font": { "type": "string" },
-                "extension": { "type": "string", "enum": ["png", "jpg", "jpeg", "gif", "webp"] },
+                "extension": { "type": "string", "enum": ["png", "jpg", "jpeg", "gif", "webp", "mp4"] },
                 "animate_text": { "type": "boolean", "description": "Type the text out one character at a time (defaults the extension to gif)" },
                 "redirect": { "type": "boolean", "description": "Redirect to the image instead of returning JSON" }
             } },

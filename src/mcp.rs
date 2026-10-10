@@ -29,7 +29,7 @@ string per line. Prefer a `filter`: it runs a ranked search over names, keywords
 through every template with a description of what it means and what each line is for; pass \
 `next_offset` back as `offset` to get the next page. \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
-Animated templates render as GIF/WebP; use `extension` to choose the format. \
+Animated templates render as GIF/WebP/MP4; use `extension` to choose the format. \
 To render several memes at once, call `generate_memes` with a list of them.";
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -113,13 +113,13 @@ pub struct GenerateMemeRequest {
     pub template_id: String,
     /// Lines of text in order, one per text box (see the template's `lines`). Use "" to leave a box empty.
     pub text: Vec<String>,
-    /// Image format: "png" (default for static templates), "jpg", "gif" (default for animated templates), or "webp".
+    /// Image format: "png" (default for static templates), "jpg", "gif" (default for animated templates), "webp", or "mp4" (H.264 video, far smaller than GIF; returned as a URL or saved file, not inline).
     #[serde(default)]
     pub extension: Option<String>,
     /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
     #[serde(default)]
     pub font: Option<String>,
-    /// Type the text out one character at a time, then hold the finished meme for a few seconds before looping. Works with any template; needs "gif" (the default when this is set) or "webp".
+    /// Type the text out one character at a time, then hold the finished meme for a few seconds before looping. Works with any template; needs "gif" (the default when this is set), "webp" or "mp4".
     #[serde(default)]
     pub animate_text: Option<bool>,
     /// Absolute file path to write the image to, e.g. "/tmp/meme.png".
@@ -466,7 +466,9 @@ impl MemegenMcp {
         });
         let content_type = rendered.content_type;
         let bytes = rendered.bytes.len();
-        let inline = if request.include_image.unwrap_or(true) {
+        // MCP image content can't hold a video.
+        let inline = if request.include_image.unwrap_or(true) && content_type.starts_with("image/")
+        {
             Some(
                 self.app
                     .fit(rendered, max_inline)

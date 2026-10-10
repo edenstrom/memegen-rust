@@ -26,6 +26,9 @@ jpeg-encoder = { version = "0.7.1", features = ["simd"] }
 percent-encoding = "2.3.2"
 rayon = "1.12.0"
 rmcp = { version = "3.5.1", default-features = false, features = ["macros", "server"] }
+# Without the default `global-alloc` feature, which replaces the global allocator.
+rusty_h264-common = { version = "0.16.0", default-features = false, features = ["asm", "std"] }
+rusty_h264-encoder = { version = "0.16.0", default-features = false, features = ["asm", "std"] }
 schemars = "1.2.2"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
@@ -54,6 +57,9 @@ webp = "0.3.1"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # rmcp's server feature pulls in uuid, which needs a randomness source on wasm.
 uuid = { version = "1", features = ["js"] }
+
+[dev-dependencies]
+rusty_h264-decoder = { version = "0.16.0", default-features = false, features = ["asm", "std"] }
 
 [profile.release]
 lto = "thin"

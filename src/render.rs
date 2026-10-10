@@ -95,7 +95,7 @@ pub struct MemeRequest {
     pub lines: Vec<String>,
     pub font: String,
     pub extension: String,
-    /// Type the text out one mark at a time (GIF and WebP only).
+    /// Type the text out one mark at a time (GIF, WebP and MP4 only).
     pub animate_text: bool,
 }
 
@@ -107,11 +107,17 @@ fn maximum_frames(extension: &str) -> usize {
     }
 }
 
+/// Whether `extension` is an animated format.
+pub fn is_animated(extension: &str) -> bool {
+    matches!(extension, "gif" | "webp" | "mp4")
+}
+
 pub fn content_type(extension: &str) -> &'static str {
     match extension {
         "jpg" | "jpeg" => "image/jpeg",
         "gif" => "image/gif",
         "webp" => "image/webp",
+        "mp4" => "video/mp4",
         _ => "image/png",
     }
 }
@@ -239,9 +245,9 @@ impl Renderer {
                 .ok_or_else(|| RenderError::Invalid(format!("Invalid font: {name}")))?,
         };
 
-        if request.animate_text && !matches!(extension.as_str(), "gif" | "webp") {
+        if request.animate_text && !is_animated(&extension) {
             return Err(RenderError::Invalid(format!(
-                "Animated text needs a gif or webp extension, not {extension}"
+                "Animated text needs a gif, webp or mp4 extension, not {extension}"
             )));
         }
 
@@ -277,7 +283,7 @@ impl Renderer {
         let template = &prepared.template;
         let extension = prepared.extension.as_str();
         let mut paths: Vec<String> = match extension {
-            "gif" | "webp" => {
+            "gif" | "webp" | "mp4" => {
                 let key = (template.id.clone(), maximum_frames(extension));
                 (!self.animations.contains(&key))
                     .then(|| template.animated_image.clone())
@@ -379,7 +385,7 @@ impl Renderer {
         source: &dyn Source,
     ) -> Result<Vec<u8>> {
         match extension {
-            "gif" | "webp" => {
+            "gif" | "webp" | "mp4" => {
                 let maximum_frames = maximum_frames(extension);
                 let (frames, delays) = if animate_text {
                     self.render_typing(template, lines, font, maximum_frames, source)?
@@ -389,10 +395,10 @@ impl Renderer {
                     let delays = vec![duration; frames.len()];
                     (frames, delays)
                 };
-                if extension == "gif" {
-                    encode_gif(frames, &delays)
-                } else {
-                    crate::webp::encode(&frames, &delays)
+                match extension {
+                    "gif" => encode_gif(frames, &delays),
+                    "webp" => crate::webp::encode(&frames, &delays),
+                    _ => crate::mp4::encode(&frames, &delays),
                 }
             }
             _ => self.render_static(template, lines, font, extension, source),
@@ -1046,6 +1052,8 @@ mod tests {
             ("fry", "webp", "image/webp"),
             ("oprah", "gif", "image/gif"),
             ("oprah", "webp", "image/webp"),
+            ("fry", "mp4", "video/mp4"),
+            ("oprah", "mp4", "video/mp4"),
         ] {
             let request = MemeRequest {
                 template_id: template.into(),
@@ -1056,8 +1064,13 @@ mod tests {
             };
             let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             assert_eq!(rendered.content_type, content_type);
-            if extension != "webp" {
-                decode(&rendered.bytes);
+            match extension {
+                "webp" => {}
+                // Decoded in `mp4::tests`.
+                "mp4" => assert_eq!(&rendered.bytes[4..8], b"ftyp"),
+                _ => {
+                    decode(&rendered.bytes);
+                }
             }
         }
     }
@@ -1191,6 +1204,14 @@ mod tests {
             let shrunk = shrink(&rendered, rendered.bytes.len() / 2).unwrap();
             assert_eq!(decode_frames(&shrunk, extension).unwrap().1, decoded_delays);
         }
+        let request = MemeRequest {
+            template_id: "sf".into(),
+            lines: lines.clone(),
+            font: String::new(),
+            extension: "mp4".into(),
+            animate_text: true,
+        };
+        assert!(renderer.render(&request, &directory).is_ok());
         let request = MemeRequest {
             template_id: "fry".into(),
             lines,

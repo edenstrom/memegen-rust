@@ -10,6 +10,7 @@ pub mod emoji;
 pub mod fonts;
 pub mod jpeg;
 pub mod mcp;
+pub mod mp4;
 pub mod openapi;
 pub mod png;
 pub mod quantize;
