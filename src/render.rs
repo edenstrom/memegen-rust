@@ -27,10 +27,22 @@ const MAXIMUM_FRAMES: usize = 20;
 const MINIMUM_FRAMES: usize = 5;
 const JPEG_QUALITY: u8 = 95;
 
-/// Animated text: delay per mark on a still background, and how long the
-/// finished text holds before the animation loops.
+/// Animated text: delay per mark on a still background, the pause between
+/// text boxes, and how long the finished text holds before the animation
+/// loops.
 const TYPING_DELAY_MS: u32 = 60;
+const TYPING_GAP_MS: u32 = 600;
 const TYPING_HOLD_MS: u32 = 3000;
+
+/// Eased animated text (MP4): how long each text box takes to fade and slide
+/// into place, the frame step on a still background (30 fps), and how far the
+/// text rises, as a fraction of the image height.
+const EASING_MS: u32 = 500;
+const EASING_STEP_MS: u32 = 33;
+const EASING_RISE: f32 = 0.04;
+
+/// Browsers show GIF frames of 10 ms or less for 100 ms.
+const MINIMUM_FRAME_MS: u32 = 20;
 
 /// Frame budgets for animated text: frames while typing (longer text types
 /// several marks per frame), and frames in total including the hold on an
@@ -175,6 +187,21 @@ struct Prepared {
     extension: String,
     animate_text: bool,
     key: String,
+}
+
+/// How animated text appears, one text box after another.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Reveal {
+    /// Typed out a mark at a time (GIF and WebP).
+    Typing,
+    /// Each box fades in and slides up into place with an ease-out (MP4,
+    /// where the extra frames compress well).
+    Easing,
+}
+
+/// Ease-out cubic: fast at first, settling gently into place.
+fn ease_out(progress: f32) -> f32 {
+    1.0 - (1.0 - progress.clamp(0.0, 1.0)).powi(3)
 }
 
 /// A text box's text, wrapped and sized, ready to draw in full or in part.
@@ -388,7 +415,12 @@ impl Renderer {
             "gif" | "webp" | "mp4" => {
                 let maximum_frames = maximum_frames(extension);
                 let (frames, delays) = if animate_text {
-                    self.render_typing(template, lines, font, maximum_frames, source)?
+                    let reveal = if extension == "mp4" {
+                        Reveal::Easing
+                    } else {
+                        Reveal::Typing
+                    };
+                    self.render_typing(template, lines, font, maximum_frames, reveal, source)?
                 } else {
                     let (frames, duration) =
                         self.render_animation(template, lines, font, maximum_frames, source)?;
@@ -527,16 +559,18 @@ impl Renderer {
         Ok((frames, animation.frame_duration()))
     }
 
-    /// Animated text: the lines are typed out in order, a mark at a time,
-    /// over the template's frames (looped as needed), then the finished text
-    /// holds for [`TYPING_HOLD_MS`]. Text boxes' `start`/`stop` are ignored.
-    /// Returns the frames and each frame's delay in milliseconds.
+    /// Animated text: the text boxes appear in order, typed out a mark at a
+    /// time or eased in (see [`Reveal`]), with a [`TYPING_GAP_MS`] pause
+    /// between boxes, over the template's frames (looped as needed); then the
+    /// finished text holds for [`TYPING_HOLD_MS`]. Text boxes' `start`/`stop`
+    /// are ignored. Returns the frames and each frame's delay in milliseconds.
     fn render_typing(
         &self,
         template: &Template,
         lines: &[String],
         font: &str,
         maximum_frames: usize,
+        reveal: Reveal,
         source: &dyn Source,
     ) -> Result<(Vec<RgbaImage>, Vec<u32>)> {
         let animation = self.animation(template, maximum_frames, source)?;
@@ -545,71 +579,143 @@ impl Renderer {
             return Err(anyhow!("no frames decoded for {}", template.id));
         };
         let size = first.dimensions();
-        let layouts: Vec<TextLayout> = template
+        let boxes: Vec<(TextLayout, usize)> = template
             .text
             .iter()
             .enumerate()
             .filter_map(|(index, text)| self.text_layout(text, lines.get(index), lines, font, size))
-            .collect();
-        let (marks, full): (Vec<usize>, Vec<_>) = layouts
-            .par_iter()
             .map(|layout| {
-                let full = self.draw_layout(layout, None, source);
-                (layout.font.marks(&layout.line), full)
+                let marks = layout.font.marks(&layout.line);
+                (layout, marks)
             })
-            .unzip();
-        let total: usize = marks.iter().sum();
-        if total == 0 {
+            .filter(|(_, marks)| *marks > 0)
+            .collect();
+        if boxes.is_empty() {
             let (frames, duration) =
                 self.render_animation(template, lines, font, maximum_frames, source)?;
             let delays = vec![duration; frames.len()];
             return Ok((frames, delays));
         }
-        let still = backgrounds.len() == 1;
-        let step = if still {
-            TYPING_DELAY_MS
-        } else {
-            animation.frame_duration().max(1)
-        };
-        let (typing_budget, frame_budget) = TYPING_FRAMES;
-        let typing = (total as u64 * TYPING_DELAY_MS as u64)
-            .div_ceil(step as u64)
-            .clamp(1, typing_budget as u64) as usize;
-        let holding = if still {
-            0
-        } else {
-            (TYPING_HOLD_MS.div_ceil(step) as usize).min(frame_budget - typing)
-        };
+        let full: Vec<_> = boxes
+            .par_iter()
+            .map(|(layout, _)| self.draw_layout(layout, None, source))
+            .collect();
 
-        let frames: Vec<RgbaImage> = (0..typing + holding)
-            .into_par_iter()
-            .map(|index| {
-                // Marks shown so far, filled into the boxes in order.
-                let mut shown = (total * (index + 1)).div_ceil(typing).min(total);
-                let mut image = backgrounds[index % backgrounds.len()].1.clone();
-                for ((layout, marks), full) in layouts.iter().zip(&marks).zip(&full) {
-                    let visible = shown.min(*marks);
-                    shown -= visible;
-                    if visible == *marks {
-                        if let Some((point, layer)) = full {
-                            typeset::paste_with_alpha(&mut image, layer, *point);
+        // Each box's `(start, length)` in milliseconds.
+        let mut windows = Vec::with_capacity(boxes.len());
+        let mut end = 0;
+        for (_, marks) in &boxes {
+            let length = match reveal {
+                Reveal::Typing => *marks as u32 * TYPING_DELAY_MS,
+                Reveal::Easing => EASING_MS,
+            };
+            let start = if windows.is_empty() {
+                0
+            } else {
+                end + TYPING_GAP_MS
+            };
+            windows.push((start, length));
+            end = start + length;
+        }
+
+        // When each frame starts; the text is drawn as it is then. A still
+        // background needs frames only while the text changes (the pauses and
+        // the hold lengthen the frame before them); an animated one also
+        // needs one per background frame, and keeps moving through the
+        // pauses and the hold. Each half of the typing budget goes to one.
+        let (typing_budget, frame_budget) = TYPING_FRAMES;
+        let animated = backgrounds.len() > 1;
+        let period = animation.frame_duration().max(1);
+        let text_budget = if animated {
+            typing_budget / 2
+        } else {
+            typing_budget
+        } as u32;
+        let base = match reveal {
+            // Typing over an animated background keeps to its pace, as more
+            // frames make a GIF much larger.
+            Reveal::Typing if animated => period.max(TYPING_DELAY_MS),
+            Reveal::Typing => TYPING_DELAY_MS,
+            Reveal::Easing => EASING_STEP_MS,
+        };
+        let moving: u32 = windows.iter().map(|(_, length)| length).sum();
+        let step = base.max(moving.div_ceil(text_budget));
+        let mut times: Vec<u32> = Vec::new();
+        for &(start, length) in &windows {
+            let steps = length.div_ceil(step).max(1);
+            times.extend(
+                (1..=steps)
+                    .map(|index| start + (length as u64 * index as u64 / steps as u64) as u32),
+            );
+        }
+        if animated {
+            let spacing = period.max(end.div_ceil(text_budget));
+            // Skip a background frame that would last only a moment before a
+            // text frame (browsers slow down very short GIF frames).
+            let changes = times.clone();
+            times.extend((0..end).step_by(spacing as usize).filter(|&time| {
+                !changes
+                    .iter()
+                    .any(|&change| change.abs_diff(time) < MINIMUM_FRAME_MS)
+            }));
+            times.sort_unstable();
+            let hold = (end / period + 1..)
+                .map(|index| index * period)
+                .take_while(|&time| time < end + TYPING_HOLD_MS)
+                .take(frame_budget.saturating_sub(times.len()));
+            times.extend(hold);
+        }
+        let delays: Vec<u32> = times
+            .windows(2)
+            .map(|pair| pair[1] - pair[0])
+            .chain(times.last().map(|&last| end + TYPING_HOLD_MS - last))
+            .collect();
+
+        let rise = size.1 as f32 * EASING_RISE;
+        let frames: Vec<RgbaImage> = times
+            .par_iter()
+            .map(|&time| {
+                let background = (time / period) as usize % backgrounds.len();
+                let mut image = backgrounds[background].1.clone();
+                for (((layout, marks), full), &(start, length)) in
+                    boxes.iter().zip(&full).zip(&windows)
+                {
+                    let elapsed = time.saturating_sub(start).min(length);
+                    if elapsed == 0 {
+                        continue;
+                    }
+                    let Some((point, layer)) = full else {
+                        continue;
+                    };
+                    if elapsed == length {
+                        typeset::paste_with_alpha(&mut image, layer, *point);
+                        continue;
+                    }
+                    match reveal {
+                        Reveal::Typing => {
+                            let visible = (*marks as u64 * elapsed as u64 / length as u64) as usize;
+                            if visible > 0
+                                && let Some((point, layer)) =
+                                    self.draw_layout(layout, Some(visible), source)
+                            {
+                                typeset::paste_with_alpha(&mut image, &layer, point);
+                            }
                         }
-                    } else if visible > 0
-                        && let Some((point, layer)) =
-                            self.draw_layout(layout, Some(visible), source)
-                    {
-                        typeset::paste_with_alpha(&mut image, &layer, point);
+                        Reveal::Easing => {
+                            let progress = ease_out(elapsed as f32 / length as f32);
+                            let lowered = (rise * (1.0 - progress)).round() as i64;
+                            typeset::paste_faded(
+                                &mut image,
+                                layer,
+                                (point.0, point.1 + lowered),
+                                progress,
+                            );
+                        }
                     }
                 }
                 image
             })
             .collect();
-
-        let mut delays = vec![step; frames.len()];
-        if let Some(last) = delays.last_mut() {
-            // Make up whatever hold the frame budget didn't cover.
-            *last += TYPING_HOLD_MS.saturating_sub(step * (holding as u32 + 1));
-        }
         Ok((frames, delays))
     }
 
@@ -1158,13 +1264,15 @@ mod tests {
         let lines: Vec<String> = vec!["hi you".into(), "ok :fire:".into()];
 
         // A still background: a frame per mark (spaces don't count; the emoji
-        // does), then the last frame holds.
+        // does), a pause after the first box, then the last frame holds.
         let template = renderer.catalog().get("sf").unwrap().clone();
         let (frames, delays) = renderer
-            .render_typing(&template, &lines, "", 0, &directory)
+            .render_typing(&template, &lines, "", 0, Reveal::Typing, &directory)
             .unwrap();
         assert_eq!(frames.len(), 8);
-        assert!(delays[..7].iter().all(|&delay| delay == TYPING_DELAY_MS));
+        let mut expected = vec![TYPING_DELAY_MS; 7];
+        expected[4] += TYPING_GAP_MS;
+        assert_eq!(delays[..7], expected);
         assert_eq!(delays[7], TYPING_HOLD_MS);
         assert!(frames.windows(2).all(|pair| pair[0] != pair[1]));
         let (full, _) = renderer
@@ -1175,17 +1283,20 @@ mod tests {
         // An animated background keeps moving through the typing and the hold.
         let template = renderer.catalog().get("oprah").unwrap().clone();
         let (frames, delays) = renderer
-            .render_typing(&template, &lines, "", 0, &directory)
+            .render_typing(&template, &lines, "", 0, Reveal::Typing, &directory)
             .unwrap();
         let total: u32 = delays.iter().sum();
         assert!(frames.len() > 8);
-        assert!(total >= TYPING_HOLD_MS + 8 * TYPING_DELAY_MS, "{delays:?}");
+        assert!(
+            total >= TYPING_HOLD_MS + TYPING_GAP_MS + 8 * TYPING_DELAY_MS,
+            "{delays:?}"
+        );
 
         // Long text types several marks per frame to stay in budget.
         let template = renderer.catalog().get("sf").unwrap().clone();
         let long = vec!["a".repeat(150), "b".repeat(150)];
         let (frames, _) = renderer
-            .render_typing(&template, &long, "", 0, &directory)
+            .render_typing(&template, &long, "", 0, Reveal::Typing, &directory)
             .unwrap();
         assert_eq!(frames.len(), TYPING_FRAMES.0);
 
@@ -1212,6 +1323,35 @@ mod tests {
             animate_text: true,
         };
         assert!(renderer.render(&request, &directory).is_ok());
+
+        // Eased (MP4): each box fades and rises into place at 30 fps, one box
+        // after the other, the pause and the hold on the last frame of each.
+        let (frames, delays) = renderer
+            .render_typing(&template, &lines, "", 0, Reveal::Easing, &directory)
+            .unwrap();
+        let steps = EASING_MS.div_ceil(EASING_STEP_MS) as usize;
+        assert_eq!(frames.len(), 2 * steps);
+        assert_eq!(delays[steps - 1], TYPING_GAP_MS + EASING_MS / steps as u32);
+        assert_eq!(delays[2 * steps - 1], TYPING_HOLD_MS);
+        assert!(frames.windows(2).all(|pair| pair[0] != pair[1]));
+        assert!(frames[2 * steps - 1] == full[0]);
+        assert!(frames[steps - 1] != frames[steps]);
+        let (frames, delays) = renderer
+            .render_typing(
+                &renderer.catalog().get("oprah").unwrap().clone(),
+                &lines,
+                "",
+                0,
+                Reveal::Easing,
+                &directory,
+            )
+            .unwrap();
+        let total: u32 = delays.iter().sum();
+        assert!(frames.len() > 2);
+        assert!(
+            total >= TYPING_HOLD_MS + TYPING_GAP_MS + 2 * EASING_MS,
+            "{delays:?}"
+        );
         let request = MemeRequest {
             template_id: "fry".into(),
             lines,

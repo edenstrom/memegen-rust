@@ -6,7 +6,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
 - PNG, JPG, GIF, WebP and MP4 output, including animated GIF/WebP/MP4 templates
-- Animated text: the text types out one character at a time, then holds the finished meme for 3 seconds before looping, on static and animated templates
+- Animated text: the text boxes appear one after another (typed out a character at a time in GIF/WebP, eased in for MP4), then hold the finished meme for 3 seconds before looping, on static and animated templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
 - Also runs on [Cloudflare Workers](#cloudflare-workers), with the API and a remote MCP endpoint
@@ -60,7 +60,7 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `list_templates` | Templates with their ID, name, description (what it means and what each line is for), line count and example text. With `filter`, a ranked search (word order doesn't matter, typos are tolerated) returning the top 20. Without it, every template, 100 per page. Returns `{templates, total, next_offset}`; pass `next_offset` back as `offset` for the next page (`limit` sets the page size, up to 100). `animated` limits to animated or static templates |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
-| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (type the text out; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size. MP4 isn't returned inline (MCP has no video content) |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (type the text out, or ease it in for mp4; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size. MP4 isn't returned inline (MCP has no video content) |
 | `generate_memes` | Render up to 10 memes in one call: `memes` is a list of `generate_meme` arguments, rendered concurrently. Returns each image and its summary (with `index`) in order, or an `error` for entries that failed. The inline images share the 1 MB limit, so each is downscaled further as the batch grows |
 
 ### MCP Apps
@@ -75,7 +75,7 @@ Start the server with `memegen serve` (or just `memegen`). `/` is a landing page
 
 | Route | Description |
 |---|---|
-| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out, or eases it in for mp4 (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
 | `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, redirect}` (JSON or form) |
@@ -87,11 +87,16 @@ Text escapes in URLs: `_` → space, `__` → `_`, `--` → `-`, `~q` → `?`, `
 
 ### Animated text
 
-With `animate_text`, the lines are typed out in order, one mark at a time (letters and emoji; spaces don't take a step), then the finished meme holds for 3 seconds before the GIF loops. The layout is the finished meme's, so text doesn't shift as it appears. On a static template each mark takes 60 ms and the last frame holds; on an animated template the text types at the same speed over the template's frames, which keep playing through the hold. Long text types several marks per frame to stay within 60 typing frames (24 on Workers). Text boxes' `start`/`stop` timing is ignored.
+With `animate_text`, the text boxes appear in order, with a 0.6 s pause between boxes, then the finished meme holds for 3 seconds before it loops. The layout is the finished meme's, so text doesn't shift as it appears. Text boxes' `start`/`stop` timing is ignored.
+
+- **GIF and WebP**: each box is typed out one mark at a time (letters and emoji; spaces don't take a step), 60 ms per mark. On an animated template the text types at the same speed over the template's frames. Long text types several marks per frame to stay within 60 typing frames (24 on Workers).
+- **MP4**: each box fades in and rises into place over 0.5 s with an ease-out, at 30 fps. Video compresses the extra frames well, so this stays small (`fry` is about 200 KB).
+
+On an animated template the background keeps playing through the pauses and the hold.
 
 ### MP4
 
-`.mp4` renders the same frames and timing as `.gif`, as H.264 video, and is much smaller: `oprah` is 262 KB instead of 1.7 MB, and `fry` with animated text 128 KB instead of 2.8 MB. It's encoded with [rusty_h264](https://crates.io/crates/rusty_h264-encoder), a pure-Rust encoder, so it's the same on Workers. A video doesn't loop by itself and has no transparency, so embed it with `<video autoplay loop muted playsinline>`. An odd width or height loses its last pixel column or row (4:2:0 chroma needs even dimensions). Encoding is single-threaded, so an MP4 takes longer to render than a GIF (see [Performance](#performance)).
+`.mp4` renders the same frames and timing as `.gif` (except for [animated text](#animated-text), which eases in), as H.264 video, and is much smaller: `oprah` is 262 KB instead of 1.7 MB, and `fry` with animated text 128 KB instead of 2.8 MB. It's encoded with [rusty_h264](https://crates.io/crates/rusty_h264-encoder), a pure-Rust encoder, so it's the same on Workers. A video doesn't loop by itself and has no transparency, so embed it with `<video autoplay loop muted playsinline>`. An odd width or height loses its last pixel column or row (4:2:0 chroma needs even dimensions). Encoding is single-threaded, so an MP4 takes longer to render than a GIF (see [Performance](#performance)).
 
 ## Configuration
 

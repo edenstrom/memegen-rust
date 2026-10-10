@@ -62,7 +62,7 @@ pub fn spec(base_url: &str) -> Value {
     let animate_text = query(
         "animate_text",
         "boolean",
-        "Type the text out one character at a time, then hold the finished meme (gif, webp and mp4 only)",
+        "Reveal the text boxes one after another, typed out a character at a time (gif, webp) or eased in (mp4), then hold the finished meme (gif, webp and mp4 only)",
     );
 
     json!({
@@ -167,7 +167,7 @@ pub fn spec(base_url: &str) -> Value {
                 "text": { "type": "array", "items": { "type": "string" }, "description": "Lines of text (raw, not escape-encoded)" },
                 "font": { "type": "string" },
                 "extension": { "type": "string", "enum": ["png", "jpg", "jpeg", "gif", "webp", "mp4"] },
-                "animate_text": { "type": "boolean", "description": "Type the text out one character at a time (defaults the extension to gif)" },
+                "animate_text": { "type": "boolean", "description": "Reveal the text boxes one after another: typed out (gif, webp) or eased in (mp4). Defaults the extension to gif" },
                 "redirect": { "type": "boolean", "description": "Redirect to the image instead of returning JSON" }
             } },
             "MemeRequest": { "allOf": [
