@@ -108,7 +108,7 @@ npx wrangler dev      # http://localhost:8787
 npx wrangler deploy   # https://memegen.<account>.workers.dev
 ```
 
-Wrangler builds with `worker/build.sh`, which adds the `wasm32-unknown-unknown` Rust target and installs `worker-build`. If `cargo` isn't on the `PATH` (as in Cloudflare's Workers Builds), it installs Rust with rustup first.
+Wrangler builds with `worker/build.sh`, which adds the `wasm32-unknown-unknown` Rust target and installs `worker-build`. If `cargo` isn't on the `PATH` (as in Cloudflare's Workers Builds), it installs Rust with rustup first. In Workers Builds it keeps the toolchain, `worker-build` and the target directory under `~/.npm`, which the [build cache](https://developers.cloudflare.com/workers/ci-cd/builds/build-caching/) saves between builds (`worker/package.json` exists only so the cache detects npm).
 
 - **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 1.6 MB gzipped.
 - **Startup**: the template catalog is embedded at build time; fonts (5 MB) are fetched on the first request in each isolate.
