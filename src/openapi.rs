@@ -1,19 +1,26 @@
-//! OpenAPI document and Swagger UI page.
+//! OpenAPI document and Scalar API reference page.
 
 use serde_json::{Value, json};
 
-pub const SWAGGER_HTML: &str = r##"<!DOCTYPE html>
+pub const DOCS_HTML: &str = r##"<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Memegen API</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
-  <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
+  <div id="app"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1" crossorigin></script>
   <script>
-    window.ui = SwaggerUIBundle({ url: "/openapi.json", dom_id: "#swagger-ui" });
+    Scalar.createApiReference("#app", {
+      url: "/openapi.json",
+      showDeveloperTools: "never",
+      agent: { disabled: true },
+      mcp: { disabled: true },
+    });
   </script>
 </body>
 </html>

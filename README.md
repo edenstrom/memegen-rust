@@ -70,7 +70,7 @@ Over stdio there is usually no server behind `http://localhost` URLs, so `memege
 
 ## HTTP API
 
-Start the server with `memegen serve` (or just `memegen`). Swagger docs are at `/docs` and the OpenAPI spec at `/openapi.json`.
+Start the server with `memegen serve` (or just `memegen`). `/` is a landing page with a meme playground, MCP setup snippets and the template gallery (live at [memegen.dev](https://memegen.dev)). API docs ([Scalar](https://scalar.com)) are at `/docs` and the OpenAPI spec at `/openapi.json`.
 
 | Route | Description |
 |---|---|
