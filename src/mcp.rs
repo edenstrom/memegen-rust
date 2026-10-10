@@ -119,7 +119,7 @@ pub struct GenerateMemeRequest {
     /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
     #[serde(default)]
     pub font: Option<String>,
-    /// Reveal the text boxes one after another, typed out a character at a time (GIF, WebP) or faded and slid in with an easing (MP4), then hold the finished meme for a few seconds before looping. Works with any template; needs "gif" (the default when this is set), "webp" or "mp4".
+    /// Type the text boxes out one after another, a character at a time (MP4 eases the timing: slow, fast, then slow again), then hold the finished meme for a few seconds before looping. Works with any template; needs "gif" (the default when this is set), "webp" or "mp4".
     #[serde(default)]
     pub animate_text: Option<bool>,
     /// Absolute file path to write the image to, e.g. "/tmp/meme.png".

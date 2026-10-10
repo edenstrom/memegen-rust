@@ -621,12 +621,7 @@ fn dilate(
 }
 
 /// Pillow `Image.paste(im, point, mask=im)`: blend using the source alpha.
-pub fn paste_with_alpha(dst: &mut RgbaImage, src: &RgbaImage, point: (i64, i64)) {
-    paste_faded(dst, src, point, 1.0);
-}
-
-/// [`paste_with_alpha`] with `src` at `opacity` (0 to 1).
-pub fn paste_faded(dst: &mut RgbaImage, src: &RgbaImage, (left, top): (i64, i64), opacity: f32) {
+pub fn paste_with_alpha(dst: &mut RgbaImage, src: &RgbaImage, (left, top): (i64, i64)) {
     let (dst_width, dst_height) = (dst.width() as i64, dst.height() as i64);
     let (x0, x1) = (left.max(0), (left + src.width() as i64).min(dst_width));
     let (y0, y1) = (top.max(0), (top + src.height() as i64).min(dst_height));
@@ -646,12 +641,8 @@ pub fn paste_faded(dst: &mut RgbaImage, src: &RgbaImage, (left, top): (i64, i64)
         for (target, pixel) in pixels {
             match pixel[3] {
                 0 => {}
-                255 if opacity >= 1.0 => target.copy_from_slice(pixel),
-                alpha => blend(
-                    target,
-                    pixel.try_into().unwrap(),
-                    alpha as f32 / 255.0 * opacity,
-                ),
+                255 => target.copy_from_slice(pixel),
+                alpha => blend(target, pixel.try_into().unwrap(), alpha as f32 / 255.0),
             }
         }
     }
