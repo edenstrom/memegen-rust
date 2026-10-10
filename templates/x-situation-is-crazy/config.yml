@@ -1,0 +1,24 @@
+name: X Situation Is Crazy
+source: https://imgflip.com/meme/547497453/X-situation-is-crazy
+description: Commenting on an absurd ongoing situation as if it were a YouTube video title. The line is what the situation is about.
+keywords:
+  - Moistcr1tikal
+  - penguinz0
+  - YouTube
+  - situation is crazy
+  - commentary
+  - absurd news
+text:
+  - style: default
+    color: black
+    font: segoe
+    anchor_x: 0.13
+    anchor_y: 0.785
+    angle: 0.0
+    scale_x: 0.25
+    scale_y: 0.065
+    align: right
+    start: 0.0
+    stop: 1.0
+example:
+  - The npm

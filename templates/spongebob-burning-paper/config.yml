@@ -1,0 +1,24 @@
+name: Spongebob Burning Paper
+source: https://imgflip.com/meme/174368692/spongebob-throwing-paper-into-fire
+description: Reading an opinion and immediately throwing it in the fire as nonsense. The line is the dismissed opinion, written on the paper.
+keywords:
+  - SpongeBob SquarePants
+  - burning paper
+  - rejecting an opinion
+  - disagree
+  - into the fire
+  - bad take
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.095
+    anchor_y: 0.125
+    angle: 0.0
+    scale_x: 0.28
+    scale_y: 0.29
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Tabs are better than spaces.

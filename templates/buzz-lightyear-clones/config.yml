@@ -1,0 +1,36 @@
+name: Buzz Lightyear Clones
+source: https://imgflip.com/meme/326590566/Buzz-lightyear-clones
+description: 'Thinking you''re one of a kind, then seeing thousands just like you. Top line is the belief in being unique; bottom line is the reality.'
+keywords:
+  - Toy Story
+  - Buzz Lightyear
+  - clones
+  - not unique
+  - mass produced
+  - reality check
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.83
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - me thinking my startup idea is original
+  - every other founder

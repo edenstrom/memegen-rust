@@ -1,0 +1,36 @@
+name: 'Teacher''s Copy'
+source: https://imgflip.com/meme/318009221/Teachers-Copy
+description: A clean original next to a degraded copy of it. Left line labels the original; right line labels the cursed copy.
+keywords:
+  - Mr. Incredible
+  - uncanny
+  - original vs copy
+  - photocopy
+  - degraded
+  - knockoff
+text:
+  - style: default
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.04
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.32
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: default
+    color: black
+    font: thick
+    anchor_x: 0.52
+    anchor_y: 0.04
+    angle: 0.0
+    scale_x: 0.46
+    scale_y: 0.32
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'Teacher''s copy'
+  - My copy after 12 photocopies

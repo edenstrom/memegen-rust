@@ -1,0 +1,35 @@
+name: It Is Wednesday My Dudes
+source: https://imgflip.com/meme/214741131/Wednesday-Frog
+description: Announcing what day it is, or any routine event, with absurd excitement. Top line is the setup; bottom line is the announcement.
+keywords:
+  - Wednesday frog
+  - it is wednesday my dudes
+  - budgett's frog
+  - day of the week
+  - announcement
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.02
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - it is wednesday
+  - my dudes

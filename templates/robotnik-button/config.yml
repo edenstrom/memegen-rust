@@ -1,0 +1,36 @@
+name: Robotnik Button
+source: https://imgflip.com/meme/243879998/Robotnik-Button
+description: 'Gleefully slamming a button you know you shouldn''t press. Top line is the label on the button; bottom line is who presses it.'
+keywords:
+  - Sonic the Hedgehog
+  - Jim Carrey
+  - Dr. Robotnik
+  - pressing the button
+  - temptation
+  - gleeful
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.44
+    anchor_y: 0.06
+    angle: 0.0
+    scale_x: 0.36
+    scale_y: 0.11
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Deploy to prod
+  - 'me at 4:59 on a friday'

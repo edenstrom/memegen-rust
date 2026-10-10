@@ -1,0 +1,24 @@
+name: 'Don''t Make Me Tap the Sign'
+source: https://imgflip.com/meme/145699196/Dont-make-me-tap-the-sign
+description: Pointing at a rule people keep ignoring. The line is the rule written on the sign.
+keywords:
+  - The Simpsons
+  - bus driver
+  - tap the sign
+  - reminder
+  - rules
+  - pointing at sign
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.15
+    anchor_y: 0.61
+    angle: 0.0
+    scale_x: 0.71
+    scale_y: 0.24
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'It''s always DNS.'

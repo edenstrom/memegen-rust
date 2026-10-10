@@ -1,0 +1,24 @@
+name: This Is Worthless
+source: https://imgflip.com/meme/153452716/This-is-Worthless
+description: 'Excitedly receiving something supposedly valuable, then dismissing it as worthless. The line is what''s on the paper.'
+keywords:
+  - Gravity Falls
+  - Dipper
+  - worthless
+  - disappointment
+  - woah
+  - gift
+text:
+  - style: none
+    color: black
+    font: thick
+    anchor_x: 0.13
+    anchor_y: 0.11
+    angle: 0.0
+    scale_x: 0.74
+    scale_y: 0.32
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'Unlimited PTO you can''t take'

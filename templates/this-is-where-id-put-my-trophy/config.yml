@@ -1,0 +1,36 @@
+name: 'This Is Where I''d Put My Trophy If I Had One'
+source: https://imgflip.com/meme/145831116/Fairly-Odd-Parents---If-I-had-any
+description: 'Proudly showing off an empty spot, then admitting you never got the thing. Top line names what''s missing; bottom line is the bitter admission.'
+keywords:
+  - The Fairly OddParents
+  - 'Timmy''s dad'
+  - trophy
+  - empty pedestal
+  - if I had one
+  - bitter
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.85
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.14
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'this is where I''d put my weekend'
+  - 'if I had one!'

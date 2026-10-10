@@ -1,0 +1,36 @@
+name: Stupid Dumb Drooling Puzzle
+source: https://imgflip.com/meme/329074899/Stupid-dumb-drooling-puzzle
+description: 'Failing at something trivially simple. Top line is who''s struggling; bottom line is the easy task.'
+keywords:
+  - wojak
+  - shape puzzle
+  - drooling
+  - dumb
+  - struggling
+  - simple task
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.82
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - me trying to plug in
+  - a usb on the first try

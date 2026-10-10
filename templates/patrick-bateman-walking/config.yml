@@ -1,0 +1,35 @@
+name: Patrick Bateman Walking
+description: Stone-faced, self-assured confidence while doing something mundane, like a sigma-male walk to work. Top line is the situation; bottom line is the detached attitude or soundtrack.
+keywords:
+  - American Psycho
+  - Christian Bale
+  - sigma male
+  - headphones
+  - confident
+  - stoic
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - me walking into the standup
+  - after deleting the flaky tests
