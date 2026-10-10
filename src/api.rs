@@ -276,20 +276,23 @@ async fn create_image(State(app): State<AppState>, headers: HeaderMap, body: Byt
     generate_url(&app, &template_id, &payload)
 }
 
-async fn render_response(app: &AppState, request: MemeRequest) -> Response {
+async fn render_response(
+    app: &AppState,
+    request: MemeRequest,
+    range: Option<&HeaderValue>,
+) -> Response {
     match app.render(request).await {
         Ok(rendered) => {
-            let mut response = rendered.bytes.clone().into_response();
-            let headers = response.headers_mut();
-            headers.insert(
+            let (mut parts, ()) = Response::new(()).into_parts();
+            parts.headers.insert(
                 header::CONTENT_TYPE,
                 HeaderValue::from_static(rendered.content_type),
             );
-            headers.insert(
+            parts.headers.insert(
                 header::CACHE_CONTROL,
                 HeaderValue::from_static("public, max-age=86400"),
             );
-            response
+            byte_range(range, parts, rendered.bytes.clone())
         }
         Err(render_error) => {
             if matches!(render_error, RenderError::Internal(_)) {
@@ -307,6 +310,7 @@ async fn blank_image(
     State(app): State<AppState>,
     Path(filename): Path<String>,
     Query(params): Query<HashMap<String, String>>,
+    headers: HeaderMap,
 ) -> Response {
     let Some((template_id, extension)) = filename.rsplit_once('.') else {
         return error(
@@ -321,7 +325,7 @@ async fn blank_image(
         extension: extension.to_string(),
         animate_text: false,
     };
-    render_response(&app, request).await
+    render_response(&app, request, headers.get(header::RANGE)).await
 }
 
 /// `GET /images/{id}/{line1}/{line2}.{ext}`
@@ -330,6 +334,7 @@ async fn meme_image(
     Path((template_id, text_filepath)): Path<(String, String)>,
     RawQuery(query): RawQuery,
     Query(params): Query<HashMap<String, String>>,
+    headers: HeaderMap,
 ) -> Response {
     let Some((text_paths, extension)) = text_filepath
         .rsplit_once('.')
@@ -359,12 +364,119 @@ async fn meme_image(
         extension: extension.to_string(),
         animate_text: flag(&params, "animate_text").unwrap_or(false),
     };
-    render_response(&app, request).await
+    render_response(&app, request, headers.get(header::RANGE)).await
+}
+
+/// A successful response for `bytes`, or the part a `Range` header asks
+/// for. Safari won't play a video from a server without byte ranges. Only a
+/// single range is served; anything else gets the whole body, as RFC 9110
+/// allows.
+pub fn byte_range(
+    range: Option<&HeaderValue>,
+    mut parts: axum::http::response::Parts,
+    bytes: Bytes,
+) -> Response {
+    let length = bytes.len() as u64;
+    let headers = &mut parts.headers;
+    headers.insert(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"));
+    headers.remove(header::TRANSFER_ENCODING);
+    let (status, body) = match range.and_then(|range| parse_range(range.to_str().ok()?, length)) {
+        None => (StatusCode::OK, bytes),
+        Some(None) => {
+            headers.insert(
+                header::CONTENT_RANGE,
+                HeaderValue::from_str(&format!("bytes */{length}")).expect("ASCII"),
+            );
+            (StatusCode::RANGE_NOT_SATISFIABLE, Bytes::new())
+        }
+        Some(Some((start, end))) => {
+            headers.insert(
+                header::CONTENT_RANGE,
+                HeaderValue::from_str(&format!("bytes {start}-{end}/{length}")).expect("ASCII"),
+            );
+            let slice = bytes.slice(start as usize..=end as usize);
+            (StatusCode::PARTIAL_CONTENT, slice)
+        }
+    };
+    parts.status = status;
+    headers.insert(header::CONTENT_LENGTH, HeaderValue::from(body.len()));
+    Response::from_parts(parts, body.into())
+}
+
+/// The inclusive byte range a single-range `Range` header selects:
+/// `None` to ignore the header, `Some(None)` when it can't be satisfied.
+fn parse_range(range: &str, length: u64) -> Option<Option<(u64, u64)>> {
+    let spec = range.trim().strip_prefix("bytes=")?.trim();
+    if spec.contains(',') {
+        return None;
+    }
+    let (first, last) = spec.split_once('-')?;
+    let (first, last) = (first.trim(), last.trim());
+    let selected = if first.is_empty() {
+        // The last `suffix` bytes.
+        let suffix: u64 = last.parse().ok()?;
+        (suffix > 0 && length > 0).then(|| (length.saturating_sub(suffix), length - 1))
+    } else {
+        let start: u64 = first.parse().ok()?;
+        let end = if last.is_empty() {
+            u64::MAX
+        } else {
+            last.parse().ok()?
+        };
+        if end < start {
+            return None;
+        }
+        (start < length).then(|| (start, end.min(length - 1)))
+    };
+    Some(selected)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parses_ranges() {
+        assert_eq!(parse_range("bytes=0-1", 10), Some(Some((0, 1))));
+        assert_eq!(parse_range("bytes=5-", 10), Some(Some((5, 9))));
+        assert_eq!(parse_range("bytes=2-100", 10), Some(Some((2, 9))));
+        assert_eq!(parse_range("bytes=-3", 10), Some(Some((7, 9))));
+        assert_eq!(parse_range("bytes=-30", 10), Some(Some((0, 9))));
+        assert_eq!(parse_range("bytes=10-", 10), Some(None));
+        assert_eq!(parse_range("bytes=-0", 10), Some(None));
+        assert_eq!(parse_range("bytes=0-1,4-5", 10), None);
+        assert_eq!(parse_range("bytes=3-1", 10), None);
+        assert_eq!(parse_range("items=0-1", 10), None);
+    }
+
+    #[tokio::test]
+    async fn serves_byte_ranges() {
+        let body = |response: Response| async {
+            axum::body::to_bytes(response.into_body(), usize::MAX)
+                .await
+                .unwrap()
+        };
+        let bytes = Bytes::from_static(b"0123456789");
+        let parts = || Response::new(()).into_parts().0;
+
+        let full = byte_range(None, parts(), bytes.clone());
+        assert_eq!(full.status(), StatusCode::OK);
+        assert_eq!(full.headers()[header::ACCEPT_RANGES], "bytes");
+        assert_eq!(full.headers()[header::CONTENT_LENGTH], "10");
+        assert_eq!(body(full).await, "0123456789");
+
+        let range = HeaderValue::from_static("bytes=2-4");
+        let partial = byte_range(Some(&range), parts(), bytes.clone());
+        assert_eq!(partial.status(), StatusCode::PARTIAL_CONTENT);
+        assert_eq!(partial.headers()[header::CONTENT_RANGE], "bytes 2-4/10");
+        assert_eq!(partial.headers()[header::CONTENT_LENGTH], "3");
+        assert_eq!(body(partial).await, "234");
+
+        let range = HeaderValue::from_static("bytes=20-");
+        let unsatisfiable = byte_range(Some(&range), parts(), bytes);
+        assert_eq!(unsatisfiable.status(), StatusCode::RANGE_NOT_SATISFIABLE);
+        assert_eq!(unsatisfiable.headers()[header::CONTENT_RANGE], "bytes */10");
+    }
 
     #[test]
     fn parses_json_payload() {
