@@ -6,7 +6,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
 - PNG, JPG, GIF, WebP and MP4 output, including animated GIF/WebP/MP4 templates
-- Animated text: the text boxes are typed out one after another, a character at a time (with eased timing in MP4), then hold the finished meme for 3 seconds before looping, on static and animated templates
+- Animated text: the text boxes are typed out one after another, a character or a word at a time (with eased timing in MP4), then hold the finished meme for 3 seconds before looping, on static and animated templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
 - Also runs on [Cloudflare Workers](#cloudflare-workers), with the API and a remote MCP endpoint
@@ -60,7 +60,7 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `list_templates` | Templates with their ID, name, description (what it means and what each line is for), line count and example text. With `filter`, a ranked search (word order doesn't matter, typos are tolerated) returning the top 20. Without it, every template, 100 per page. Returns `{templates, total, next_offset}`; pass `next_offset` back as `offset` for the next page (`limit` sets the page size, up to 100). `animated` limits to animated or static templates |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
-| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (type the text out; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size. MP4 isn't returned inline (MCP has no video content) |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (`true`/`"characters"` or `"words"`: type the text out a character or a word at a time; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size. MP4 isn't returned inline (MCP has no video content) |
 | `generate_memes` | Render up to 10 memes in one call: `memes` is a list of `generate_meme` arguments, rendered concurrently. Returns each image and its summary (with `index`) in order, or an `error` for entries that failed. The inline images share the 1 MB limit, so each is downscaled further as the batch grows |
 
 ### MCP Apps
@@ -75,7 +75,7 @@ Start the server with `memegen serve` (or just `memegen`). `/` is a landing page
 
 | Route | Description |
 |---|---|
-| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out a character at a time, `?animate_text=words` a word at a time (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
 | `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, redirect}` (JSON or form) |
@@ -87,10 +87,15 @@ Text escapes in URLs: `_` → space, `__` → `_`, `--` → `-`, `~q` → `?`, `
 
 ### Animated text
 
-With `animate_text`, the text boxes are typed out in order, one mark at a time (letters and emoji; spaces don't take a step), with a 0.6 s pause between boxes, then the finished meme holds for 3 seconds before it loops. The layout is the finished meme's, so text doesn't shift as it appears. Each box takes 60 ms per mark on average. Text boxes' `start`/`stop` timing is ignored.
+With `animate_text`, the text boxes are typed out in order, with a 0.6 s pause between boxes, then the finished meme holds for 3 seconds before it loops. The layout is the finished meme's, so text doesn't shift as it appears. Text boxes' `start`/`stop` timing is ignored. It takes:
 
-- **GIF and WebP**: every mark takes 60 ms. On an animated template the text types over the template's frames, several marks per frame if they're slow. Long text types several marks per frame to stay within 60 typing frames (24 on Workers).
-- **MP4**: the timing is eased in and out (an inverse ease-in-out sine). Each box starts slowly, speeds up to about 40 ms per mark in the middle, and slows down again for the last marks. On an animated template the text is drawn at up to 30 fps between the template's frames, which video compresses well.
+- `true` or `characters`: one mark at a time (letters and emoji; spaces don't take a step), 60 ms per mark on average.
+- `words`: one word at a time, 200 ms per word on average.
+
+The pacing depends on the format:
+
+- **GIF and WebP**: every step takes the same time. On an animated template the text types over the template's frames, several marks per frame if they're slow. Long text types several marks per frame to stay within 60 typing frames (24 on Workers).
+- **MP4**: the timing is eased in and out (an inverse ease-in-out sine). Each box starts slowly, speeds up to about 1.6 times the average pace in the middle (about 40 ms per mark), and slows down again for the last marks or words. On an animated template the text is drawn at up to 30 fps between the template's frames, which video compresses well.
 
 On an animated template the background keeps playing through the pauses and the hold.
 

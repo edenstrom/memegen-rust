@@ -162,9 +162,8 @@
   #lines { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .hint { font-size: 13px; color: var(--fg-2); margin: 14px 0 0; }
-  .toggle { display: flex; gap: 10px; align-items: center; font: 700 14px var(--sans); margin: 14px 0 0; cursor: pointer; }
-  .toggle input { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); cursor: pointer; }
-  .toggle span { font-weight: 400; color: var(--fg-2); }
+  .animate-field { margin: 14px 0 0; }
+  .animate-field label.field span { font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--fg-2); }
   .preview { background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 12px 12px 0 var(--ink); overflow: hidden; }
   .stage { background: repeating-conic-gradient(var(--paper-2) 0% 25%, var(--paper) 0% 50%) 0 0 / 24px 24px; display: grid; place-items: center; min-height: 420px; padding: 28px; position: relative; }
   .stage img, .stage video { max-height: 460px; width: auto; border-radius: 4px; box-shadow: 0 14px 34px rgba(0, 0, 0, .22); transition: opacity .2s; }
@@ -437,7 +436,10 @@
             <select id="font"><option value="">Template default</option></select>
           </div>
         </div>
-        <label class="toggle"><input type="checkbox" id="animate"> Animate text <span>types it out, then holds (GIF, WebP or MP4)</span></label>
+        <div class="animate-field">
+          <label class="field" for="animate">Animate text <span>GIF, WebP or MP4</span></label>
+          <select id="animate"><option value="">Off</option><option value="true">Character by character</option><option value="words">Word by word</option></select>
+        </div>
         <p class="hint">Emoji shortcodes like <code>:fire:</code> work too.</p>
       </div>
       <div class="preview">
@@ -816,7 +818,7 @@ runChat();
 
 // Playground.
 const state = { template: null, timer: 0 };
-const linesBox = $("#lines"), extSelect = $("#ext"), fontSelect = $("#font"), animateBox = $("#animate"), memeImg = $("#meme"), memeVideo = $("#meme-video"), stage = $("#stage");
+const linesBox = $("#lines"), extSelect = $("#ext"), fontSelect = $("#font"), animateSelect = $("#animate"), memeImg = $("#meme"), memeVideo = $("#meme-video"), stage = $("#stage");
 const ANIMATED = ["gif", "webp", "mp4"];
 const START = { id: "drake", lines: ["Writing memes by hand", "Typing them into a URL"] };
 
@@ -842,7 +844,7 @@ function chooseTemplate(template, lines) {
     input.addEventListener("input", schedule);
     linesBox.append(input);
   }
-  extSelect.value = extOf(template.example?.url || "") === "gif" || animateBox.checked ? "gif" : "png";
+  extSelect.value = extOf(template.example?.url || "") === "gif" || animateSelect.value ? "gif" : "png";
   render();
 }
 function currentPath() {
@@ -851,7 +853,7 @@ function currentPath() {
   const path = memePath(state.template.id, lines, extSelect.value);
   const query = new URLSearchParams();
   if (fontSelect.value) query.set("font", fontSelect.value);
-  if (animateBox.checked) query.set("animate_text", "true");
+  if (animateSelect.value) query.set("animate_text", animateSelect.value);
   return query.size ? `${path}?${query}` : path;
 }
 function render() {
@@ -872,12 +874,12 @@ for (const [media, loaded] of [[memeImg, "load"], [memeVideo, "loadeddata"]]) {
   media.addEventListener("error", () => { stage.classList.remove("busy"); $("#meme-err").hidden = false; $("#meme-err").textContent = "Couldn't render that one. Try different text or format."; });
 }
 extSelect.addEventListener("change", () => {
-  if (!ANIMATED.includes(extSelect.value)) animateBox.checked = false;
+  if (!ANIMATED.includes(extSelect.value)) animateSelect.value = "";
   render();
 });
 fontSelect.addEventListener("change", render);
-animateBox.addEventListener("change", () => {
-  if (animateBox.checked && !ANIMATED.includes(extSelect.value)) extSelect.value = "gif";
+animateSelect.addEventListener("change", () => {
+  if (animateSelect.value && !ANIMATED.includes(extSelect.value)) extSelect.value = "gif";
   render();
 });
 $("#copy-md").addEventListener("click", (event) => copyText(event.currentTarget, `![${state.template.name}](${BASE + currentPath()})`));

@@ -6,6 +6,8 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
+use crate::render::AnimateText;
+
 /// Saved memes older than this are deleted.
 pub const MAX_AGE: Duration = Duration::from_secs(7 * 24 * 60 * 60);
 
@@ -31,13 +33,15 @@ pub fn key(
     lines: &[String],
     font: &str,
     extension: &str,
-    animate_text: bool,
+    animate_text: AnimateText,
 ) -> String {
     let mut hasher = DefaultHasher::new();
     (template_id, lines, font, extension).hash(&mut hasher);
     // Only hashed when set, so keys of memes saved before it existed hold.
-    if animate_text {
-        animate_text.hash(&mut hasher);
+    match animate_text {
+        AnimateText::Off => {}
+        AnimateText::Characters => true.hash(&mut hasher),
+        AnimateText::Words => "words".hash(&mut hasher),
     }
     format!("{template_id}-{:016x}.{extension}", hasher.finish())
 }
@@ -153,7 +157,7 @@ mod tests {
 
     fn name(template_id: &str, text: &[&str], font: &str, extension: &str) -> String {
         file_name(
-            &key(template_id, &lines(text), font, extension, false),
+            &key(template_id, &lines(text), font, extension, AnimateText::Off),
             SystemTime::now(),
         )
     }
@@ -167,11 +171,30 @@ mod tests {
 
     #[test]
     fn keys_are_stable_and_distinct() {
-        let a = key("fry", &lines(&["a", "b"]), "", "gif", false);
-        assert_eq!(a, key("fry", &lines(&["a", "b"]), "", "gif", false));
-        assert_ne!(a, key("fry", &lines(&["a", "c"]), "", "gif", false));
-        assert_ne!(a, key("fry", &lines(&["a", "b"]), "comic", "gif", false));
-        assert_ne!(a, key("fry", &lines(&["a", "b"]), "", "gif", true));
+        let a = key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Off);
+        assert_eq!(
+            a,
+            key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Off)
+        );
+        assert_ne!(
+            a,
+            key("fry", &lines(&["a", "c"]), "", "gif", AnimateText::Off)
+        );
+        assert_ne!(
+            a,
+            key("fry", &lines(&["a", "b"]), "comic", "gif", AnimateText::Off)
+        );
+        let characters = key(
+            "fry",
+            &lines(&["a", "b"]),
+            "",
+            "gif",
+            AnimateText::Characters,
+        );
+        let words = key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Words);
+        assert_ne!(a, characters);
+        assert_ne!(a, words);
+        assert_ne!(characters, words);
         assert!(a.starts_with("fry-") && a.ends_with(".gif"));
         assert!(is_saved_meme(&a));
         assert!(is_saved_meme(&name("fry", &["a"], "", "gif")));
@@ -182,8 +205,8 @@ mod tests {
     fn file_names_sort_by_time() {
         let earlier = SystemTime::now();
         let later = earlier + Duration::from_secs(24 * 60 * 60 + 1);
-        let a = file_name(&key("zzz", &[], "", "png", false), earlier);
-        let b = file_name(&key("aaa", &[], "", "png", false), later);
+        let a = file_name(&key("zzz", &[], "", "png", AnimateText::Off), earlier);
+        let b = file_name(&key("aaa", &[], "", "png", AnimateText::Off), later);
         assert!(a < b, "{a} should sort before {b}");
         let date = &a[..10];
         assert!(date.starts_with("20") && date.as_bytes()[4] == b'-');
@@ -204,7 +227,7 @@ mod tests {
     #[test]
     fn reuses_saved_memes_from_any_date() {
         let dir = temp_dir("reuse");
-        let fry = key("fry", &lines(&["a"]), "", "png", false);
+        let fry = key("fry", &lines(&["a"]), "", "png", AnimateText::Off);
         assert_eq!(reuse(&dir, &fry), None);
 
         let week_ago = SystemTime::now() - MAX_AGE + Duration::from_secs(60);
@@ -220,11 +243,14 @@ mod tests {
         let modified = std::fs::metadata(&saved).unwrap().modified().unwrap();
         assert!(modified > week_ago + Duration::from_secs(60));
 
-        let legacy = key("fry", &lines(&["b"]), "", "png", false);
+        let legacy = key("fry", &lines(&["b"]), "", "png", AnimateText::Off);
         std::fs::write(dir.join(&legacy), b"image").unwrap();
         assert_eq!(reuse(&dir, &legacy), Some(dir.join(&legacy)));
         assert_eq!(
-            reuse(&dir, &key("fry", &lines(&["a"]), "", "gif", false)),
+            reuse(
+                &dir,
+                &key("fry", &lines(&["a"]), "", "gif", AnimateText::Off)
+            ),
             None
         );
         std::fs::remove_dir_all(&dir).unwrap();

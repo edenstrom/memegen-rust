@@ -27,10 +27,12 @@ const MAXIMUM_FRAMES: usize = 20;
 const MINIMUM_FRAMES: usize = 5;
 const JPEG_QUALITY: u8 = 95;
 
-/// Animated text: delay per mark on a still background, the pause between
+/// Animated text: delay per mark, the pause between
 /// text boxes, and how long the finished text holds before the animation
 /// loops.
 const TYPING_DELAY_MS: u32 = 60;
+/// The same for word by word: delay per word.
+const TYPING_WORD_DELAY_MS: u32 = 200;
 const TYPING_GAP_MS: u32 = 600;
 const TYPING_HOLD_MS: u32 = 3000;
 
@@ -95,14 +97,49 @@ impl RenderError {
     }
 }
 
+/// Whether and how the text is typed out (`animate_text`).
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+pub enum AnimateText {
+    #[default]
+    Off,
+    /// A mark (letter or emoji) at a time.
+    Characters,
+    /// A word at a time.
+    Words,
+}
+
+impl AnimateText {
+    /// `true` (or `characters`) or `words`; anything else is off.
+    pub fn parse(value: &str) -> Self {
+        match value.trim().to_lowercase().as_str() {
+            "1" | "true" | "yes" | "characters" | "chars" => AnimateText::Characters,
+            "words" => AnimateText::Words,
+            _ => AnimateText::Off,
+        }
+    }
+
+    pub fn is_on(self) -> bool {
+        self != AnimateText::Off
+    }
+
+    /// The `animate_text` query value that asks for this, if on.
+    pub fn query(self) -> Option<&'static str> {
+        match self {
+            AnimateText::Off => None,
+            AnimateText::Characters => Some("true"),
+            AnimateText::Words => Some("words"),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct MemeRequest {
     pub template_id: String,
     pub lines: Vec<String>,
     pub font: String,
     pub extension: String,
-    /// Type the text out one mark at a time (GIF, WebP and MP4 only).
-    pub animate_text: bool,
+    /// Type the text out (GIF, WebP and MP4 only).
+    pub animate_text: AnimateText,
 }
 
 fn maximum_frames(extension: &str) -> usize {
@@ -179,26 +216,26 @@ struct Prepared {
     template: Arc<Template>,
     font: String,
     extension: String,
-    animate_text: bool,
+    animate_text: AnimateText,
     key: String,
 }
 
-/// How animated text is typed out, a mark at a time, one text box after
+/// How animated text is paced as it's typed out, one text box after
 /// another.
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Reveal {
-    /// Every mark after the same delay (GIF and WebP).
+    /// Every step (mark or word) after the same delay (GIF and WebP).
     Typing,
-    /// The marks speed up and then slow down again, easing in and out (MP4,
+    /// The steps speed up and then slow down again, easing in and out (MP4,
     /// where the extra frames compress well).
     Easing,
 }
 
 impl Reveal {
-    /// When mark `index` (from 1) of `marks` appears, as a fraction of the
+    /// When step `index` (from 1) of `count` appears, as a fraction of the
     /// box's typing time. Easing is the inverse of an ease-in-out sine.
-    fn appears(self, index: usize, marks: usize) -> f64 {
-        let progress = index as f64 / marks as f64;
+    fn appears(self, index: usize, count: usize) -> f64 {
+        let progress = index as f64 / count as f64;
         match self {
             Reveal::Typing => progress,
             Reveal::Easing => (1.0 - 2.0 * progress).acos() / std::f64::consts::PI,
@@ -274,7 +311,7 @@ impl Renderer {
                 .ok_or_else(|| RenderError::Invalid(format!("Invalid font: {name}")))?,
         };
 
-        if request.animate_text && !is_animated(&extension) {
+        if request.animate_text.is_on() && !is_animated(&extension) {
             return Err(RenderError::Invalid(format!(
                 "Animated text needs a gif, webp or mp4 extension, not {extension}"
             )));
@@ -288,8 +325,10 @@ impl Renderer {
             return Err(RenderError::TooLong);
         }
         let mut key = format!("{}|{slug}|{font}|{extension}", template.id);
-        if request.animate_text {
-            key.push_str("|animate_text");
+        match request.animate_text {
+            AnimateText::Off => {}
+            AnimateText::Characters => key.push_str("|animate_text"),
+            AnimateText::Words => key.push_str("|animate_words"),
         }
         Ok(Prepared {
             template,
@@ -381,7 +420,7 @@ impl Renderer {
         lines: &[String],
         font: &str,
         extension: &str,
-        animate_text: bool,
+        animate_text: AnimateText,
         source: &dyn Source,
     ) -> Result<Rendered> {
         // `Instant::now` panics on wasm32-unknown-unknown.
@@ -410,20 +449,15 @@ impl Renderer {
         lines: &[String],
         font: &str,
         extension: &str,
-        animate_text: bool,
+        animate_text: AnimateText,
         source: &dyn Source,
     ) -> Result<Vec<u8>> {
         match extension {
             "gif" | "webp" | "mp4" => {
-                let maximum_frames = maximum_frames(extension);
-                let (frames, delays) = if animate_text {
-                    let reveal = if extension == "mp4" {
-                        Reveal::Easing
-                    } else {
-                        Reveal::Typing
-                    };
-                    self.render_typing(template, lines, font, maximum_frames, reveal, source)?
+                let (frames, delays) = if animate_text.is_on() {
+                    self.render_typing(template, lines, font, extension, animate_text, source)?
                 } else {
+                    let maximum_frames = maximum_frames(extension);
                     let (frames, duration) =
                         self.render_animation(template, lines, font, maximum_frames, source)?;
                     let delays = vec![duration; frames.len()];
@@ -561,8 +595,8 @@ impl Renderer {
         Ok((frames, animation.frame_duration()))
     }
 
-    /// Animated text: the text boxes are typed out in order, a mark at a
-    /// time (see [`Reveal`]), with a [`TYPING_GAP_MS`] pause between boxes, over the template's frames (looped as needed); then the
+    /// Animated text: the text boxes are typed out in order, a mark or a
+    /// word (`unit`) at a time (see [`Reveal`]), with a [`TYPING_GAP_MS`] pause between boxes, over the template's frames (looped as needed); then the
     /// finished text holds for [`TYPING_HOLD_MS`]. Text boxes' `start`/`stop`
     /// are ignored. Returns the frames and each frame's delay in milliseconds.
     fn render_typing(
@@ -570,26 +604,53 @@ impl Renderer {
         template: &Template,
         lines: &[String],
         font: &str,
-        maximum_frames: usize,
-        reveal: Reveal,
+        extension: &str,
+        unit: AnimateText,
         source: &dyn Source,
     ) -> Result<(Vec<RgbaImage>, Vec<u32>)> {
+        let maximum_frames = maximum_frames(extension);
+        let reveal = if extension == "mp4" {
+            Reveal::Easing
+        } else {
+            Reveal::Typing
+        };
         let animation = self.animation(template, maximum_frames, source)?;
         let backgrounds = &animation.frames;
         let Some((_, first)) = backgrounds.first() else {
             return Err(anyhow!("no frames decoded for {}", template.id));
         };
         let size = first.dimensions();
-        let boxes: Vec<(TextLayout, usize)> = template
+        // Each box's layout, marks, and the marks shown after each step.
+        let boxes: Vec<(TextLayout, usize, Vec<usize>)> = template
             .text
             .iter()
             .enumerate()
             .filter_map(|(index, text)| self.text_layout(text, lines.get(index), lines, font, size))
-            .map(|layout| {
+            .filter_map(|layout| {
                 let marks = layout.font.marks(&layout.line);
-                (layout, marks)
+                let steps = match unit {
+                    AnimateText::Words => {
+                        let mut shown = 0;
+                        let mut steps: Vec<usize> = layout
+                            .line
+                            .split_whitespace()
+                            .map(|word| {
+                                shown = (shown + layout.font.marks(word)).min(marks);
+                                shown
+                            })
+                            .filter(|&shown| shown > 0)
+                            .collect();
+                        steps.dedup();
+                        // In case words' marks don't add up to the line's.
+                        if steps.last() != Some(&marks) {
+                            steps.push(marks);
+                        }
+                        steps
+                    }
+                    _ => (1..=marks).collect(),
+                };
+                (marks > 0).then_some((layout, marks, steps))
             })
-            .filter(|(_, marks)| *marks > 0)
             .collect();
         if boxes.is_empty() {
             let (frames, duration) =
@@ -599,22 +660,28 @@ impl Renderer {
         }
         let full: Vec<_> = boxes
             .par_iter()
-            .map(|(layout, _)| self.draw_layout(layout, None, source))
+            .map(|(layout, ..)| self.draw_layout(layout, None, source))
             .collect();
 
-        // When each box's marks appear, in milliseconds. Each box takes
-        // [`TYPING_DELAY_MS`] per mark on average.
+        // When each box's steps appear, in milliseconds. Each box takes
+        // [`TYPING_DELAY_MS`] per mark (or [`TYPING_WORD_DELAY_MS`] per word)
+        // on average.
+        let delay = match unit {
+            AnimateText::Words => TYPING_WORD_DELAY_MS,
+            _ => TYPING_DELAY_MS,
+        };
         let mut appears: Vec<Vec<u32>> = Vec::with_capacity(boxes.len());
         let mut end = 0;
-        for (_, marks) in &boxes {
+        for (.., steps) in &boxes {
             let start = if appears.is_empty() {
                 0
             } else {
                 end + TYPING_GAP_MS
             };
-            let length = (*marks as u32 * TYPING_DELAY_MS) as f64;
-            let times: Vec<u32> = (1..=*marks)
-                .map(|index| start + (length * reveal.appears(index, *marks)).round() as u32)
+            let count = steps.len();
+            let length = (count as u32 * delay) as f64;
+            let times: Vec<u32> = (1..=count)
+                .map(|index| start + (length * reveal.appears(index, count)).round() as u32)
                 .collect();
             end = times[times.len() - 1];
             appears.push(times);
@@ -625,14 +692,14 @@ impl Renderer {
         let period = animation.frame_duration().max(1);
         let mut times: Vec<u32> = Vec::new();
         if backgrounds.len() == 1 {
-            // A still background needs a frame only when a mark appears (or a
-            // few marks, to stay in budget): the pauses and the hold lengthen
-            // the frame before them.
-            let total: usize = boxes.iter().map(|(_, marks)| marks).sum();
+            // A still background needs a frame only when a step appears (or
+            // a few steps, to stay in budget): the pauses and the hold
+            // lengthen the frame before them.
+            let total: usize = appears.iter().map(Vec::len).sum();
             for box_times in &appears {
-                let marks = box_times.len();
-                let frames = marks.min((marks * typing_budget).div_ceil(total));
-                times.extend((1..=frames).map(|frame| box_times[marks * frame / frames - 1]));
+                let count = box_times.len();
+                let frames = count.min((count * typing_budget).div_ceil(total));
+                times.extend((1..=frames).map(|frame| box_times[count * frame / frames - 1]));
             }
         } else {
             // An animated background keeps moving through the typing, the
@@ -661,8 +728,13 @@ impl Renderer {
             .map(|&time| {
                 let background = (time / period) as usize % backgrounds.len();
                 let mut image = backgrounds[background].1.clone();
-                for (((layout, marks), full), box_times) in boxes.iter().zip(&full).zip(&appears) {
-                    let visible = box_times.partition_point(|&appear| appear <= time);
+                for (((layout, marks, steps), full), box_times) in
+                    boxes.iter().zip(&full).zip(&appears)
+                {
+                    let visible = match box_times.partition_point(|&appear| appear <= time) {
+                        0 => 0,
+                        count => steps[count - 1],
+                    };
                     if visible == *marks {
                         if let Some((point, layer)) = full {
                             typeset::paste_with_alpha(&mut image, layer, *point);
@@ -1099,7 +1171,7 @@ mod tests {
                 lines: template.example.clone(),
                 font: String::new(),
                 extension: "jpg".into(),
-                animate_text: false,
+                animate_text: AnimateText::Off,
             };
             let rendered = renderer
                 .render(&request, &Directory::new(root()))
@@ -1127,7 +1199,7 @@ mod tests {
                 lines: vec!["hello :fire:".into(), "world".into()],
                 font: "impact".into(),
                 extension: extension.into(),
-                animate_text: false,
+                animate_text: AnimateText::Off,
             };
             let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             assert_eq!(rendered.content_type, content_type);
@@ -1156,7 +1228,7 @@ mod tests {
                 lines: vec!["a".into(), "b".into()],
                 font: String::new(),
                 extension: extension.into(),
-                animate_text: false,
+                animate_text: AnimateText::Off,
             };
             let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             let max_bytes = rendered.bytes.len() / 2;
@@ -1181,7 +1253,7 @@ mod tests {
             lines: vec![line.into()],
             font: font.into(),
             extension: extension.into(),
-            animate_text: false,
+            animate_text: AnimateText::Off,
         };
         assert!(matches!(
             renderer.render(&request("nope", "", "png", "a"), &directory),
@@ -1228,7 +1300,14 @@ mod tests {
         // does), a pause after the first box, then the last frame holds.
         let template = renderer.catalog().get("sf").unwrap().clone();
         let (frames, delays) = renderer
-            .render_typing(&template, &lines, "", 0, Reveal::Typing, &directory)
+            .render_typing(
+                &template,
+                &lines,
+                "",
+                "gif",
+                AnimateText::Characters,
+                &directory,
+            )
             .unwrap();
         assert_eq!(frames.len(), 8);
         let mut expected = vec![TYPING_DELAY_MS; 7];
@@ -1244,7 +1323,14 @@ mod tests {
         // An animated background keeps moving through the typing and the hold.
         let template = renderer.catalog().get("oprah").unwrap().clone();
         let (frames, delays) = renderer
-            .render_typing(&template, &lines, "", 0, Reveal::Typing, &directory)
+            .render_typing(
+                &template,
+                &lines,
+                "",
+                "gif",
+                AnimateText::Characters,
+                &directory,
+            )
             .unwrap();
         let total: u32 = delays.iter().sum();
         assert!(frames.len() > 8);
@@ -1257,7 +1343,14 @@ mod tests {
         let template = renderer.catalog().get("sf").unwrap().clone();
         let long = vec!["a".repeat(150), "b".repeat(150)];
         let (frames, _) = renderer
-            .render_typing(&template, &long, "", 0, Reveal::Typing, &directory)
+            .render_typing(
+                &template,
+                &long,
+                "",
+                "gif",
+                AnimateText::Characters,
+                &directory,
+            )
             .unwrap();
         assert_eq!(frames.len(), TYPING_FRAMES.0);
 
@@ -1267,7 +1360,7 @@ mod tests {
                 lines: lines.clone(),
                 font: String::new(),
                 extension: extension.into(),
-                animate_text: true,
+                animate_text: AnimateText::Characters,
             };
             let rendered = renderer.render(&request, &directory).unwrap();
             let (decoded, decoded_delays) = decode_frames(&rendered.bytes, extension).unwrap();
@@ -1281,17 +1374,31 @@ mod tests {
             lines: lines.clone(),
             font: String::new(),
             extension: "mp4".into(),
-            animate_text: true,
+            animate_text: AnimateText::Characters,
         };
         assert!(renderer.render(&request, &directory).is_ok());
 
         // Eased (MP4): still a frame per mark, but the delays between marks
         // shrink towards the middle of each box and grow towards its end.
         let (eased, delays) = renderer
-            .render_typing(&template, &lines, "", 0, Reveal::Easing, &directory)
+            .render_typing(
+                &template,
+                &lines,
+                "",
+                "mp4",
+                AnimateText::Characters,
+                &directory,
+            )
             .unwrap();
         let (typed, _) = renderer
-            .render_typing(&template, &lines, "", 0, Reveal::Typing, &directory)
+            .render_typing(
+                &template,
+                &lines,
+                "",
+                "gif",
+                AnimateText::Characters,
+                &directory,
+            )
             .unwrap();
         assert_eq!(eased.len(), 8);
         assert!(eased == typed);
@@ -1304,8 +1411,8 @@ mod tests {
                 &renderer.catalog().get("oprah").unwrap().clone(),
                 &lines,
                 "",
-                0,
-                Reveal::Easing,
+                "mp4",
+                AnimateText::Characters,
                 &directory,
             )
             .unwrap();
@@ -1317,12 +1424,41 @@ mod tests {
             "{delays:?}"
         );
 
+        // Word by word: a frame per word, each showing what typing a mark at
+        // a time shows once that word is done.
+        let (words, delays) = renderer
+            .render_typing(&template, &lines, "", "gif", AnimateText::Words, &directory)
+            .unwrap();
+        assert_eq!(words.len(), 4);
+        assert!(
+            [1, 4, 6, 7]
+                .iter()
+                .zip(&words)
+                .all(|(&index, word)| *word == typed[index])
+        );
+        let word = TYPING_WORD_DELAY_MS;
+        assert_eq!(delays, [word, word + TYPING_GAP_MS, word, TYPING_HOLD_MS]);
+        let (eased, _) = renderer
+            .render_typing(&template, &lines, "", "mp4", AnimateText::Words, &directory)
+            .unwrap();
+        assert!(eased == words);
+        let request = |animate_text| MemeRequest {
+            template_id: "sf".into(),
+            lines: lines.clone(),
+            font: String::new(),
+            extension: "gif".into(),
+            animate_text,
+        };
+        let characters = renderer.render(&request(AnimateText::Characters), &directory);
+        let words = renderer.render(&request(AnimateText::Words), &directory);
+        assert_ne!(characters.unwrap().bytes, words.unwrap().bytes);
+
         let request = MemeRequest {
             template_id: "fry".into(),
             lines,
             font: String::new(),
             extension: "png".into(),
-            animate_text: true,
+            animate_text: AnimateText::Characters,
         };
         assert!(matches!(
             renderer.render(&request, &directory),
@@ -1339,7 +1475,7 @@ mod tests {
             lines: vec![":fire: hot".into(), ":fire:".into()],
             font: String::new(),
             extension: extension.into(),
-            animate_text: false,
+            animate_text: AnimateText::Off,
         };
         assert_eq!(
             renderer.missing(&request("png")),

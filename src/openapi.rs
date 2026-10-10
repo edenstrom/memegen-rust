@@ -59,11 +59,11 @@ pub fn spec(base_url: &str) -> Value {
         })
     };
     let font = query("font", "string", "Font ID or alias (`GET /fonts/`)");
-    let animate_text = query(
-        "animate_text",
-        "boolean",
-        "Type the text boxes out one after another, a character at a time (with eased timing in mp4), then hold the finished meme (gif, webp and mp4 only)",
-    );
+    let animate_text = json!({
+        "name": "animate_text", "in": "query", "required": false,
+        "schema": { "type": "string", "enum": ["true", "characters", "words"] },
+        "description": "Type the text boxes out one after another, a character (`true` or `characters`) or a word (`words`) at a time, with eased timing in mp4, then hold the finished meme (gif, webp and mp4 only)",
+    });
 
     json!({
         "openapi": "3.0.3",
@@ -167,7 +167,10 @@ pub fn spec(base_url: &str) -> Value {
                 "text": { "type": "array", "items": { "type": "string" }, "description": "Lines of text (raw, not escape-encoded)" },
                 "font": { "type": "string" },
                 "extension": { "type": "string", "enum": ["png", "jpg", "jpeg", "gif", "webp", "mp4"] },
-                "animate_text": { "type": "boolean", "description": "Type the text boxes out one after another, a character at a time (defaults the extension to gif)" },
+                "animate_text": {
+                    "oneOf": [{ "type": "boolean" }, { "type": "string", "enum": ["characters", "words"] }],
+                    "description": "Type the text boxes out one after another, a character (`true` or \"characters\") or a word (\"words\") at a time (defaults the extension to gif)"
+                },
                 "redirect": { "type": "boolean", "description": "Redirect to the image instead of returning JSON" }
             } },
             "MemeRequest": { "allOf": [
