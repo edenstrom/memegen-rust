@@ -14,7 +14,7 @@ use tokio::net::TcpStream;
 
 use memegen::app::App;
 use memegen::assets::Source;
-use memegen::render::MemeRequest;
+use memegen::render::{AnimateText, MemeRequest};
 use memegen::slug;
 
 pub struct Case {
@@ -124,7 +124,14 @@ pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> 
             renderer.clear_caches();
             let (wall, cpu) = measure(|| {
                 renderer
-                    .render_bytes(&template, &lines, "", case.extension, false, source)
+                    .render_bytes(
+                        &template,
+                        &lines,
+                        "",
+                        case.extension,
+                        AnimateText::Off,
+                        source,
+                    )
                     .map(drop)
             })?;
             cold.0.push(ms(wall));
@@ -133,12 +140,26 @@ pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> 
 
         // Warm: background cached, output not cached (a new meme every time).
         let mut size = 0;
-        renderer.render_bytes(&template, &lines, "", case.extension, false, source)?;
+        renderer.render_bytes(
+            &template,
+            &lines,
+            "",
+            case.extension,
+            AnimateText::Off,
+            source,
+        )?;
         let mut warm = (vec![], vec![]);
         for _ in 0..iterations {
             let (wall, cpu) = measure(|| {
                 size = renderer
-                    .render_bytes(&template, &lines, "", case.extension, false, source)?
+                    .render_bytes(
+                        &template,
+                        &lines,
+                        "",
+                        case.extension,
+                        AnimateText::Off,
+                        source,
+                    )?
                     .len();
                 Ok(())
             })?;
@@ -152,7 +173,7 @@ pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> 
             lines: lines.clone(),
             font: String::new(),
             extension: case.extension.into(),
-            animate_text: false,
+            animate_text: AnimateText::Off,
         };
         renderer.render(&request, source).ok();
         let mut cached = vec![];

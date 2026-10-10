@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::app::App;
-use crate::render::MemeRequest;
+use crate::render::{AnimateText, MemeRequest};
 
 const INSTRUCTIONS: &str = "Generate meme images from 500+ classic templates. \
 Typical flow: call `list_templates` to find a template, then call `generate_meme` with its ID and one \
@@ -107,6 +107,33 @@ pub struct GetTemplateRequest {
     pub id: String,
 }
 
+/// `animate_text`: on or off, or how to type the text out.
+#[derive(Debug, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum AnimateTextArg {
+    Flag(bool),
+    Unit(TextUnit),
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum TextUnit {
+    Characters,
+    Words,
+}
+
+impl From<Option<AnimateTextArg>> for AnimateText {
+    fn from(arg: Option<AnimateTextArg>) -> Self {
+        match arg {
+            None | Some(AnimateTextArg::Flag(false)) => AnimateText::Off,
+            Some(AnimateTextArg::Flag(true) | AnimateTextArg::Unit(TextUnit::Characters)) => {
+                AnimateText::Characters
+            }
+            Some(AnimateTextArg::Unit(TextUnit::Words)) => AnimateText::Words,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct GenerateMemeRequest {
     /// Template ID from `list_templates`, e.g. "fry".
@@ -119,9 +146,9 @@ pub struct GenerateMemeRequest {
     /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
     #[serde(default)]
     pub font: Option<String>,
-    /// Type the text out one character at a time, then hold the finished meme for a few seconds before looping. Works with any template; needs "gif" (the default when this is set), "webp" or "mp4".
+    /// Type the text boxes out one after another, then hold the finished meme for a few seconds before looping: true or "characters" for a character at a time, "words" for a word at a time (MP4 eases the timing: slow, fast, then slow again). Works with any template; needs "gif" (the default when this is set), "webp" or "mp4".
     #[serde(default)]
-    pub animate_text: Option<bool>,
+    pub animate_text: Option<AnimateTextArg>,
     /// Absolute file path to write the image to, e.g. "/tmp/meme.png".
     #[cfg(not(target_arch = "wasm32"))]
     #[serde(default)]
@@ -395,12 +422,12 @@ impl MemegenMcp {
                 request.template_id
             ));
         };
-        let animate_text = request.animate_text.unwrap_or(false);
+        let animate_text = AnimateText::from(request.animate_text);
         let extension = request
             .extension
             .filter(|ext| !ext.is_empty())
             .unwrap_or_else(|| {
-                if animate_text {
+                if animate_text.is_on() {
                     return config.default_animated_extension.clone();
                 }
                 template
@@ -580,5 +607,26 @@ impl ServerHandler for MemegenMcp {
         _context: RequestContext<RoleServer>,
     ) -> Result<ReadResourceResponse, ErrorData> {
         self.resource(&request.uri).map(Into::into)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_animate_text() {
+        let parse = |value: serde_json::Value| {
+            let request: GenerateMemeRequest = serde_json::from_value(
+                json!({ "template_id": "fry", "text": [], "animate_text": value }),
+            )
+            .unwrap();
+            AnimateText::from(request.animate_text)
+        };
+        assert_eq!(parse(json!(true)), AnimateText::Characters);
+        assert_eq!(parse(json!("characters")), AnimateText::Characters);
+        assert_eq!(parse(json!("words")), AnimateText::Words);
+        assert_eq!(parse(json!(false)), AnimateText::Off);
+        assert_eq!(parse(json!(null)), AnimateText::Off);
     }
 }

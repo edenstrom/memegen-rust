@@ -8,7 +8,7 @@ use serde::Serialize;
 use crate::assets::Assets;
 use crate::config::Config;
 use crate::fonts::Fonts;
-use crate::render::{MemeRequest, RenderError, Rendered, Renderer};
+use crate::render::{AnimateText, MemeRequest, RenderError, Rendered, Renderer};
 use crate::settings;
 use crate::template::{Catalog, Template, TemplateInfo};
 
@@ -119,7 +119,7 @@ impl App {
         lines: &[String],
         font: &str,
         extension: &str,
-        animate_text: bool,
+        animate_text: AnimateText,
     ) -> (String, bool) {
         let config = self.config();
         let template = self
@@ -140,7 +140,7 @@ impl App {
         };
         let extension = if settings::ALLOWED_EXTENSIONS.contains(&extension) {
             extension.to_string()
-        } else if animate_text {
+        } else if animate_text.is_on() {
             config.default_animated_extension.clone()
         } else {
             default_extension
@@ -154,8 +154,8 @@ impl App {
         if !font.is_empty() && font != settings::PLACEHOLDER {
             query.push(format!("font={font}"));
         }
-        if animate_text {
-            query.push("animate_text=true".to_string());
+        if let Some(value) = animate_text.query() {
+            query.push(format!("animate_text={value}"));
         }
         if !query.is_empty() {
             url.push('?');

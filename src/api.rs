@@ -13,7 +13,7 @@ use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use serde_json::{Value, json};
 
 use crate::app::App;
-use crate::render::{MemeRequest, RenderError};
+use crate::render::{AnimateText, MemeRequest, RenderError};
 use crate::{openapi, slug};
 
 type AppState = Arc<App>;
@@ -170,7 +170,7 @@ struct Payload {
     text: Vec<String>,
     font: String,
     extension: String,
-    animate_text: bool,
+    animate_text: AnimateText,
     redirect: bool,
 }
 
@@ -200,7 +200,7 @@ fn parse_payload(headers: &HeaderMap, body: &Bytes) -> Payload {
                 "text_lines" | "text_lines[]" => text_lines.push(value),
                 "font" => payload.font = value,
                 "extension" => payload.extension = value,
-                "animate_text" => payload.animate_text = truthy(&value),
+                "animate_text" => payload.animate_text = AnimateText::parse(&value),
                 "redirect" => payload.redirect = truthy(&value),
                 _ => {}
             }
@@ -231,7 +231,11 @@ fn parse_payload(headers: &HeaderMap, body: &Bytes) -> Payload {
         Some(Value::Number(n)) => n.as_f64().unwrap_or(0.0) != 0.0,
         _ => false,
     };
-    payload.animate_text = boolean("animate_text");
+    payload.animate_text = match map.get("animate_text") {
+        Some(Value::String(s)) => AnimateText::parse(s),
+        Some(_) if boolean("animate_text") => AnimateText::Characters,
+        _ => AnimateText::Off,
+    };
     payload.redirect = boolean("redirect");
     payload
 }
@@ -323,7 +327,7 @@ async fn blank_image(
         lines: vec![],
         font: params.get("font").cloned().unwrap_or_default(),
         extension: extension.to_string(),
-        animate_text: false,
+        animate_text: AnimateText::Off,
     };
     render_response(&app, request, headers.get(header::RANGE)).await
 }
@@ -362,7 +366,9 @@ async fn meme_image(
         lines: slug::decode(&normalized),
         font: params.get("font").cloned().unwrap_or_default(),
         extension: extension.to_string(),
-        animate_text: flag(&params, "animate_text").unwrap_or(false),
+        animate_text: params
+            .get("animate_text")
+            .map_or(AnimateText::Off, |value| AnimateText::parse(value)),
     };
     render_response(&app, request, headers.get(header::RANGE)).await
 }
@@ -491,7 +497,7 @@ mod tests {
         let payload = parse_payload(&headers, &body);
         assert_eq!(payload.template_id.as_deref(), Some("fry"));
         assert_eq!(payload.text, vec!["a", "b"]);
-        assert!(payload.animate_text);
+        assert_eq!(payload.animate_text, AnimateText::Characters);
         assert!(payload.redirect);
     }
 
@@ -506,6 +512,34 @@ mod tests {
         let payload = parse_payload(&headers, &body);
         assert_eq!(payload.text, vec!["a", "b"]);
         assert_eq!(payload.extension, "jpg");
-        assert!(!payload.animate_text);
+        assert_eq!(payload.animate_text, AnimateText::Off);
+
+        let body = Bytes::from("template_id=fry&animate_text=words");
+        let payload = parse_payload(&headers, &body);
+        assert_eq!(payload.animate_text, AnimateText::Words);
+    }
+
+    #[test]
+    fn parses_animate_text() {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("application/json"),
+        );
+        for (value, expected) in [
+            ("true", AnimateText::Characters),
+            ("1", AnimateText::Characters),
+            (r#""characters""#, AnimateText::Characters),
+            (r#""Words""#, AnimateText::Words),
+            ("false", AnimateText::Off),
+            (r#""nope""#, AnimateText::Off),
+        ] {
+            let body = Bytes::from(format!(r#"{{"animate_text": {value}}}"#));
+            assert_eq!(
+                parse_payload(&headers, &body).animate_text,
+                expected,
+                "{value}"
+            );
+        }
     }
 }
