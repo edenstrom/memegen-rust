@@ -3,7 +3,7 @@
 pub const DEFAULT_FONT: &str = "impact";
 pub const MINIMUM_FONT_SIZE: u32 = 7;
 
-pub const ALLOWED_EXTENSIONS: &[&str] = &["gif", "jpg", "jpeg", "png", "webp"];
+pub const ALLOWED_EXTENSIONS: &[&str] = &["gif", "jpg", "jpeg", "mp4", "png", "webp"];
 pub const DEFAULT_STATIC_EXTENSION: &str = "png";
 pub const DEFAULT_ANIMATED_EXTENSION: &str = "gif";
 

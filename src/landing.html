@@ -167,8 +167,8 @@
   .toggle span { font-weight: 400; color: var(--fg-2); }
   .preview { background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 12px 12px 0 var(--ink); overflow: hidden; }
   .stage { background: repeating-conic-gradient(var(--paper-2) 0% 25%, var(--paper) 0% 50%) 0 0 / 24px 24px; display: grid; place-items: center; min-height: 420px; padding: 28px; position: relative; }
-  .stage img { max-height: 460px; width: auto; border-radius: 4px; box-shadow: 0 14px 34px rgba(0, 0, 0, .22); transition: opacity .2s; }
-  .stage.busy img { opacity: .55; }
+  .stage img, .stage video { max-height: 460px; width: auto; border-radius: 4px; box-shadow: 0 14px 34px rgba(0, 0, 0, .22); transition: opacity .2s; }
+  .stage.busy img, .stage.busy video { opacity: .55; }
   .stage .err { position: absolute; bottom: 12px; left: 12px; right: 12px; text-align: center; font-size: 13px; color: #b91c1c; }
   .urlbar { display: flex; gap: 8px; align-items: center; padding: 14px; border-top: 3px solid var(--ink); background: var(--yellow); flex-wrap: wrap; }
   .urlbar code { flex: 1 1 260px; min-width: 0; background: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 8px 12px; font-size: 13px; white-space: nowrap; overflow-x: auto; scrollbar-width: thin; }
@@ -406,7 +406,7 @@
 
 <div class="bands" aria-hidden="true">
   <div class="band red"><div class="track"><span>No API key</span><span>No sign-up</span><span>Open source</span><span>Claude</span><span>Cursor</span><span>VS Code</span><span>Anything that speaks MCP</span></div></div>
-  <div class="band black"><div class="track"><span>568 templates</span><span>Renders in about half a millisecond</span><span>PNG · JPG · GIF · WebP</span><span>Animated templates</span><span>Written in Rust</span><span>Cached at the edge</span></div></div>
+  <div class="band black"><div class="track"><span>568 templates</span><span>Renders in about half a millisecond</span><span>PNG · JPG · GIF · WebP · MP4</span><span>Animated templates</span><span>Written in Rust</span><span>Cached at the edge</span></div></div>
 </div>
 
 <section id="playground">
@@ -430,18 +430,18 @@
         <div class="row">
           <div>
             <label class="field" for="ext">Format</label>
-            <select id="ext"><option>png</option><option>jpg</option><option>gif</option><option>webp</option></select>
+            <select id="ext"><option>png</option><option>jpg</option><option>gif</option><option>webp</option><option>mp4</option></select>
           </div>
           <div>
             <label class="field" for="font">Font</label>
             <select id="font"><option value="">Template default</option></select>
           </div>
         </div>
-        <label class="toggle"><input type="checkbox" id="animate"> Animate text <span>types it out, then holds (GIF or WebP)</span></label>
+        <label class="toggle"><input type="checkbox" id="animate"> Animate text <span>types it out, then holds (GIF, WebP or MP4)</span></label>
         <p class="hint">Emoji shortcodes like <code>:fire:</code> work too.</p>
       </div>
       <div class="preview">
-        <div class="stage" id="stage"><img id="meme" alt="Meme preview"><div class="err" id="meme-err" hidden></div></div>
+        <div class="stage" id="stage"><img id="meme" alt="Meme preview"><video id="meme-video" autoplay loop muted playsinline hidden></video><div class="err" id="meme-err" hidden></div></div>
         <div class="urlbar">
           <code id="meme-url"></code>
           <button class="btn small" data-copy="#meme-url">Copy URL</button>
@@ -501,7 +501,7 @@ claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="
           <hr>
           <div class="r-item"><div class="r-line"><code>list_templates</code><span>0.00</span></div><p>Ranked, typo-tolerant search, or page through all 568.</p></div>
           <div class="r-item"><div class="r-line"><code>get_template</code><span>0.00</span></div><p>What a template means and what each line is for.</p></div>
-          <div class="r-item"><div class="r-line"><code>generate_meme</code><span>0.00</span></div><p>Render as PNG, JPG, GIF or WebP. Returns the image and its URL.</p></div>
+          <div class="r-item"><div class="r-line"><code>generate_meme</code><span>0.00</span></div><p>Render as PNG, JPG, GIF, WebP or MP4. Returns the image and its URL.</p></div>
           <div class="r-item"><div class="r-line"><code>generate_memes</code><span>0.00</span></div><p>Up to 10 at once, so your agent can offer options.</p></div>
           <div class="r-item"><div class="r-line"><code>list_fonts</code><span>0.00</span></div><p>From Impact to Comic-style handwriting.</p></div>
           <hr>
@@ -523,12 +523,12 @@ claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="
     <h2>Every meme is a URL</h2>
     <p class="sub">No SDK needed. Put the text in the path and you get an image back, cached at the edge.</p>
     <div class="anatomy">
-      <div class="url-parts" id="anatomy"><span class="p p-base">{{BASE_URL}}/images/</span><span class="p p-tpl">rollsafe<i class="ann up" aria-hidden="true"><span>which meme</span><svg viewBox="0 0 40 44"><path d="M30 4c-12 4-20 16-18 34"/><path d="M5 30l7 9 8-7"/></svg></i></span>/<span class="p p-l1">cant_break_prod<i class="ann down" aria-hidden="true"><svg viewBox="0 0 40 44"><path d="M30 40C16 36 10 24 12 6"/><path d="M5 14l7-9 8 7"/></svg><span>top text</span></i></span>/<span class="p p-l2">if_you_only_ship_memes<i class="ann up" aria-hidden="true"><span>bottom text</span><svg viewBox="0 0 40 44"><path d="M30 4c-12 4-20 16-18 34"/><path d="M5 30l7 9 8-7"/></svg></i></span>.<span class="p p-ext">png<i class="ann down flip" aria-hidden="true"><svg viewBox="0 0 40 44"><path d="M30 40C16 36 10 24 12 6"/><path d="M5 14l7-9 8 7"/></svg><span>or jpg, gif, webp</span></i></span></div>
+      <div class="url-parts" id="anatomy"><span class="p p-base">{{BASE_URL}}/images/</span><span class="p p-tpl">rollsafe<i class="ann up" aria-hidden="true"><span>which meme</span><svg viewBox="0 0 40 44"><path d="M30 4c-12 4-20 16-18 34"/><path d="M5 30l7 9 8-7"/></svg></i></span>/<span class="p p-l1">cant_break_prod<i class="ann down" aria-hidden="true"><svg viewBox="0 0 40 44"><path d="M30 40C16 36 10 24 12 6"/><path d="M5 14l7-9 8 7"/></svg><span>top text</span></i></span>/<span class="p p-l2">if_you_only_ship_memes<i class="ann up" aria-hidden="true"><span>bottom text</span><svg viewBox="0 0 40 44"><path d="M30 4c-12 4-20 16-18 34"/><path d="M5 30l7 9 8-7"/></svg></i></span>.<span class="p p-ext">png<i class="ann down flip" aria-hidden="true"><svg viewBox="0 0 40 44"><path d="M30 40C16 36 10 24 12 6"/><path d="M5 14l7-9 8 7"/></svg><span>or jpg, gif, webp, mp4</span></i></span></div>
       <div class="legend">
         <span><i style="background:#ffe58a"></i>template ID</span>
         <span><i style="background:#bfe6ff"></i>top line</span>
         <span><i style="background:#ffc9de"></i>bottom line</span>
-        <span><i style="background:#ccf2c2"></i>png, jpg, gif or webp</span>
+        <span><i style="background:#ccf2c2"></i>png, jpg, gif, webp or mp4</span>
       </div>
       <div class="returns">
         <img loading="lazy" src="/images/rollsafe/cant_break_prod/if_you_only_ship_memes.jpg" alt="Roll Safe meme: can't break prod if you only ship memes" width="420" height="420">
@@ -540,7 +540,7 @@ claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="
         <table>
           <thead><tr><th>Route</th><th>What it does</th></tr></thead>
           <tbody>
-            <tr><td><code>GET /images/{id}/{lines…}.{ext}</code></td><td>Render a meme. <code>?font=</code> picks a font; <code>?animate_text=true</code> types the text out (GIF/WebP)</td></tr>
+            <tr><td><code>GET /images/{id}/{lines…}.{ext}</code></td><td>Render a meme. <code>?font=</code> picks a font; <code>?animate_text=true</code> types the text out (GIF/WebP/MP4)</td></tr>
             <tr><td><code>POST /images/</code></td><td>Build a meme URL from JSON</td></tr>
             <tr><td><code>GET /templates/</code></td><td>The catalog; <code>?filter=</code> for ranked search</td></tr>
             <tr><td><code>GET /templates/{id}</code></td><td>One template, with its line meanings</td></tr>
@@ -816,7 +816,8 @@ runChat();
 
 // Playground.
 const state = { template: null, timer: 0 };
-const linesBox = $("#lines"), extSelect = $("#ext"), fontSelect = $("#font"), animateBox = $("#animate"), memeImg = $("#meme"), stage = $("#stage");
+const linesBox = $("#lines"), extSelect = $("#ext"), fontSelect = $("#font"), animateBox = $("#animate"), memeImg = $("#meme"), memeVideo = $("#meme-video"), stage = $("#stage");
+const ANIMATED = ["gif", "webp", "mp4"];
 const START = { id: "drake", lines: ["Writing memes by hand", "Typing them into a URL"] };
 
 async function fetchJson(url) {
@@ -858,20 +859,25 @@ function render() {
   const path = currentPath();
   $("#meme-url").textContent = BASE + path;
   $("#open").href = path;
-  if (memeImg.getAttribute("src") === path) return;
+  const media = extSelect.value === "mp4" ? memeVideo : memeImg;
+  memeImg.hidden = media !== memeImg;
+  memeVideo.hidden = media !== memeVideo;
+  if (media.getAttribute("src") === path) return;
   stage.classList.add("busy");
-  memeImg.src = path;
+  media.src = path;
 }
 const schedule = debounce(render, 250);
-memeImg.addEventListener("load", () => { stage.classList.remove("busy"); $("#meme-err").hidden = true; });
-memeImg.addEventListener("error", () => { stage.classList.remove("busy"); $("#meme-err").hidden = false; $("#meme-err").textContent = "Couldn't render that one. Try different text or format."; });
+for (const [media, loaded] of [[memeImg, "load"], [memeVideo, "loadeddata"]]) {
+  media.addEventListener(loaded, () => { stage.classList.remove("busy"); $("#meme-err").hidden = true; });
+  media.addEventListener("error", () => { stage.classList.remove("busy"); $("#meme-err").hidden = false; $("#meme-err").textContent = "Couldn't render that one. Try different text or format."; });
+}
 extSelect.addEventListener("change", () => {
-  if (!["gif", "webp"].includes(extSelect.value)) animateBox.checked = false;
+  if (!ANIMATED.includes(extSelect.value)) animateBox.checked = false;
   render();
 });
 fontSelect.addEventListener("change", render);
 animateBox.addEventListener("change", () => {
-  if (animateBox.checked && !["gif", "webp"].includes(extSelect.value)) extSelect.value = "gif";
+  if (animateBox.checked && !ANIMATED.includes(extSelect.value)) extSelect.value = "gif";
   render();
 });
 $("#copy-md").addEventListener("click", (event) => copyText(event.currentTarget, `![${state.template.name}](${BASE + currentPath()})`));

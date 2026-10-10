@@ -69,6 +69,12 @@ pub const CASES: &[Case] = &[
         lines: &["not sure if animated", "or just slow"],
         extension: "webp",
     },
+    Case {
+        name: "animated mp4 (24 frames)",
+        template: "fry",
+        lines: &["not sure if animated", "or just slow"],
+        extension: "mp4",
+    },
 ];
 
 /// Process CPU time (user + system, all threads).
