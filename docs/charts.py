@@ -1,6 +1,7 @@
 """Draw the README benchmark charts: `python3 docs/charts.py`.
 
-The numbers are copied from the tables in README.md; update both together.
+The numbers are copied from the tables in README.md, and the landing page
+(src/landing.html) shows them too; update all three together.
 Writes a light and a dark SVG per chart into docs/.
 """
 
