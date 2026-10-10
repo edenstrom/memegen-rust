@@ -17,220 +17,304 @@
 <meta property="og:image" content="{{BASE_URL}}/images/drake/Opening_an_image_editor/Asking_Claude_for_a_meme.png">
 <meta name="twitter:card" content="summary_large_image">
 <style>
+  /* Kalam (OFL, from fonts/), subset to ASCII and arrows, for the scribbled notes. */
+  @font-face { font-family: "Kalam"; font-display: swap; src: url(data:font/woff2;base64,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) format("woff2"); }
   :root {
-    --bg: #faf8f3;
-    --bg-2: #f1ede3;
+    --paper: #fbf7ec;
+    --paper-2: #f1ead8;
     --card: #fff;
-    --fg: #111;
-    --fg-2: #5b5852;
-    --line: #e2ddd1;
-    --accent: #ffd400;
-    --accent-ink: #111;
-    --ink: #121214;
-    --ink-2: #1c1c20;
-    --ink-line: #2e2e35;
-    --ink-fg: #f4f3ef;
-    --ink-fg-2: #a3a1a8;
-    --radius: 14px;
+    --ink: #0e0e0e;
+    --fg-2: #57534a;
+    --line: #e4dcc8;
+    --yellow: #ffd400;
+    --red: #ff4a26;
+    --night: #121214;
+    --night-2: #1b1b1f;
+    --night-line: #2f2f36;
+    --night-fg: #f4f3ef;
+    --night-fg-2: #a3a1a8;
     --meme: Impact, Haettenschweiler, "Arial Narrow Bold", "Franklin Gothic Bold", sans-serif;
     --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --hand: Kalam, "Bradley Hand", "Segoe Print", cursive;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; }
   img { display: block; max-width: 100%; }
   code, pre, kbd { font-family: var(--mono); font-size: .9em; }
-  .wrap { width: min(1160px, 100% - 40px); margin: 0 auto; }
+  .wrap { width: min(1180px, 100% - 40px); margin: 0 auto; }
   [hidden] { display: none !important; }
+  ::selection { background: var(--ink); color: var(--yellow); }
 
   /* Meme caption type: white fill, heavy black outline. */
   .caption {
     font-family: var(--meme); text-transform: uppercase; color: #fff; letter-spacing: .01em; line-height: .98;
-    -webkit-text-stroke: .09em #000; paint-order: stroke fill;
-    text-shadow: 0 .05em 0 #000;
+    -webkit-text-stroke: .09em var(--ink); paint-order: stroke fill;
+    text-shadow: 0 .05em 0 var(--ink);
   }
+  /* Notes scribbled in the margins. */
+  .scribble { font: 400 22px/1.15 var(--hand); color: var(--ink); margin: 0; }
+  .scribble svg { width: 54px; height: 54px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .squiggle { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0 6 Q5 1 10 6 T20 6 T30 6 T40 6' fill='none' stroke='%23ffd400' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 0 100% / 34px 9px repeat-x; padding-bottom: .1em; }
 
   /* Nav */
-  nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent; transition: border-color .2s; }
-  nav.scrolled { border-bottom-color: var(--line); }
-  nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
-  .logo { font-size: 28px; text-decoration: none; -webkit-text-stroke-width: .07em; text-shadow: none; }
-  .logo span { color: var(--accent); }
-  nav .links { display: flex; gap: 22px; margin-left: auto; align-items: center; font-size: 15px; }
-  nav .links a { text-decoration: none; color: var(--fg-2); }
-  nav .links a:hover { color: var(--fg); }
-  .gh { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; color: var(--fg) !important; }
+  nav { position: sticky; top: 0; z-index: 20; background: var(--yellow); border-bottom: 2px solid transparent; transition: border-color .2s; }
+  nav.scrolled { border-bottom-color: var(--ink); }
+  nav .wrap { display: flex; align-items: center; gap: 28px; height: 66px; }
+  .logo { font-size: 30px; text-decoration: none; -webkit-text-stroke-width: .08em; text-shadow: none; transform: rotate(-2deg); }
+  nav .links { display: flex; gap: 24px; margin-left: auto; align-items: center; font-size: 15px; font-weight: 600; }
+  nav .links a { text-decoration: none; }
+  nav .links a:not(.gh):hover { text-decoration: underline wavy; text-underline-offset: 5px; }
+  .gh { display: inline-flex; align-items: center; gap: 7px; background: var(--ink); color: var(--yellow); border-radius: 999px; padding: 7px 14px; }
   .gh svg { width: 16px; height: 16px; }
 
   /* Buttons */
-  .btn { display: inline-flex; align-items: center; gap: 8px; font: 600 15px/1 var(--sans); border-radius: 10px; padding: 13px 18px; text-decoration: none; cursor: pointer; border: 2px solid var(--fg); background: var(--card); color: var(--fg); transition: transform .08s, box-shadow .08s; box-shadow: 3px 3px 0 var(--fg); }
-  .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--fg); }
-  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--fg); }
-  .btn.primary { background: var(--accent); color: var(--accent-ink); }
-  .btn.small { padding: 8px 12px; font-size: 13px; border-width: 1.5px; box-shadow: 2px 2px 0 var(--fg); border-radius: 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; font: 700 15px/1 var(--sans); border-radius: 10px; padding: 14px 20px; text-decoration: none; cursor: pointer; border: 2px solid var(--ink); background: var(--card); color: var(--ink); transition: transform .08s, box-shadow .08s; box-shadow: 4px 4px 0 var(--ink); }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+  .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+  .btn.primary { background: var(--yellow); }
+  .btn.dark { background: var(--ink); color: var(--yellow); }
+  .btn.small { padding: 8px 12px; font-size: 13px; border-width: 1.5px; box-shadow: 2px 2px 0 var(--ink); border-radius: 8px; }
+  .btn.small:hover { box-shadow: 3px 3px 0 var(--ink); transform: translate(-1px, -1px); }
 
   /* Hero */
-  .hero { padding: 72px 0 56px; }
-  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; }
-  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--fg-2); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px 5px 8px; }
-  .eyebrow b { background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 1px 8px; font-size: 11px; letter-spacing: .04em; }
-  h1 { font-size: clamp(56px, 8.4vw, 104px); margin: 22px 0 22px; font-weight: 400; }
-  h1 .bottom { display: block; }
-  .lede { font-size: 20px; color: var(--fg-2); max-width: 34ch; margin: 0 0 30px; }
-  .lede strong { color: var(--fg); font-weight: 600; }
-  .ctas { display: flex; flex-wrap: wrap; gap: 14px; }
-  .install { margin-top: 26px; display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--ink-fg); border-radius: 12px; padding: 12px 12px 12px 16px; max-width: 620px; font-family: var(--mono); font-size: 13.5px; }
+  .hero { background: var(--yellow); padding: 40px 0 150px; position: relative; }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); gap: 64px; align-items: center; }
+  .psst { display: flex; align-items: flex-end; gap: 4px; transform: rotate(-3deg); margin-left: 4px; }
+  .psst svg { transform: translateY(18px) scaleX(-1); }
+  h1 { font: 400 clamp(56px, 8.2vw, 116px)/.86 var(--meme); text-transform: uppercase; margin: 10px 0 30px; letter-spacing: -.005em; }
+  h1 .caption { display: block; white-space: nowrap; font-size: 1.04em; margin-top: .06em; transform: rotate(-1.5deg); transform-origin: left; }
+  .lede { font-size: 20px; max-width: 33ch; margin: 0 0 32px; }
+  .lede strong { background: var(--ink); color: var(--yellow); padding: 0 .3em; font-weight: 700; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 16px; }
+  .install { margin-top: 30px; display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--night-fg); border-radius: 12px; padding: 12px 12px 12px 16px; max-width: 600px; font-family: var(--mono); font-size: 13.5px; }
   .install code { flex: 1; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-  .install .prompt { color: var(--accent); user-select: none; }
+  .install .prompt { color: var(--yellow); user-select: none; }
 
-  /* Hero chat mock */
-  .chat { background: var(--card); border: 2px solid var(--fg); border-radius: 18px; box-shadow: 8px 8px 0 var(--fg); overflow: hidden; }
-  .chat-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--fg-2); }
+  /* Hero chat, taped on with a sticker. */
+  .art { position: relative; }
+  .chat { position: relative; background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 12px 12px 0 var(--ink); transform: rotate(2deg); }
+  .tape { position: absolute; z-index: 2; width: 130px; height: 34px; background: rgba(255, 255, 255, .6); border-inline: 2px dashed rgba(0, 0, 0, .06); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+  .chat .tape { top: -18px; left: 38%; transform: rotate(-5deg); }
+  .chat-head { display: flex; align-items: center; gap: 8px; padding: 13px 16px; border-bottom: 2px solid var(--ink); font: 600 13px var(--sans); }
   .dots { display: flex; gap: 6px; margin-right: 6px; }
-  .dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
-  .chat-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 470px; }
-  .bubble { align-self: flex-end; background: var(--bg-2); border-radius: 16px 16px 4px 16px; padding: 10px 14px; max-width: 85%; font-size: 15px; min-height: 44px; }
-  .bubble .cursor { display: inline-block; width: 2px; height: 1.05em; background: var(--fg); vertical-align: -2px; margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ink); }
+  .dots i:first-child { background: var(--red); }
+  .chat-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 480px; }
+  .bubble { align-self: flex-end; background: var(--yellow); border: 2px solid var(--ink); border-radius: 16px 16px 4px 16px; padding: 10px 14px; max-width: 85%; font-size: 15px; font-weight: 500; min-height: 46px; }
+  .bubble .cursor { display: inline-block; width: 2px; height: 1.05em; background: var(--ink); vertical-align: -2px; margin-left: 1px; animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
-  .tool { display: inline-flex; align-items: center; gap: 8px; font: 12.5px var(--mono); color: var(--fg-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; align-self: flex-start; transition: opacity .3s; }
-  .tool .spin { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--fg); animation: spin .7s linear infinite; }
+  .tool { display: inline-flex; align-items: center; gap: 8px; font: 12.5px var(--mono); color: var(--fg-2); border: 1.5px dashed var(--line); border-radius: 8px; padding: 6px 10px; align-self: flex-start; transition: opacity .3s; }
+  .tool .spin { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--ink); animation: spin .7s linear infinite; }
   .tool.done .spin { animation: none; border-color: #16a34a; background: #16a34a; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .result { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--bg-2); align-self: flex-start; max-width: 100%; transition: opacity .35s, transform .35s; }
+  .result { border-radius: 10px; overflow: hidden; border: 2px solid var(--ink); background: var(--paper-2); align-self: flex-start; max-width: 100%; transition: opacity .35s, transform .35s; }
   .result img { max-height: 330px; width: auto; }
   .fade { opacity: 0; transform: translateY(6px); }
+  .sticker { position: absolute; z-index: 3; top: -54px; right: -34px; width: 138px; aspect-ratio: 1; display: grid; place-content: center; text-align: center; background: var(--red); color: #fff; font: 400 46px/.9 var(--meme); transform: rotate(14deg); animation: wobble 5s ease-in-out infinite;
+    clip-path: polygon(50% 0%, 59.1% 10%, 71.7% 5%, 75.6% 17.9%, 89.1% 18.8%, 86.9% 32.2%, 98.7% 38.9%, 91% 50%, 98.7% 61.1%, 86.9% 67.8%, 89.1% 81.2%, 75.6% 82.1%, 71.7% 95%, 59.1% 90%, 50% 100%, 40.9% 90%, 28.3% 95%, 24.4% 82.1%, 10.9% 81.2%, 13.1% 67.8%, 1.3% 61.1%, 9% 50%, 1.3% 38.9%, 13.1% 32.2%, 10.9% 18.8%, 24.4% 17.9%, 28.3% 5%, 40.9% 10%); }
+  .sticker small { display: block; font-size: 17px; letter-spacing: .04em; margin-top: 4px; }
+  @keyframes wobble { 50% { transform: rotate(8deg) scale(1.04); } }
+  .real { position: absolute; right: calc(100% + 4px); bottom: 60px; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; transform: rotate(-6deg); }
+  .real svg { transform: rotate(10deg); margin-right: -6px; }
 
-  /* Stats */
-  .stats { border-block: 2px solid var(--fg); background: var(--accent); }
-  .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
-  .stat { padding: 22px 18px; border-left: 2px solid var(--fg); }
-  .stat:first-child { border-left: 0; }
-  .stat b { display: block; font: 400 40px/1 var(--meme); letter-spacing: .01em; }
-  .stat span { font-size: 14px; font-weight: 500; }
+  /* Two strips of tape crossing the bottom of the hero. */
+  .bands { position: relative; height: 180px; margin: -110px 0 -40px; overflow: hidden; pointer-events: none; z-index: 2; }
+  .band { position: absolute; left: -5%; width: 110%; border-block: 3px solid var(--ink); overflow: hidden; white-space: nowrap; }
+  .band.black { top: 74px; background: var(--ink); color: var(--yellow); transform: rotate(-2.4deg); }
+  .band.red { top: 34px; background: var(--red); color: #fff; transform: rotate(1.8deg); }
+  .track { display: inline-flex; animation: slide 38s linear infinite; }
+  .band.red .track { animation-direction: reverse; animation-duration: 46s; }
+  .track span { font: 400 30px/1 var(--meme); text-transform: uppercase; letter-spacing: .02em; padding: 13px 0; }
+  .track span::after { content: "✶"; margin: 0 26px; font-family: var(--sans); font-size: .8em; }
+  @keyframes slide { to { transform: translateX(-50%); } }
 
   /* Sections */
-  section { padding: 96px 0; scroll-margin-top: 40px; }
-  .kicker { font: 700 13px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--fg-2); margin: 0 0 10px; }
-  h2 { font: 400 clamp(40px, 5vw, 60px)/1 var(--meme); text-transform: uppercase; margin: 0 0 16px; letter-spacing: .005em; }
-  .sub { font-size: 18px; color: var(--fg-2); max-width: 60ch; margin: 0 0 40px; }
-  .dark { background: var(--ink); color: var(--ink-fg); }
-  .dark .kicker, .dark .sub { color: var(--ink-fg-2); }
+  section { padding: 110px 0; scroll-margin-top: 56px; }
+  h2 { font: 400 clamp(46px, 6.6vw, 88px)/.9 var(--meme); text-transform: uppercase; margin: 0 0 18px; letter-spacing: -.003em; }
+  .sub { font-size: 18px; color: var(--fg-2); max-width: 56ch; margin: 0 0 44px; }
+  .head { display: flex; align-items: flex-end; gap: 28px 48px; flex-wrap: wrap; margin-bottom: 44px; }
+  .head h2 { margin: 0; }
+  .head .scribble { max-width: 300px; transform: rotate(-3deg); padding-bottom: 6px; display: flex; align-items: flex-end; gap: 6px; }
+  .dark { background: var(--night); color: var(--night-fg); }
+  .dark .sub { color: var(--night-fg-2); }
 
   /* Playground */
-  .play { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 28px; align-items: start; }
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-  label.field { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; }
-  .input, select { width: 100%; font: 15px var(--sans); color: var(--fg); background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; outline: none; transition: border-color .15s, box-shadow .15s; }
-  .input:focus, select:focus { border-color: var(--fg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent); }
+  #playground { padding-top: 90px; }
+  .play { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 32px; align-items: start; }
+  .panel { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; padding: 22px; box-shadow: 6px 6px 0 var(--ink); }
+  label.field { display: block; font: 700 12px var(--sans); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 7px; }
+  .input, select { width: 100%; font: 15px var(--sans); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 10px; padding: 10px 12px; outline: none; transition: box-shadow .15s, background .15s; }
+  .input:focus, select:focus { background: #fff; box-shadow: 3px 3px 0 var(--yellow), 3px 3px 0 2px var(--ink); }
   .search { position: relative; }
-  .results { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px); background: var(--card); border: 1.5px solid var(--fg); border-radius: 12px; box-shadow: 4px 4px 0 var(--fg); max-height: 340px; overflow-y: auto; padding: 6px; }
+  .results { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px); background: var(--card); border: 2px solid var(--ink); border-radius: 12px; box-shadow: 5px 5px 0 var(--ink); max-height: 340px; overflow-y: auto; padding: 6px; }
   .results button { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 6px; cursor: pointer; font: inherit; color: inherit; }
-  .results button:hover, .results button.active { background: var(--bg-2); }
-  .results img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: var(--bg-2); flex: none; }
+  .results button:hover, .results button.active { background: var(--yellow); }
+  .results img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: var(--paper-2); flex: none; }
   .results b { display: block; font-size: 14px; }
   .results small { color: var(--fg-2); font-size: 12px; }
-  .chosen { display: flex; gap: 12px; margin: 16px 0 18px; padding: 12px; background: var(--bg); border-radius: 10px; }
-  .chosen img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex: none; }
+  .chosen { display: flex; gap: 12px; margin: 16px 0 18px; padding: 12px; background: var(--paper-2); border-radius: 10px; }
+  .chosen img { width: 58px; height: 58px; border-radius: 8px; object-fit: cover; flex: none; border: 2px solid var(--ink); }
   .chosen b { font-size: 15px; }
   .chosen p { margin: 2px 0 0; font-size: 13px; color: var(--fg-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   #lines { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .hint { font-size: 12.5px; color: var(--fg-2); margin: 14px 0 0; }
-  .preview { background: var(--card); border: 2px solid var(--fg); border-radius: 18px; box-shadow: 8px 8px 0 var(--fg); overflow: hidden; }
-  .stage { background: repeating-conic-gradient(var(--bg-2) 0% 25%, var(--bg) 0% 50%) 0 0 / 22px 22px; display: grid; place-items: center; min-height: 380px; padding: 24px; position: relative; }
-  .stage img { max-height: 440px; width: auto; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.18); transition: opacity .2s; }
+  .hint { font-size: 13px; color: var(--fg-2); margin: 14px 0 0; }
+  .preview { background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 12px 12px 0 var(--ink); overflow: hidden; }
+  .stage { background: repeating-conic-gradient(var(--paper-2) 0% 25%, var(--paper) 0% 50%) 0 0 / 24px 24px; display: grid; place-items: center; min-height: 420px; padding: 28px; position: relative; }
+  .stage img { max-height: 460px; width: auto; border-radius: 4px; box-shadow: 0 14px 34px rgba(0, 0, 0, .22); transition: opacity .2s; }
   .stage.busy img { opacity: .55; }
   .stage .err { position: absolute; bottom: 12px; left: 12px; right: 12px; text-align: center; font-size: 13px; color: #b91c1c; }
-  .urlbar { display: flex; gap: 8px; align-items: center; padding: 14px; border-top: 2px solid var(--fg); background: var(--card); flex-wrap: wrap; }
-  .urlbar code { flex: 1 1 260px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13px; white-space: nowrap; overflow-x: auto; scrollbar-width: thin; }
+  .urlbar { display: flex; gap: 8px; align-items: center; padding: 14px; border-top: 3px solid var(--ink); background: var(--yellow); flex-wrap: wrap; }
+  .urlbar code { flex: 1 1 260px; min-width: 0; background: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 8px 12px; font-size: 13px; white-space: nowrap; overflow-x: auto; scrollbar-width: thin; }
 
   /* MCP */
-  .mcp { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 40px; align-items: start; }
-  .endpoint { display: flex; align-items: center; gap: 12px; background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: 12px; padding: 14px 14px 14px 18px; margin-bottom: 22px; }
-  .endpoint span { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-fg-2); }
-  .endpoint code { flex: 1; font-size: 16px; color: var(--accent); }
-  .tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--ink-line); }
-  .tabs button { font: 600 14px var(--sans); color: var(--ink-fg-2); background: none; border: 0; padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-  .tabs button[aria-selected="true"] { color: var(--ink-fg); border-bottom-color: var(--accent); }
-  .tabpanel { padding: 20px 0 0; }
-  .tabpanel p { color: var(--ink-fg-2); margin: 0 0 12px; font-size: 15px; }
-  .tabpanel p code { color: var(--ink-fg); }
-  .code { position: relative; background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: 12px; }
-  .code pre { margin: 0; padding: 16px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; color: var(--ink-fg); }
+  #mcp h2 { color: #fff; margin-bottom: 30px; }
+  .mcp { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 72px; align-items: start; }
+  .endpoint { display: flex; align-items: center; gap: 12px; background: var(--night-2); border: 2px solid var(--yellow); border-radius: 12px; padding: 14px 14px 14px 18px; margin-bottom: 26px; }
+  .endpoint span { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--night-fg-2); }
+  .endpoint code { flex: 1; font-size: 16px; color: var(--yellow); overflow-wrap: anywhere; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tabs button { font: 600 14px var(--sans); color: var(--night-fg-2); background: none; border: 1.5px solid var(--night-line); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+  .tabs button:hover { color: var(--night-fg); border-color: var(--night-fg-2); }
+  .tabs button[aria-selected="true"] { color: var(--ink); background: var(--yellow); border-color: var(--yellow); }
+  .tabpanel { padding: 22px 0 0; }
+  .tabpanel p { color: var(--night-fg-2); margin: 0 0 12px; font-size: 15px; }
+  .tabpanel p code, .tabpanel p b { color: var(--night-fg); }
+  .code { position: relative; background: var(--night-2); border: 1px solid var(--night-line); border-radius: 12px; }
+  .code pre { margin: 0; padding: 16px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; color: var(--night-fg); }
   .code .copy { position: absolute; top: 9px; right: 9px; }
-  .copy { font: 600 12px var(--sans); color: var(--ink-fg); background: var(--ink-line); border: 0; border-radius: 7px; padding: 6px 10px; cursor: pointer; }
+  .copy { font: 600 12px var(--sans); color: var(--night-fg); background: var(--night-line); border: 0; border-radius: 7px; padding: 6px 10px; cursor: pointer; }
   .copy:hover { background: #3c3c45; }
   .copy.ok { background: #16a34a; color: #fff; }
   .install .copy { background: #2c2c33; }
   .tok-k { color: #ffd400; } .tok-s { color: #9fe0a0; } .tok-c { color: #7d7b84; }
-  .tools { display: flex; flex-direction: column; gap: 10px; }
-  .tool-card { background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: 12px; padding: 14px 16px; }
-  .tool-card code { color: var(--accent); font-size: 14px; font-weight: 600; }
-  .tool-card p { margin: 4px 0 0; color: var(--ink-fg-2); font-size: 14px; }
-  .apps { margin-top: 18px; display: flex; gap: 14px; align-items: flex-start; background: color-mix(in srgb, var(--accent) 12%, var(--ink-2)); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--ink-line)); border-radius: 12px; padding: 16px; font-size: 14px; color: var(--ink-fg-2); }
-  .apps b { color: var(--ink-fg); }
-  .apps .badge { flex: none; background: var(--accent); color: var(--accent-ink); font: 400 18px/1 var(--meme); padding: 6px 8px; border-radius: 6px; }
+  .apps { margin-top: 30px; display: flex; gap: 16px; align-items: flex-start; font-size: 15px; color: var(--night-fg-2); max-width: 560px; }
+  .apps b { color: var(--night-fg); }
+  .apps .badge { flex: none; background: var(--red); color: #fff; font: 400 19px/1 var(--meme); padding: 7px 9px; border-radius: 4px; transform: rotate(-4deg); }
+
+  /* The tool list, as a receipt. */
+  .receipt-wrap { position: relative; transform: rotate(2deg); margin-top: 8px; }
+  .receipt-shadow { filter: drop-shadow(10px 10px 0 var(--yellow)); }
+  .receipt { background: #fffef9; color: var(--ink); font: 13.5px/1.5 var(--mono); padding: 28px 26px 44px;
+    -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 18px 100%;
+    mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 18px 100%; }
+  .receipt-wrap > .tape { top: -16px; left: 50%; transform: translateX(-50%) rotate(3deg); background: rgba(255, 212, 0, .75); }
+  .r-head { text-align: center; text-transform: uppercase; }
+  .r-head .caption { font-size: 38px; display: block; margin-bottom: 6px; -webkit-text-stroke-width: .07em; }
+  .r-head span { display: block; font-size: 12px; color: var(--fg-2); }
+  .receipt hr { border: 0; border-top: 2px dashed var(--ink); margin: 16px 0; }
+  .r-line { display: flex; gap: 8px; align-items: baseline; }
+  .r-line::before { content: ""; order: 2; flex: 1; border-bottom: 2px dotted #b9b3a3; transform: translateY(-4px); }
+  .r-line > :last-child { order: 3; }
+  .r-item { margin-bottom: 12px; }
+  .r-item code { font-size: 14px; font-weight: 700; }
+  .r-item p { margin: 1px 0 0; font-family: var(--sans); font-size: 13px; color: var(--fg-2); max-width: 30ch; }
+  .r-total { font-weight: 700; font-size: 17px; text-transform: uppercase; }
+  .r-small { text-transform: uppercase; font-size: 12px; }
+  .r-foot { text-align: center; margin: 18px 0 14px; font-size: 12px; letter-spacing: .06em; }
+  .barcode { height: 46px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 7px, transparent 7px 8px, var(--ink) 8px 9px, transparent 9px 12px, var(--ink) 12px 15px, transparent 15px 17px); }
+  .receipt-note { position: absolute; right: -10px; bottom: -86px; color: var(--yellow); transform: rotate(-4deg); display: flex; align-items: flex-start; gap: 4px; }
+  .receipt-note svg { transform: translateY(-34px) rotate(200deg); }
 
   /* API */
-  .anatomy { background: var(--card); border: 2px solid var(--fg); border-radius: 16px; box-shadow: 6px 6px 0 var(--fg); padding: 28px; margin-bottom: 28px; }
-  .url-parts { font: 500 clamp(14px, 1.9vw, 22px)/1.5 var(--mono); overflow-wrap: anywhere; }
-  .url-parts .p { border-radius: 6px; padding: 1px 4px; }
+  .anatomy { position: relative; background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 12px 12px 0 var(--ink); padding: 92px 34px 34px; margin-bottom: 40px; }
+  .url-parts { font: 600 clamp(13px, 1.7vw, 20px)/1.5 var(--mono); overflow-wrap: anywhere; }
+  .url-parts .p { position: relative; border-radius: 6px; padding: 2px 5px; }
+  .url-parts .p:not(.p-base) { white-space: nowrap; }
   .p-base { color: var(--fg-2); }
-  .p-tpl { background: #ffe9a3; }
-  .p-l1 { background: #c9ecff; }
-  .p-l2 { background: #ffd6e7; }
-  .p-ext { background: #d7f5d0; }
-  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; font-size: 14px; color: var(--fg-2); }
-  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
-  .api-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
-  .api-grid .code { background: var(--ink); }
+  .p-tpl { background: #ffe58a; }
+  .p-l1 { background: #bfe6ff; }
+  .p-l2 { background: #ffc9de; }
+  .p-ext { background: #ccf2c2; }
+  .ann { position: absolute; left: 50%; display: flex; flex-direction: column; align-items: flex-start; font: 400 21px/1 var(--hand); white-space: nowrap; color: var(--ink); pointer-events: none; }
+  .ann svg { width: 40px; height: 44px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  .ann.up { bottom: calc(100% + 2px); transform: translateX(-12px) rotate(-3deg); }
+  .ann.up span { margin-left: 22px; }
+  .ann.down { top: calc(100% + 2px); transform: translateX(-12px) rotate(2deg); }
+  .ann.down span { margin-left: 26px; }
+  .ann.flip { left: auto; right: 50%; align-items: flex-end; transform: translateX(12px) rotate(2deg); }
+  .ann.flip svg { transform: scaleX(-1); }
+  .ann.flip span { margin: 0 26px 0 0; }
+  .returns { display: flex; align-items: center; gap: 22px; margin-top: 84px; padding-top: 26px; border-top: 2px dashed var(--line); flex-wrap: wrap; }
+  .returns img { height: 250px; width: auto; border: 2px solid var(--ink); border-radius: 6px; transform: rotate(-2deg); box-shadow: 5px 5px 0 var(--ink); }
+  .returns .scribble { transform: rotate(-2deg); font-size: 24px; }
+  .legend { display: none; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; font-size: 14px; color: var(--fg-2); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; border: 1px solid rgba(0, 0, 0, .2); }
+  .api-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+  .api-grid .code { background: var(--ink); border-color: var(--ink); }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-2); }
-  td code { background: var(--bg-2); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
-  .escapes { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 14px; }
-  .escapes div { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
-  .escapes code { font-weight: 600; }
-  .escapes span { color: var(--fg-2); }
-  .api-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+  th, td { text-align: left; padding: 10px; border-bottom: 1.5px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-2); border-bottom: 2px solid var(--ink); }
+  td code { background: var(--paper-2); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
+  .escapes { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin-top: 12px; }
+  .escapes div { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg-2); }
+  .escapes kbd { min-width: 34px; text-align: center; font-weight: 700; color: var(--ink); background: var(--card); border: 1.5px solid var(--ink); border-radius: 6px; padding: 3px 6px; box-shadow: 0 3px 0 var(--ink); }
+  .api-links { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 34px; }
 
   /* Gallery */
-  .gallery-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 28px; }
-  .gallery-head .sub { margin: 0; }
+  #templates { padding-top: 40px; }
+  .gallery-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 36px; }
+  .gallery-head .head { margin: 0; }
   .gallery-head .input { width: 320px; background: var(--card); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
-  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; font: inherit; color: inherit; display: flex; flex-direction: column; transition: transform .12s, box-shadow .12s, border-color .12s; }
-  .tile:hover { transform: translateY(-3px); border-color: var(--fg); box-shadow: 4px 4px 0 var(--fg); }
-  .tile .thumb { aspect-ratio: 1; background: var(--bg-2); display: grid; place-items: center; overflow: hidden; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 22px 18px; }
+  .tile { background: var(--card); border: 2px solid var(--ink); border-radius: 10px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; font: inherit; color: inherit; display: flex; flex-direction: column; transition: transform .12s, box-shadow .12s; }
+  .tile:hover { transform: rotate(-1.5deg) translateY(-4px); box-shadow: 6px 6px 0 var(--ink); }
+  .tile:nth-child(even):hover { transform: rotate(1.5deg) translateY(-4px); }
+  .tile .thumb { aspect-ratio: 1; background: var(--paper-2); display: grid; place-items: center; overflow: hidden; border-bottom: 2px solid var(--ink); }
   .tile .thumb img { width: 100%; height: 100%; object-fit: cover; }
   .tile .meta { padding: 10px 12px 12px; }
   .tile b { font-size: 14px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tile small { display: block; color: var(--fg-2); font: 12px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .more { display: flex; justify-content: center; margin-top: 32px; }
+  .more { display: flex; justify-content: center; margin-top: 40px; }
   .empty { color: var(--fg-2); padding: 30px 0; }
 
-  /* CTA + footer */
-  .final { text-align: center; padding: 110px 0; background: var(--accent); border-top: 2px solid var(--fg); }
-  .final h2 { font-size: clamp(48px, 7vw, 92px); margin-bottom: 26px; }
-  .final .btn { box-shadow: 4px 4px 0 var(--fg); }
-  .final .ctas { justify-content: center; }
-  footer { background: var(--ink); color: var(--ink-fg-2); font-size: 14px; padding: 36px 0; }
+  /* Last call + footer */
+  .final { background: var(--yellow); border-top: 3px solid var(--ink); padding: 110px 0 120px; overflow: hidden; }
+  .final .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); gap: 64px; align-items: center; }
+  .final h2 { font-size: clamp(56px, 8vw, 112px); margin-bottom: 30px; }
+  .final .install { margin: 0 0 28px; }
+  .final .art { justify-self: center; max-width: 470px; }
+  .final .art img { border: 3px solid var(--ink); border-radius: 6px; transform: rotate(3deg); box-shadow: 14px 14px 0 var(--ink); background: var(--ink); }
+  .final .art .tape { top: -14px; left: 30px; transform: rotate(-8deg); }
+  .final .art .tape + .tape { left: auto; right: 24px; top: auto; bottom: -12px; transform: rotate(-6deg); }
+  footer { background: var(--ink); color: var(--night-fg-2); font-size: 14px; padding: 38px 0; }
   footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-  footer a { color: var(--ink-fg); }
+  footer a { color: var(--night-fg); }
 
   @media (max-width: 980px) {
-    .hero .wrap, .play, .mcp, .api-grid { grid-template-columns: minmax(0, 1fr); }
+    .hero .wrap, .play, .mcp, .api-grid, .final .wrap { grid-template-columns: minmax(0, 1fr); }
+    .hero { padding-bottom: 130px; }
+    .hero .wrap { gap: 72px; }
+    .real { display: none; }
+    .sticker { width: 108px; font-size: 36px; right: -8px; top: -46px; }
+    .sticker small { font-size: 14px; }
+    .chat { transform: rotate(1deg); }
+    .chat-body { min-height: 0; }
     .gallery-head .input { width: 100%; }
     .lede { font-size: 18px; }
-    .hero { padding-top: 40px; }
-    .chat-body { min-height: 0; }
-    .stats .wrap { grid-template-columns: repeat(2, 1fr); }
-    .stat:nth-child(3) { border-left: 0; }
-    .stat:nth-child(n+3) { border-top: 2px solid var(--fg); }
     nav .links a:not(.gh) { display: none; }
-    section { padding: 72px 0; }
+    section { padding: 80px 0; }
+    .mcp { gap: 64px; }
+    .receipt-wrap { max-width: 420px; }
+    .receipt-note { display: none; }
+    .ann { display: none; }
+    .anatomy { padding: 28px; }
+    .returns { margin-top: 24px; }
+    .returns .arr { display: inline-block; transform: rotate(90deg); }
+    .legend { display: flex; }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
+    .tile b { font-size: 13px; }
+    thead { display: none; }
+    tr { display: block; padding: 10px 0; border-bottom: 1.5px solid var(--line); }
+    td { display: block; border: 0; padding: 2px 0; }
+    td code { white-space: normal; overflow-wrap: anywhere; }
+    .endpoint span { display: none; }
+    .panel { padding: 18px; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -242,13 +326,13 @@
 
 <nav id="nav">
   <div class="wrap">
-    <a class="logo caption" href="/">memegen<span>.dev</span></a>
+    <a class="logo caption" href="/">memegen.dev</a>
     <div class="links">
       <a href="#playground">Playground</a>
       <a href="#mcp">MCP</a>
       <a href="#api">API</a>
       <a href="#templates">Templates</a>
-      <a class="gh" href="https://github.com/edenstrom/memegen-rust"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
+      <a class="gh" href="https://github.com/edenstrom/memegen-rust"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.580 0 8c0 3.54 2.29 6.53 5.47 7.590.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.920.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
     </div>
   </div>
 </nav>
@@ -256,11 +340,11 @@
 <header class="hero">
   <div class="wrap">
     <div>
-      <span class="eyebrow"><b>MCP</b> Works in Claude, Cursor, VS Code and friends</span>
-      <h1 class="caption">Memes for<span class="bottom">your agent</span></h1>
-      <p class="lede"><strong>537 meme templates</strong> behind a free MCP server and HTTP API. Ask your agent for a meme, or build one with a URL. No API key, no sign-up.</p>
+      <p class="scribble psst">psst. it's free, and there's no API key<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M50 8c-14 2-30 12-34 34"/><path d="M8 34l8 10 9-8"/></svg></p>
+      <h1>Memes for <span class="caption">your agent</span></h1>
+      <p class="lede"><strong>537 meme templates</strong> behind a free MCP server and HTTP API. Ask your agent for a meme, or build one with a URL.</p>
       <div class="ctas">
-        <a class="btn primary" href="#mcp">Connect to Claude</a>
+        <a class="btn dark" href="#mcp">Connect to Claude</a>
         <a class="btn" href="#playground">Make a meme</a>
       </div>
       <div class="install">
@@ -268,31 +352,33 @@
         <button class="copy" data-copy="#install-cmd">Copy</button>
       </div>
     </div>
-    <div class="chat" aria-hidden="true">
-      <div class="chat-head"><div class="dots"><i></i><i></i><i></i></div>Your agent</div>
-      <div class="chat-body">
-        <div class="bubble"><span id="chat-prompt"></span><span class="cursor"></span></div>
-        <div class="tool fade" id="chat-tool"><span class="spin"></span><span id="chat-tool-text">generate_meme</span></div>
-        <div class="result fade" id="chat-result"><img id="chat-img" alt="" width="460" height="460"></div>
+    <div class="art">
+      <div class="sticker" aria-hidden="true">537<small>templates</small></div>
+      <div class="chat" aria-hidden="true">
+        <span class="tape"></span>
+        <div class="chat-head"><div class="dots"><i></i><i></i><i></i></div>Your agent</div>
+        <div class="chat-body">
+          <div class="bubble"><span id="chat-prompt"></span><span class="cursor"></span></div>
+          <div class="tool fade" id="chat-tool"><span class="spin"></span><span id="chat-tool-text">generate_meme</span></div>
+          <div class="result fade" id="chat-result"><img id="chat-img" alt="" width="460" height="460"></div>
+        </div>
       </div>
+      <p class="scribble real" aria-hidden="true">rendered live,<br>right now<svg viewBox="0 0 60 60"><path d="M10 6c18 4 32 18 36 40"/><path d="M36 40l10 8 6-11"/></svg></p>
     </div>
   </div>
 </header>
 
-<div class="stats">
-  <div class="wrap">
-    <div class="stat"><b>537</b><span>templates, each described for agents</span></div>
-    <div class="stat"><b>&lt;1 ms</b><span>to render a new meme natively</span></div>
-    <div class="stat"><b>GIF + WebP</b><span>animated templates, plus PNG and JPG</span></div>
-    <div class="stat"><b>0 keys</b><span>free and open source, written in Rust</span></div>
-  </div>
+<div class="bands" aria-hidden="true">
+  <div class="band red"><div class="track"><span>No API key</span><span>No sign-up</span><span>Open source</span><span>Claude</span><span>Cursor</span><span>VS Code</span><span>Anything that speaks MCP</span></div></div>
+  <div class="band black"><div class="track"><span>537 templates</span><span>Renders in about half a millisecond</span><span>PNG · JPG · GIF · WebP</span><span>Animated templates</span><span>Written in Rust</span><span>Cached at the edge</span></div></div>
 </div>
 
 <section id="playground">
   <div class="wrap">
-    <p class="kicker">Playground</p>
-    <h2>Make one right now</h2>
-    <p class="sub">Pick a template, type your lines, and the URL is the meme. Paste it anywhere that shows images.</p>
+    <div class="head">
+      <h2>Make one<br>right now</h2>
+      <p class="scribble"><span>the URL <u>is</u> the meme. paste it anywhere that shows images</span><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M6 10c20-2 36 10 40 34"/><path d="M36 38l10 8 7-10"/></svg></p>
+    </div>
     <div class="play">
       <div class="panel">
         <label class="field" for="tpl-search">Template</label>
@@ -301,7 +387,7 @@
           <div class="results" id="tpl-results" role="listbox" hidden></div>
         </div>
         <div class="chosen" id="chosen">
-          <img id="chosen-img" alt="" width="56" height="56">
+          <img id="chosen-img" alt="" width="58" height="58">
           <div><b id="chosen-name">Drakeposting</b><p id="chosen-desc"></p></div>
         </div>
         <div id="lines"></div>
@@ -332,8 +418,7 @@
 
 <section id="mcp" class="dark">
   <div class="wrap">
-    <p class="kicker">MCP server</p>
-    <h2>Give your agent a sense of humor</h2>
+    <h2>Give your agent<br>a sense of <span class="squiggle">humor</span></h2>
     <p class="sub">A remote MCP server with no authentication. Every template comes with a description of what it means and what each line is for, so your agent picks the right one.</p>
     <div class="mcp">
       <div>
@@ -371,14 +456,26 @@
 cargo build --release
 claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="copy" data-copy="#c-local">Copy</button></div>
         </div>
-        <div class="apps"><span class="badge">MCP APPS</span><div><b>Memes you can edit in the chat.</b> In hosts that support MCP Apps, such as Claude, results open in a view where you can change the text, re-render, download, and pick a favorite from a batch.</div></div>
+        <div class="apps"><span class="badge">MCP Apps</span><div><b>Memes you can edit in the chat.</b> In hosts that support MCP Apps, such as Claude, results open in a view where you can change the text, re-render, download, and pick a favorite from a batch.</div></div>
       </div>
-      <div class="tools">
-        <div class="tool-card"><code>list_templates</code><p>Ranked, typo-tolerant search over names, keywords and meanings, or page through all 537.</p></div>
-        <div class="tool-card"><code>get_template</code><p>Full details for one template: what it means, what each line is for, and example text.</p></div>
-        <div class="tool-card"><code>generate_meme</code><p>Render a template with your lines as PNG, JPG, GIF or WebP. Returns the image and its URL.</p></div>
-        <div class="tool-card"><code>generate_memes</code><p>Render up to 10 memes in one call, concurrently, so your agent can offer options.</p></div>
-        <div class="tool-card"><code>list_fonts</code><p>Fonts you can swap in, from Impact to Comic-style handwriting.</p></div>
+      <div class="receipt-wrap">
+        <div class="receipt-shadow"><div class="receipt">
+          <div class="r-head"><b class="caption">memegen.dev</b><span>MCP server · tools</span><span id="r-date"></span></div>
+          <hr>
+          <div class="r-item"><div class="r-line"><code>list_templates</code><span>0.00</span></div><p>Ranked, typo-tolerant search, or page through all 537.</p></div>
+          <div class="r-item"><div class="r-line"><code>get_template</code><span>0.00</span></div><p>What a template means and what each line is for.</p></div>
+          <div class="r-item"><div class="r-line"><code>generate_meme</code><span>0.00</span></div><p>Render as PNG, JPG, GIF or WebP. Returns the image and its URL.</p></div>
+          <div class="r-item"><div class="r-line"><code>generate_memes</code><span>0.00</span></div><p>Up to 10 at once, so your agent can offer options.</p></div>
+          <div class="r-item"><div class="r-line"><code>list_fonts</code><span>0.00</span></div><p>From Impact to Comic-style handwriting.</p></div>
+          <hr>
+          <div class="r-line r-total"><span>Total</span><span>$0.00</span></div>
+          <div class="r-line r-small"><span>API key</span><span>Not required</span></div>
+          <div class="r-line r-small"><span>Sign-up</span><span>Nope</span></div>
+          <p class="r-foot">*** THANK YOU, COME AGAIN ***</p>
+          <div class="barcode"></div>
+        </div></div>
+        <span class="tape"></span>
+        <p class="scribble receipt-note" aria-hidden="true"><svg viewBox="0 0 60 60"><path d="M50 8c-14 2-30 12-34 34"/><path d="M8 34l8 10 9-8"/></svg>five tools. that's<br>the whole menu</p>
       </div>
     </div>
   </div>
@@ -386,16 +483,19 @@ claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="
 
 <section id="api">
   <div class="wrap">
-    <p class="kicker">HTTP API</p>
     <h2>Every meme is a URL</h2>
     <p class="sub">No SDK needed. Put the text in the path and you get an image back, cached at the edge.</p>
     <div class="anatomy">
-      <div class="url-parts" id="anatomy"><span class="p p-base">{{BASE_URL}}/images/</span><span class="p p-tpl">rollsafe</span>/<span class="p p-l1">cant_break_prod</span>/<span class="p p-l2">if_you_only_ship_memes</span>.<span class="p p-ext">png</span></div>
+      <div class="url-parts" id="anatomy"><span class="p p-base">{{BASE_URL}}/images/</span><span class="p p-tpl">rollsafe<i class="ann up" aria-hidden="true"><span>which meme</span><svg viewBox="0 0 40 44"><path d="M30 4c-12 4-20 16-18 34"/><path d="M5 30l7 9 8-7"/></svg></i></span>/<span class="p p-l1">cant_break_prod<i class="ann down" aria-hidden="true"><svg viewBox="0 0 40 44"><path d="M30 40C16 36 10 24 12 6"/><path d="M5 14l7-9 8 7"/></svg><span>top text</span></i></span>/<span class="p p-l2">if_you_only_ship_memes<i class="ann up" aria-hidden="true"><span>bottom text</span><svg viewBox="0 0 40 44"><path d="M30 4c-12 4-20 16-18 34"/><path d="M5 30l7 9 8-7"/></svg></i></span>.<span class="p p-ext">png<i class="ann down flip" aria-hidden="true"><svg viewBox="0 0 40 44"><path d="M30 40C16 36 10 24 12 6"/><path d="M5 14l7-9 8 7"/></svg><span>or jpg, gif, webp</span></i></span></div>
       <div class="legend">
-        <span><i style="background:#ffe9a3"></i>template ID</span>
-        <span><i style="background:#c9ecff"></i>top line</span>
-        <span><i style="background:#ffd6e7"></i>bottom line</span>
-        <span><i style="background:#d7f5d0"></i>png, jpg, gif or webp</span>
+        <span><i style="background:#ffe58a"></i>template ID</span>
+        <span><i style="background:#bfe6ff"></i>top line</span>
+        <span><i style="background:#ffc9de"></i>bottom line</span>
+        <span><i style="background:#ccf2c2"></i>png, jpg, gif or webp</span>
+      </div>
+      <div class="returns">
+        <img loading="lazy" src="/images/rollsafe/cant_break_prod/if_you_only_ship_memes.jpg" alt="Roll Safe meme: can't break prod if you only ship memes" width="420" height="420">
+        <p class="scribble"><span class="arr">←</span> that's what comes back.<br>the whole API, honestly</p>
       </div>
     </div>
     <div class="api-grid">
@@ -410,18 +510,18 @@ claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="
             <tr><td><code>GET /fonts/</code></td><td>Available fonts</td></tr>
           </tbody>
         </table>
-        <p class="hint" style="margin-top:18px"><b>Special characters</b> in the path:</p>
+        <p class="hint" style="margin-top:20px"><b>Special characters</b> in the path:</p>
         <div class="escapes">
-          <div><code>_</code><span>space</span></div>
-          <div><code>__</code><span>_</span></div>
-          <div><code>--</code><span>-</span></div>
-          <div><code>~q</code><span>?</span></div>
-          <div><code>~a</code><span>&amp;</span></div>
-          <div><code>~p</code><span>%</span></div>
-          <div><code>~h</code><span>#</span></div>
-          <div><code>~s</code><span>/</span></div>
-          <div><code>~n</code><span>newline</span></div>
-          <div><code>''</code><span>"</span></div>
+          <div><kbd>_</kbd>space</div>
+          <div><kbd>__</kbd>_</div>
+          <div><kbd>--</kbd>-</div>
+          <div><kbd>~q</kbd>?</div>
+          <div><kbd>~a</kbd>&amp;</div>
+          <div><kbd>~p</kbd>%</div>
+          <div><kbd>~h</kbd>#</div>
+          <div><kbd>~s</kbd>/</div>
+          <div><kbd>~n</kbd>newline</div>
+          <div><kbd>''</kbd>"</div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
@@ -438,19 +538,18 @@ curl {{BASE_URL}}/images/ \
       </div>
     </div>
     <div class="api-links">
-      <a class="btn" href="/docs">Interactive API docs</a>
+      <a class="btn primary" href="/docs">Interactive API docs</a>
       <a class="btn" href="/openapi.json">OpenAPI spec</a>
     </div>
   </div>
 </section>
 
-<section id="templates" style="padding-top:24px">
+<section id="templates">
   <div class="wrap">
     <div class="gallery-head">
-      <div>
-        <p class="kicker">Templates</p>
+      <div class="head">
         <h2>537 classics</h2>
-        <p class="sub">From Drake to Distracted Boyfriend. Click one to try it in the playground.</p>
+        <p class="scribble">(and a few you've<br>never heard of)</p>
       </div>
       <input class="input" id="gallery-search" type="search" placeholder="Search templates…" autocomplete="off" aria-label="Search templates">
     </div>
@@ -462,10 +561,21 @@ curl {{BASE_URL}}/images/ \
 
 <div class="final">
   <div class="wrap">
-    <h2 class="caption">One does not simply<br>make a meme by hand</h2>
-    <div class="ctas">
-      <a class="btn primary" href="#mcp">Connect your agent</a>
-      <a class="btn" href="https://github.com/edenstrom/memegen-rust">Star on GitHub</a>
+    <div>
+      <h2>So let your<br>agent do it</h2>
+      <div class="install">
+        <code><span class="prompt">$ </span><span id="final-cmd">claude mcp add --transport http memegen {{BASE_URL}}/mcp</span></code>
+        <button class="copy" data-copy="#final-cmd">Copy</button>
+      </div>
+      <div class="ctas">
+        <a class="btn dark" href="#mcp">Other clients</a>
+        <a class="btn" href="https://github.com/edenstrom/memegen-rust">Star on GitHub</a>
+      </div>
+    </div>
+    <div class="art">
+      <span class="tape"></span>
+      <img loading="lazy" src="/images/mordor/one_does_not_simply/make_a_meme_by_hand.jpg" alt="One does not simply make a meme by hand" width="600" height="352">
+      <span class="tape"></span>
     </div>
   </div>
 </div>
@@ -520,6 +630,12 @@ document.addEventListener("click", (event) => {
 // Nav border once scrolled.
 const nav = $("#nav");
 addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
+
+// Loop the tape: two copies of each track, scrolled by half its width.
+for (const track of document.querySelectorAll(".track")) track.innerHTML += track.innerHTML;
+
+// Today's date on the receipt.
+$("#r-date").textContent = new Date().toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
 
 // MCP tabs.
 const tabs = [...document.querySelectorAll('[role="tab"]')];
