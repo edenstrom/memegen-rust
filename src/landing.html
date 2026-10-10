@@ -162,6 +162,9 @@
   #lines { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .hint { font-size: 13px; color: var(--fg-2); margin: 14px 0 0; }
+  .toggle { display: flex; gap: 10px; align-items: center; font: 700 14px var(--sans); margin: 14px 0 0; cursor: pointer; }
+  .toggle input { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); cursor: pointer; }
+  .toggle span { font-weight: 400; color: var(--fg-2); }
   .preview { background: var(--card); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 12px 12px 0 var(--ink); overflow: hidden; }
   .stage { background: repeating-conic-gradient(var(--paper-2) 0% 25%, var(--paper) 0% 50%) 0 0 / 24px 24px; display: grid; place-items: center; min-height: 420px; padding: 28px; position: relative; }
   .stage img { max-height: 460px; width: auto; border-radius: 4px; box-shadow: 0 14px 34px rgba(0, 0, 0, .22); transition: opacity .2s; }
@@ -434,6 +437,7 @@
             <select id="font"><option value="">Template default</option></select>
           </div>
         </div>
+        <label class="toggle"><input type="checkbox" id="animate"> Animate text <span>types it out, then holds (GIF or WebP)</span></label>
         <p class="hint">Emoji shortcodes like <code>:fire:</code> work too.</p>
       </div>
       <div class="preview">
@@ -536,7 +540,7 @@ claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="
         <table>
           <thead><tr><th>Route</th><th>What it does</th></tr></thead>
           <tbody>
-            <tr><td><code>GET /images/{id}/{lines…}.{ext}</code></td><td>Render a meme. <code>?font=</code> picks a font</td></tr>
+            <tr><td><code>GET /images/{id}/{lines…}.{ext}</code></td><td>Render a meme. <code>?font=</code> picks a font; <code>?animate_text=true</code> types the text out (GIF/WebP)</td></tr>
             <tr><td><code>POST /images/</code></td><td>Build a meme URL from JSON</td></tr>
             <tr><td><code>GET /templates/</code></td><td>The catalog; <code>?filter=</code> for ranked search</td></tr>
             <tr><td><code>GET /templates/{id}</code></td><td>One template, with its line meanings</td></tr>
@@ -812,7 +816,7 @@ runChat();
 
 // Playground.
 const state = { template: null, timer: 0 };
-const linesBox = $("#lines"), extSelect = $("#ext"), fontSelect = $("#font"), memeImg = $("#meme"), stage = $("#stage");
+const linesBox = $("#lines"), extSelect = $("#ext"), fontSelect = $("#font"), animateBox = $("#animate"), memeImg = $("#meme"), stage = $("#stage");
 const START = { id: "drake", lines: ["Writing memes by hand", "Typing them into a URL"] };
 
 async function fetchJson(url) {
@@ -837,14 +841,17 @@ function chooseTemplate(template, lines) {
     input.addEventListener("input", schedule);
     linesBox.append(input);
   }
-  extSelect.value = extOf(template.example?.url || "") === "gif" ? "gif" : "png";
+  extSelect.value = extOf(template.example?.url || "") === "gif" || animateBox.checked ? "gif" : "png";
   render();
 }
 function currentPath() {
   const lines = [...linesBox.querySelectorAll("input")].map((input) => input.value);
   while (lines.length && lines[lines.length - 1] === "") lines.pop();
   const path = memePath(state.template.id, lines, extSelect.value);
-  return fontSelect.value ? `${path}?font=${encodeURIComponent(fontSelect.value)}` : path;
+  const query = new URLSearchParams();
+  if (fontSelect.value) query.set("font", fontSelect.value);
+  if (animateBox.checked) query.set("animate_text", "true");
+  return query.size ? `${path}?${query}` : path;
 }
 function render() {
   if (!state.template) return;
@@ -858,8 +865,15 @@ function render() {
 const schedule = debounce(render, 250);
 memeImg.addEventListener("load", () => { stage.classList.remove("busy"); $("#meme-err").hidden = true; });
 memeImg.addEventListener("error", () => { stage.classList.remove("busy"); $("#meme-err").hidden = false; $("#meme-err").textContent = "Couldn't render that one. Try different text or format."; });
-extSelect.addEventListener("change", render);
+extSelect.addEventListener("change", () => {
+  if (!["gif", "webp"].includes(extSelect.value)) animateBox.checked = false;
+  render();
+});
 fontSelect.addEventListener("change", render);
+animateBox.addEventListener("change", () => {
+  if (animateBox.checked && !["gif", "webp"].includes(extSelect.value)) extSelect.value = "gif";
+  render();
+});
 $("#copy-md").addEventListener("click", (event) => copyText(event.currentTarget, `![${state.template.name}](${BASE + currentPath()})`));
 
 fetchJson("/fonts/").then((fonts) => {

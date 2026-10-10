@@ -6,6 +6,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
 - PNG, JPG, GIF and WebP output, including animated GIF/WebP templates
+- Animated text: the text types out one character at a time, then holds the finished meme for 3 seconds before looping, on static and animated templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
 - Also runs on [Cloudflare Workers](#cloudflare-workers), with the API and a remote MCP endpoint
@@ -59,7 +60,7 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `list_templates` | Templates with their ID, name, description (what it means and what each line is for), line count and example text. With `filter`, a ranked search (word order doesn't matter, typos are tolerated) returning the top 20. Without it, every template, 100 per page. Returns `{templates, total, next_offset}`; pass `next_offset` back as `offset` for the next page (`limit` sets the page size, up to 100). `animated` limits to animated or static templates |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
-| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (type the text out; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size |
 | `generate_memes` | Render up to 10 memes in one call: `memes` is a list of `generate_meme` arguments, rendered concurrently. Returns each image and its summary (with `index`) in order, or an `error` for entries that failed. The inline images share the 1 MB limit, so each is downscaled further as the batch grows |
 
 ### MCP Apps
@@ -74,15 +75,19 @@ Start the server with `memegen serve` (or just `memegen`). `/` is a landing page
 
 | Route | Description |
 |---|---|
-| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp}` | Render a meme. `?font=` sets the font; non-canonical text redirects with a 301 |
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out (gif/webp only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
-| `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, redirect}` (JSON or form) |
+| `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, redirect}` (JSON or form) |
 | `GET /templates/`, `GET /templates/{id}` | Template catalog (`?filter=` for a ranked search, `?animated=`) |
 | `POST /templates/{id}` | Build a meme URL for a template |
 | `GET /fonts/`, `GET /fonts/{id}` | Fonts |
 
 Text escapes in URLs: `_` → space, `__` → `_`, `--` → `-`, `~q` → `?`, `~a` → `&`, `~p` → `%`, `~h` → `#`, `~s` → `/`, `~b` → `\`, `~l` → `<`, `~g` → `>`, `~n` → newline, `''` → `"`.
+
+### Animated text
+
+With `animate_text`, the lines are typed out in order, one mark at a time (letters and emoji; spaces don't take a step), then the finished meme holds for 3 seconds before the GIF loops. The layout is the finished meme's, so text doesn't shift as it appears. On a static template each mark takes 60 ms and the last frame holds; on an animated template the text types at the same speed over the template's frames, which keep playing through the hold. Long text types several marks per frame to stay within 60 typing frames (24 on Workers). Text boxes' `start`/`stop` timing is ignored.
 
 ## Configuration
 
@@ -124,7 +129,7 @@ claude mcp add --transport http memegen https://memegen.<account>.workers.dev/mc
 
 ## Not ported
 
-Watermarks, previews, error images, custom backgrounds and overlays, size/color/layout parameters, animated text, legacy shortcut redirects, and the remote API-key/analytics integrations.
+Watermarks, previews, error images, custom backgrounds and overlays, size/color/layout parameters, upstream's per-line animated text timing (`start`/`stop`; this port's `animate_text` is a different, typewriter effect), legacy shortcut redirects, and the remote API-key/analytics integrations.
 
 ## Performance
 

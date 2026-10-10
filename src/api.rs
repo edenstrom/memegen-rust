@@ -170,6 +170,7 @@ struct Payload {
     text: Vec<String>,
     font: String,
     extension: String,
+    animate_text: bool,
     redirect: bool,
 }
 
@@ -199,9 +200,8 @@ fn parse_payload(headers: &HeaderMap, body: &Bytes) -> Payload {
                 "text_lines" | "text_lines[]" => text_lines.push(value),
                 "font" => payload.font = value,
                 "extension" => payload.extension = value,
-                "redirect" => {
-                    payload.redirect = matches!(value.to_lowercase().as_str(), "1" | "true" | "yes")
-                }
+                "animate_text" => payload.animate_text = truthy(&value),
+                "redirect" => payload.redirect = truthy(&value),
                 _ => {}
             }
         }
@@ -225,13 +225,19 @@ fn parse_payload(headers: &HeaderMap, body: &Bytes) -> Payload {
     };
     payload.font = get(&["font"]).map(json_string).unwrap_or_default();
     payload.extension = get(&["extension"]).map(json_string).unwrap_or_default();
-    payload.redirect = match map.get("redirect") {
+    let boolean = |name: &str| match map.get(name) {
         Some(Value::Bool(b)) => *b,
-        Some(Value::String(s)) => matches!(s.to_lowercase().as_str(), "1" | "true" | "yes"),
+        Some(Value::String(s)) => truthy(s),
         Some(Value::Number(n)) => n.as_f64().unwrap_or(0.0) != 0.0,
         _ => false,
     };
+    payload.animate_text = boolean("animate_text");
+    payload.redirect = boolean("redirect");
     payload
+}
+
+fn truthy(value: &str) -> bool {
+    matches!(value.to_lowercase().as_str(), "1" | "true" | "yes")
 }
 
 fn generate_url(app: &App, template_id: &str, payload: &Payload) -> Response {
@@ -240,6 +246,7 @@ fn generate_url(app: &App, template_id: &str, payload: &Payload) -> Response {
         &payload.text,
         &payload.font,
         &payload.extension,
+        payload.animate_text,
     );
     if payload.redirect {
         return redirect(StatusCode::FOUND, &url);
@@ -312,6 +319,7 @@ async fn blank_image(
         lines: vec![],
         font: params.get("font").cloned().unwrap_or_default(),
         extension: extension.to_string(),
+        animate_text: false,
     };
     render_response(&app, request).await
 }
@@ -349,6 +357,7 @@ async fn meme_image(
         lines: slug::decode(&normalized),
         font: params.get("font").cloned().unwrap_or_default(),
         extension: extension.to_string(),
+        animate_text: flag(&params, "animate_text").unwrap_or(false),
     };
     render_response(&app, request).await
 }
@@ -364,10 +373,13 @@ mod tests {
             header::CONTENT_TYPE,
             HeaderValue::from_static("application/json"),
         );
-        let body = Bytes::from(r#"{"template_id": "fry", "text": ["a", "b"], "redirect": true}"#);
+        let body = Bytes::from(
+            r#"{"template_id": "fry", "text": ["a", "b"], "animate_text": true, "redirect": true}"#,
+        );
         let payload = parse_payload(&headers, &body);
         assert_eq!(payload.template_id.as_deref(), Some("fry"));
         assert_eq!(payload.text, vec!["a", "b"]);
+        assert!(payload.animate_text);
         assert!(payload.redirect);
     }
 
@@ -382,5 +394,6 @@ mod tests {
         let payload = parse_payload(&headers, &body);
         assert_eq!(payload.text, vec!["a", "b"]);
         assert_eq!(payload.extension, "jpg");
+        assert!(!payload.animate_text);
     }
 }

@@ -119,6 +119,9 @@ pub struct GenerateMemeRequest {
     /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
     #[serde(default)]
     pub font: Option<String>,
+    /// Type the text out one character at a time, then hold the finished meme for a few seconds before looping. Works with any template; needs "gif" (the default when this is set) or "webp".
+    #[serde(default)]
+    pub animate_text: Option<bool>,
     /// Absolute file path to write the image to, e.g. "/tmp/meme.png".
     #[cfg(not(target_arch = "wasm32"))]
     #[serde(default)]
@@ -392,10 +395,14 @@ impl MemegenMcp {
                 request.template_id
             ));
         };
+        let animate_text = request.animate_text.unwrap_or(false);
         let extension = request
             .extension
             .filter(|ext| !ext.is_empty())
             .unwrap_or_else(|| {
+                if animate_text {
+                    return config.default_animated_extension.clone();
+                }
                 template
                     .default_extension(
                         &config.default_static_extension,
@@ -414,6 +421,7 @@ impl MemegenMcp {
                 lines: request.text.clone(),
                 font: font.clone(),
                 extension: extension.clone(),
+                animate_text,
             })
             .await
             .map_err(|error| error.to_string())?;
@@ -427,7 +435,8 @@ impl MemegenMcp {
             ) {
                 (Some(path), _) => Some(save(path.into(), &rendered.bytes).await?),
                 (None, Some(output)) => {
-                    let key = files::key(&template.id, &request.text, &font, &extension);
+                    let key =
+                        files::key(&template.id, &request.text, &font, &extension, animate_text);
                     let (dir, existing) = (output.dir.clone(), key.clone());
                     let reused = tokio::task::spawn_blocking(move || files::reuse(&dir, &existing))
                         .await
@@ -447,9 +456,9 @@ impl MemegenMcp {
         #[cfg(target_arch = "wasm32")]
         let saved_to: Option<String> = None;
 
-        let (url, _) = self
-            .app
-            .build_url(&template.id, &request.text, &font, &extension);
+        let (url, _) =
+            self.app
+                .build_url(&template.id, &request.text, &font, &extension, animate_text);
         // Over stdio nothing serves localhost URLs, so return only the file.
         #[cfg(not(target_arch = "wasm32"))]
         let url = Some(url).filter(|_| {

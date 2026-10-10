@@ -26,9 +26,19 @@ pub fn default_dir() -> PathBuf {
 }
 
 /// `{template}-{hash}.{extension}`; the same request maps to the same key.
-pub fn key(template_id: &str, lines: &[String], font: &str, extension: &str) -> String {
+pub fn key(
+    template_id: &str,
+    lines: &[String],
+    font: &str,
+    extension: &str,
+    animate_text: bool,
+) -> String {
     let mut hasher = DefaultHasher::new();
     (template_id, lines, font, extension).hash(&mut hasher);
+    // Only hashed when set, so keys of memes saved before it existed hold.
+    if animate_text {
+        animate_text.hash(&mut hasher);
+    }
     format!("{template_id}-{:016x}.{extension}", hasher.finish())
 }
 
@@ -143,7 +153,7 @@ mod tests {
 
     fn name(template_id: &str, text: &[&str], font: &str, extension: &str) -> String {
         file_name(
-            &key(template_id, &lines(text), font, extension),
+            &key(template_id, &lines(text), font, extension, false),
             SystemTime::now(),
         )
     }
@@ -157,10 +167,11 @@ mod tests {
 
     #[test]
     fn keys_are_stable_and_distinct() {
-        let a = key("fry", &lines(&["a", "b"]), "", "gif");
-        assert_eq!(a, key("fry", &lines(&["a", "b"]), "", "gif"));
-        assert_ne!(a, key("fry", &lines(&["a", "c"]), "", "gif"));
-        assert_ne!(a, key("fry", &lines(&["a", "b"]), "comic", "gif"));
+        let a = key("fry", &lines(&["a", "b"]), "", "gif", false);
+        assert_eq!(a, key("fry", &lines(&["a", "b"]), "", "gif", false));
+        assert_ne!(a, key("fry", &lines(&["a", "c"]), "", "gif", false));
+        assert_ne!(a, key("fry", &lines(&["a", "b"]), "comic", "gif", false));
+        assert_ne!(a, key("fry", &lines(&["a", "b"]), "", "gif", true));
         assert!(a.starts_with("fry-") && a.ends_with(".gif"));
         assert!(is_saved_meme(&a));
         assert!(is_saved_meme(&name("fry", &["a"], "", "gif")));
@@ -171,8 +182,8 @@ mod tests {
     fn file_names_sort_by_time() {
         let earlier = SystemTime::now();
         let later = earlier + Duration::from_secs(24 * 60 * 60 + 1);
-        let a = file_name(&key("zzz", &[], "", "png"), earlier);
-        let b = file_name(&key("aaa", &[], "", "png"), later);
+        let a = file_name(&key("zzz", &[], "", "png", false), earlier);
+        let b = file_name(&key("aaa", &[], "", "png", false), later);
         assert!(a < b, "{a} should sort before {b}");
         let date = &a[..10];
         assert!(date.starts_with("20") && date.as_bytes()[4] == b'-');
@@ -193,7 +204,7 @@ mod tests {
     #[test]
     fn reuses_saved_memes_from_any_date() {
         let dir = temp_dir("reuse");
-        let fry = key("fry", &lines(&["a"]), "", "png");
+        let fry = key("fry", &lines(&["a"]), "", "png", false);
         assert_eq!(reuse(&dir, &fry), None);
 
         let week_ago = SystemTime::now() - MAX_AGE + Duration::from_secs(60);
@@ -209,10 +220,13 @@ mod tests {
         let modified = std::fs::metadata(&saved).unwrap().modified().unwrap();
         assert!(modified > week_ago + Duration::from_secs(60));
 
-        let legacy = key("fry", &lines(&["b"]), "", "png");
+        let legacy = key("fry", &lines(&["b"]), "", "png", false);
         std::fs::write(dir.join(&legacy), b"image").unwrap();
         assert_eq!(reuse(&dir, &legacy), Some(dir.join(&legacy)));
-        assert_eq!(reuse(&dir, &key("fry", &lines(&["a"]), "", "gif")), None);
+        assert_eq!(
+            reuse(&dir, &key("fry", &lines(&["a"]), "", "gif", false)),
+            None
+        );
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
