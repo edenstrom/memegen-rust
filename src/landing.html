@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>memegen.dev: memes for humans and agents</title>
+<meta name="description" content="537 meme templates behind a free MCP server and HTTP API. Ask Claude for a meme, or build one with a URL. No API key.">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#ffd400">
+<link rel="canonical" href="{{BASE_URL}}/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="memegen.dev: memes for humans and agents">
+<meta property="og:description" content="537 meme templates behind a free MCP server and HTTP API. No API key.">
+<meta property="og:url" content="{{BASE_URL}}/">
+<meta property="og:image" content="{{BASE_URL}}/images/drake/Opening_an_image_editor/Asking_Claude_for_a_meme.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-2: #f1ede3;
+    --card: #fff;
+    --fg: #111;
+    --fg-2: #5b5852;
+    --line: #e2ddd1;
+    --accent: #ffd400;
+    --accent-ink: #111;
+    --ink: #121214;
+    --ink-2: #1c1c20;
+    --ink-line: #2e2e35;
+    --ink-fg: #f4f3ef;
+    --ink-fg-2: #a3a1a8;
+    --radius: 14px;
+    --meme: Impact, Haettenschweiler, "Arial Narrow Bold", "Franklin Gothic Bold", sans-serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; }
+  code, pre, kbd { font-family: var(--mono); font-size: .9em; }
+  .wrap { width: min(1160px, 100% - 40px); margin: 0 auto; }
+  [hidden] { display: none !important; }
+
+  /* Meme caption type: white fill, heavy black outline. */
+  .caption {
+    font-family: var(--meme); text-transform: uppercase; color: #fff; letter-spacing: .01em; line-height: .98;
+    -webkit-text-stroke: .09em #000; paint-order: stroke fill;
+    text-shadow: 0 .05em 0 #000;
+  }
+
+  /* Nav */
+  nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+  nav.scrolled { border-bottom-color: var(--line); }
+  nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+  .logo { font-size: 28px; text-decoration: none; -webkit-text-stroke-width: .07em; text-shadow: none; }
+  .logo span { color: var(--accent); }
+  nav .links { display: flex; gap: 22px; margin-left: auto; align-items: center; font-size: 15px; }
+  nav .links a { text-decoration: none; color: var(--fg-2); }
+  nav .links a:hover { color: var(--fg); }
+  .gh { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; color: var(--fg) !important; }
+  .gh svg { width: 16px; height: 16px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 8px; font: 600 15px/1 var(--sans); border-radius: 10px; padding: 13px 18px; text-decoration: none; cursor: pointer; border: 2px solid var(--fg); background: var(--card); color: var(--fg); transition: transform .08s, box-shadow .08s; box-shadow: 3px 3px 0 var(--fg); }
+  .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--fg); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--fg); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.small { padding: 8px 12px; font-size: 13px; border-width: 1.5px; box-shadow: 2px 2px 0 var(--fg); border-radius: 8px; }
+
+  /* Hero */
+  .hero { padding: 72px 0 56px; }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--fg-2); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px 5px 8px; }
+  .eyebrow b { background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 1px 8px; font-size: 11px; letter-spacing: .04em; }
+  h1 { font-size: clamp(56px, 8.4vw, 104px); margin: 22px 0 22px; font-weight: 400; }
+  h1 .bottom { display: block; }
+  .lede { font-size: 20px; color: var(--fg-2); max-width: 34ch; margin: 0 0 30px; }
+  .lede strong { color: var(--fg); font-weight: 600; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 14px; }
+  .install { margin-top: 26px; display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--ink-fg); border-radius: 12px; padding: 12px 12px 12px 16px; max-width: 620px; font-family: var(--mono); font-size: 13.5px; }
+  .install code { flex: 1; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  .install .prompt { color: var(--accent); user-select: none; }
+
+  /* Hero chat mock */
+  .chat { background: var(--card); border: 2px solid var(--fg); border-radius: 18px; box-shadow: 8px 8px 0 var(--fg); overflow: hidden; }
+  .chat-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--fg-2); }
+  .dots { display: flex; gap: 6px; margin-right: 6px; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+  .chat-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 470px; }
+  .bubble { align-self: flex-end; background: var(--bg-2); border-radius: 16px 16px 4px 16px; padding: 10px 14px; max-width: 85%; font-size: 15px; min-height: 44px; }
+  .bubble .cursor { display: inline-block; width: 2px; height: 1.05em; background: var(--fg); vertical-align: -2px; margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .tool { display: inline-flex; align-items: center; gap: 8px; font: 12.5px var(--mono); color: var(--fg-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; align-self: flex-start; transition: opacity .3s; }
+  .tool .spin { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--fg); animation: spin .7s linear infinite; }
+  .tool.done .spin { animation: none; border-color: #16a34a; background: #16a34a; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .result { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--bg-2); align-self: flex-start; max-width: 100%; transition: opacity .35s, transform .35s; }
+  .result img { max-height: 330px; width: auto; }
+  .fade { opacity: 0; transform: translateY(6px); }
+
+  /* Stats */
+  .stats { border-block: 2px solid var(--fg); background: var(--accent); }
+  .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .stat { padding: 22px 18px; border-left: 2px solid var(--fg); }
+  .stat:first-child { border-left: 0; }
+  .stat b { display: block; font: 400 40px/1 var(--meme); letter-spacing: .01em; }
+  .stat span { font-size: 14px; font-weight: 500; }
+
+  /* Sections */
+  section { padding: 96px 0; scroll-margin-top: 40px; }
+  .kicker { font: 700 13px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--fg-2); margin: 0 0 10px; }
+  h2 { font: 400 clamp(40px, 5vw, 60px)/1 var(--meme); text-transform: uppercase; margin: 0 0 16px; letter-spacing: .005em; }
+  .sub { font-size: 18px; color: var(--fg-2); max-width: 60ch; margin: 0 0 40px; }
+  .dark { background: var(--ink); color: var(--ink-fg); }
+  .dark .kicker, .dark .sub { color: var(--ink-fg-2); }
+
+  /* Playground */
+  .play { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 28px; align-items: start; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  label.field { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; }
+  .input, select { width: 100%; font: 15px var(--sans); color: var(--fg); background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; outline: none; transition: border-color .15s, box-shadow .15s; }
+  .input:focus, select:focus { border-color: var(--fg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent); }
+  .search { position: relative; }
+  .results { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px); background: var(--card); border: 1.5px solid var(--fg); border-radius: 12px; box-shadow: 4px 4px 0 var(--fg); max-height: 340px; overflow-y: auto; padding: 6px; }
+  .results button { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 6px; cursor: pointer; font: inherit; color: inherit; }
+  .results button:hover, .results button.active { background: var(--bg-2); }
+  .results img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: var(--bg-2); flex: none; }
+  .results b { display: block; font-size: 14px; }
+  .results small { color: var(--fg-2); font-size: 12px; }
+  .chosen { display: flex; gap: 12px; margin: 16px 0 18px; padding: 12px; background: var(--bg); border-radius: 10px; }
+  .chosen img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex: none; }
+  .chosen b { font-size: 15px; }
+  .chosen p { margin: 2px 0 0; font-size: 13px; color: var(--fg-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  #lines { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hint { font-size: 12.5px; color: var(--fg-2); margin: 14px 0 0; }
+  .preview { background: var(--card); border: 2px solid var(--fg); border-radius: 18px; box-shadow: 8px 8px 0 var(--fg); overflow: hidden; }
+  .stage { background: repeating-conic-gradient(var(--bg-2) 0% 25%, var(--bg) 0% 50%) 0 0 / 22px 22px; display: grid; place-items: center; min-height: 380px; padding: 24px; position: relative; }
+  .stage img { max-height: 440px; width: auto; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.18); transition: opacity .2s; }
+  .stage.busy img { opacity: .55; }
+  .stage .err { position: absolute; bottom: 12px; left: 12px; right: 12px; text-align: center; font-size: 13px; color: #b91c1c; }
+  .urlbar { display: flex; gap: 8px; align-items: center; padding: 14px; border-top: 2px solid var(--fg); background: var(--card); flex-wrap: wrap; }
+  .urlbar code { flex: 1 1 260px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13px; white-space: nowrap; overflow-x: auto; scrollbar-width: thin; }
+
+  /* MCP */
+  .mcp { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 40px; align-items: start; }
+  .endpoint { display: flex; align-items: center; gap: 12px; background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: 12px; padding: 14px 14px 14px 18px; margin-bottom: 22px; }
+  .endpoint span { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-fg-2); }
+  .endpoint code { flex: 1; font-size: 16px; color: var(--accent); }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--ink-line); }
+  .tabs button { font: 600 14px var(--sans); color: var(--ink-fg-2); background: none; border: 0; padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button[aria-selected="true"] { color: var(--ink-fg); border-bottom-color: var(--accent); }
+  .tabpanel { padding: 20px 0 0; }
+  .tabpanel p { color: var(--ink-fg-2); margin: 0 0 12px; font-size: 15px; }
+  .tabpanel p code { color: var(--ink-fg); }
+  .code { position: relative; background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: 12px; }
+  .code pre { margin: 0; padding: 16px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; color: var(--ink-fg); }
+  .code .copy { position: absolute; top: 9px; right: 9px; }
+  .copy { font: 600 12px var(--sans); color: var(--ink-fg); background: var(--ink-line); border: 0; border-radius: 7px; padding: 6px 10px; cursor: pointer; }
+  .copy:hover { background: #3c3c45; }
+  .copy.ok { background: #16a34a; color: #fff; }
+  .install .copy { background: #2c2c33; }
+  .tok-k { color: #ffd400; } .tok-s { color: #9fe0a0; } .tok-c { color: #7d7b84; }
+  .tools { display: flex; flex-direction: column; gap: 10px; }
+  .tool-card { background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: 12px; padding: 14px 16px; }
+  .tool-card code { color: var(--accent); font-size: 14px; font-weight: 600; }
+  .tool-card p { margin: 4px 0 0; color: var(--ink-fg-2); font-size: 14px; }
+  .apps { margin-top: 18px; display: flex; gap: 14px; align-items: flex-start; background: color-mix(in srgb, var(--accent) 12%, var(--ink-2)); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--ink-line)); border-radius: 12px; padding: 16px; font-size: 14px; color: var(--ink-fg-2); }
+  .apps b { color: var(--ink-fg); }
+  .apps .badge { flex: none; background: var(--accent); color: var(--accent-ink); font: 400 18px/1 var(--meme); padding: 6px 8px; border-radius: 6px; }
+
+  /* API */
+  .anatomy { background: var(--card); border: 2px solid var(--fg); border-radius: 16px; box-shadow: 6px 6px 0 var(--fg); padding: 28px; margin-bottom: 28px; }
+  .url-parts { font: 500 clamp(14px, 1.9vw, 22px)/1.5 var(--mono); overflow-wrap: anywhere; }
+  .url-parts .p { border-radius: 6px; padding: 1px 4px; }
+  .p-base { color: var(--fg-2); }
+  .p-tpl { background: #ffe9a3; }
+  .p-l1 { background: #c9ecff; }
+  .p-l2 { background: #ffd6e7; }
+  .p-ext { background: #d7f5d0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; font-size: 14px; color: var(--fg-2); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .api-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+  .api-grid .code { background: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-2); }
+  td code { background: var(--bg-2); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
+  .escapes { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 14px; }
+  .escapes div { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; }
+  .escapes code { font-weight: 600; }
+  .escapes span { color: var(--fg-2); }
+  .api-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+
+  /* Gallery */
+  .gallery-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 28px; }
+  .gallery-head .sub { margin: 0; }
+  .gallery-head .input { width: 320px; background: var(--card); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; font: inherit; color: inherit; display: flex; flex-direction: column; transition: transform .12s, box-shadow .12s, border-color .12s; }
+  .tile:hover { transform: translateY(-3px); border-color: var(--fg); box-shadow: 4px 4px 0 var(--fg); }
+  .tile .thumb { aspect-ratio: 1; background: var(--bg-2); display: grid; place-items: center; overflow: hidden; }
+  .tile .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .tile .meta { padding: 10px 12px 12px; }
+  .tile b { font-size: 14px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile small { display: block; color: var(--fg-2); font: 12px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .more { display: flex; justify-content: center; margin-top: 32px; }
+  .empty { color: var(--fg-2); padding: 30px 0; }
+
+  /* CTA + footer */
+  .final { text-align: center; padding: 110px 0; background: var(--accent); border-top: 2px solid var(--fg); }
+  .final h2 { font-size: clamp(48px, 7vw, 92px); margin-bottom: 26px; }
+  .final .btn { box-shadow: 4px 4px 0 var(--fg); }
+  .final .ctas { justify-content: center; }
+  footer { background: var(--ink); color: var(--ink-fg-2); font-size: 14px; padding: 36px 0; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer a { color: var(--ink-fg); }
+
+  @media (max-width: 980px) {
+    .hero .wrap, .play, .mcp, .api-grid { grid-template-columns: minmax(0, 1fr); }
+    .gallery-head .input { width: 100%; }
+    .lede { font-size: 18px; }
+    .hero { padding-top: 40px; }
+    .chat-body { min-height: 0; }
+    .stats .wrap { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(3) { border-left: 0; }
+    .stat:nth-child(n+3) { border-top: 2px solid var(--fg); }
+    nav .links a:not(.gh) { display: none; }
+    section { padding: 72px 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="logo caption" href="/">memegen<span>.dev</span></a>
+    <div class="links">
+      <a href="#playground">Playground</a>
+      <a href="#mcp">MCP</a>
+      <a href="#api">API</a>
+      <a href="#templates">Templates</a>
+      <a class="gh" href="https://github.com/edenstrom/memegen-rust"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow"><b>MCP</b> Works in Claude, Cursor, VS Code and friends</span>
+      <h1 class="caption">Memes for<span class="bottom">your agent</span></h1>
+      <p class="lede"><strong>537 meme templates</strong> behind a free MCP server and HTTP API. Ask your agent for a meme, or build one with a URL. No API key, no sign-up.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#mcp">Connect to Claude</a>
+        <a class="btn" href="#playground">Make a meme</a>
+      </div>
+      <div class="install">
+        <code><span class="prompt">$ </span><span id="install-cmd">claude mcp add --transport http memegen {{BASE_URL}}/mcp</span></code>
+        <button class="copy" data-copy="#install-cmd">Copy</button>
+      </div>
+    </div>
+    <div class="chat" aria-hidden="true">
+      <div class="chat-head"><div class="dots"><i></i><i></i><i></i></div>Your agent</div>
+      <div class="chat-body">
+        <div class="bubble"><span id="chat-prompt"></span><span class="cursor"></span></div>
+        <div class="tool fade" id="chat-tool"><span class="spin"></span><span id="chat-tool-text">generate_meme</span></div>
+        <div class="result fade" id="chat-result"><img id="chat-img" alt="" width="460" height="460"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><b>537</b><span>templates, each described for agents</span></div>
+    <div class="stat"><b>&lt;1 ms</b><span>to render a new meme natively</span></div>
+    <div class="stat"><b>GIF + WebP</b><span>animated templates, plus PNG and JPG</span></div>
+    <div class="stat"><b>0 keys</b><span>free and open source, written in Rust</span></div>
+  </div>
+</div>
+
+<section id="playground">
+  <div class="wrap">
+    <p class="kicker">Playground</p>
+    <h2>Make one right now</h2>
+    <p class="sub">Pick a template, type your lines, and the URL is the meme. Paste it anywhere that shows images.</p>
+    <div class="play">
+      <div class="panel">
+        <label class="field" for="tpl-search">Template</label>
+        <div class="search">
+          <input class="input" id="tpl-search" type="search" placeholder="Search: drake, surprised, choosing…" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tpl-results">
+          <div class="results" id="tpl-results" role="listbox" hidden></div>
+        </div>
+        <div class="chosen" id="chosen">
+          <img id="chosen-img" alt="" width="56" height="56">
+          <div><b id="chosen-name">Drakeposting</b><p id="chosen-desc"></p></div>
+        </div>
+        <div id="lines"></div>
+        <div class="row">
+          <div>
+            <label class="field" for="ext">Format</label>
+            <select id="ext"><option>png</option><option>jpg</option><option>gif</option><option>webp</option></select>
+          </div>
+          <div>
+            <label class="field" for="font">Font</label>
+            <select id="font"><option value="">Template default</option></select>
+          </div>
+        </div>
+        <p class="hint">Emoji shortcodes like <code>:fire:</code> work too.</p>
+      </div>
+      <div class="preview">
+        <div class="stage" id="stage"><img id="meme" alt="Meme preview"><div class="err" id="meme-err" hidden></div></div>
+        <div class="urlbar">
+          <code id="meme-url"></code>
+          <button class="btn small" data-copy="#meme-url">Copy URL</button>
+          <button class="btn small" id="copy-md">Copy Markdown</button>
+          <a class="btn small" id="open" target="_blank" rel="noopener">Open</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mcp" class="dark">
+  <div class="wrap">
+    <p class="kicker">MCP server</p>
+    <h2>Give your agent a sense of humor</h2>
+    <p class="sub">A remote MCP server with no authentication. Every template comes with a description of what it means and what each line is for, so your agent picks the right one.</p>
+    <div class="mcp">
+      <div>
+        <div class="endpoint"><span>Endpoint</span><code id="endpoint">{{BASE_URL}}/mcp</code><button class="copy" data-copy="#endpoint">Copy</button></div>
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" aria-controls="tab-cc">Claude Code</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-claude">Claude.ai &amp; Desktop</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-cursor">Cursor</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-vscode">VS Code</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-local">Run locally</button>
+        </div>
+        <div class="tabpanel" id="tab-cc" role="tabpanel">
+          <p>Run this once, then ask Claude for a meme.</p>
+          <div class="code"><pre id="c-cc">claude mcp add --transport http memegen {{BASE_URL}}/mcp</pre><button class="copy" data-copy="#c-cc">Copy</button></div>
+        </div>
+        <div class="tabpanel" id="tab-claude" role="tabpanel" hidden>
+          <p>Open <b>Settings → Connectors</b>, choose <b>Add custom connector</b>, and paste the endpoint. Memes then show up in an interactive view right in the chat.</p>
+          <div class="code"><pre id="c-claude">{{BASE_URL}}/mcp</pre><button class="copy" data-copy="#c-claude">Copy</button></div>
+        </div>
+        <div class="tabpanel" id="tab-cursor" role="tabpanel" hidden>
+          <p>Add this to <code>~/.cursor/mcp.json</code>.</p>
+          <div class="code"><pre id="c-cursor">{
+  <span class="tok-k">"mcpServers"</span>: {
+    <span class="tok-k">"memegen"</span>: { <span class="tok-k">"url"</span>: <span class="tok-s">"{{BASE_URL}}/mcp"</span> }
+  }
+}</pre><button class="copy" data-copy="#c-cursor">Copy</button></div>
+        </div>
+        <div class="tabpanel" id="tab-vscode" role="tabpanel" hidden>
+          <p>Add the server from your terminal.</p>
+          <div class="code"><pre id="c-vscode">code --add-mcp '{"name":"memegen","type":"http","url":"{{BASE_URL}}/mcp"}'</pre><button class="copy" data-copy="#c-vscode">Copy</button></div>
+        </div>
+        <div class="tabpanel" id="tab-local" role="tabpanel" hidden>
+          <p>Build the binary and run it over stdio. Memes are saved to a local cache, and a new one takes about half a millisecond.</p>
+          <div class="code"><pre id="c-local"><span class="tok-c"># in a clone of github.com/edenstrom/memegen-rust</span>
+cargo build --release
+claude mcp add memegen -- "$PWD/target/release/memegen" mcp</pre><button class="copy" data-copy="#c-local">Copy</button></div>
+        </div>
+        <div class="apps"><span class="badge">MCP APPS</span><div><b>Memes you can edit in the chat.</b> In hosts that support MCP Apps, such as Claude, results open in a view where you can change the text, re-render, download, and pick a favorite from a batch.</div></div>
+      </div>
+      <div class="tools">
+        <div class="tool-card"><code>list_templates</code><p>Ranked, typo-tolerant search over names, keywords and meanings, or page through all 537.</p></div>
+        <div class="tool-card"><code>get_template</code><p>Full details for one template: what it means, what each line is for, and example text.</p></div>
+        <div class="tool-card"><code>generate_meme</code><p>Render a template with your lines as PNG, JPG, GIF or WebP. Returns the image and its URL.</p></div>
+        <div class="tool-card"><code>generate_memes</code><p>Render up to 10 memes in one call, concurrently, so your agent can offer options.</p></div>
+        <div class="tool-card"><code>list_fonts</code><p>Fonts you can swap in, from Impact to Comic-style handwriting.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="api">
+  <div class="wrap">
+    <p class="kicker">HTTP API</p>
+    <h2>Every meme is a URL</h2>
+    <p class="sub">No SDK needed. Put the text in the path and you get an image back, cached at the edge.</p>
+    <div class="anatomy">
+      <div class="url-parts" id="anatomy"><span class="p p-base">{{BASE_URL}}/images/</span><span class="p p-tpl">rollsafe</span>/<span class="p p-l1">cant_break_prod</span>/<span class="p p-l2">if_you_only_ship_memes</span>.<span class="p p-ext">png</span></div>
+      <div class="legend">
+        <span><i style="background:#ffe9a3"></i>template ID</span>
+        <span><i style="background:#c9ecff"></i>top line</span>
+        <span><i style="background:#ffd6e7"></i>bottom line</span>
+        <span><i style="background:#d7f5d0"></i>png, jpg, gif or webp</span>
+      </div>
+    </div>
+    <div class="api-grid">
+      <div class="panel">
+        <table>
+          <thead><tr><th>Route</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /images/{id}/{lines…}.{ext}</code></td><td>Render a meme. <code>?font=</code> picks a font</td></tr>
+            <tr><td><code>POST /images/</code></td><td>Build a meme URL from JSON</td></tr>
+            <tr><td><code>GET /templates/</code></td><td>The catalog; <code>?filter=</code> for ranked search</td></tr>
+            <tr><td><code>GET /templates/{id}</code></td><td>One template, with its line meanings</td></tr>
+            <tr><td><code>GET /fonts/</code></td><td>Available fonts</td></tr>
+          </tbody>
+        </table>
+        <p class="hint" style="margin-top:18px"><b>Special characters</b> in the path:</p>
+        <div class="escapes">
+          <div><code>_</code><span>space</span></div>
+          <div><code>__</code><span>_</span></div>
+          <div><code>--</code><span>-</span></div>
+          <div><code>~q</code><span>?</span></div>
+          <div><code>~a</code><span>&amp;</span></div>
+          <div><code>~p</code><span>%</span></div>
+          <div><code>~h</code><span>#</span></div>
+          <div><code>~s</code><span>/</span></div>
+          <div><code>~n</code><span>newline</span></div>
+          <div><code>''</code><span>"</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="code"><pre id="c-curl"><span class="tok-c"># Download a meme</span>
+curl -o meme.png \
+  {{BASE_URL}}/images/fry/not_sure_if_bug/or_feature.png</pre><button class="copy" data-copy="#c-curl">Copy</button></div>
+        <div class="code"><pre id="c-post"><span class="tok-c"># Or let the API encode the text for you</span>
+curl {{BASE_URL}}/images/ \
+  -H 'Content-Type: application/json' \
+  -d '{"template_id": "pigeon",
+       "text": ["Me", "A JSON API", "Is this a meme?"]}'</pre><button class="copy" data-copy="#c-post">Copy</button></div>
+        <div class="code"><pre id="c-md"><span class="tok-c"># Drop one into a README or PR</span>
+![]({{BASE_URL}}/images/buzz/tests/tests_everywhere.gif)</pre><button class="copy" data-copy="#c-md">Copy</button></div>
+      </div>
+    </div>
+    <div class="api-links">
+      <a class="btn" href="/docs">Interactive API docs</a>
+      <a class="btn" href="/openapi.json">OpenAPI spec</a>
+    </div>
+  </div>
+</section>
+
+<section id="templates" style="padding-top:24px">
+  <div class="wrap">
+    <div class="gallery-head">
+      <div>
+        <p class="kicker">Templates</p>
+        <h2>537 classics</h2>
+        <p class="sub">From Drake to Distracted Boyfriend. Click one to try it in the playground.</p>
+      </div>
+      <input class="input" id="gallery-search" type="search" placeholder="Search templates…" autocomplete="off" aria-label="Search templates">
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="grid-empty" hidden>No templates match that search.</div>
+    <div class="more"><button class="btn" id="more" hidden>Show more</button></div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="wrap">
+    <h2 class="caption">One does not simply<br>make a meme by hand</h2>
+    <div class="ctas">
+      <a class="btn primary" href="#mcp">Connect your agent</a>
+      <a class="btn" href="https://github.com/edenstrom/memegen-rust">Star on GitHub</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>A Rust port of <a href="https://github.com/jacebrowning/memegen">memegen.link</a> by Jace Browning, with extra templates from <a href="https://github.com/tenequm/memegen-rs">tenequm/memegen-rs</a>. Emoji by <a href="https://github.com/jdecked/twemoji">Twemoji</a>.</span>
+    <span><a href="https://github.com/edenstrom/memegen-rust">GitHub</a> · <a href="/docs">API docs</a></span>
+  </div>
+</footer>
+
+<script>
+"use strict";
+const BASE = "{{BASE_URL}}";
+const $ = (selector) => document.querySelector(selector);
+const debounce = (fn, ms) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+// Text to URL slug, matching the server's `slug::encode`.
+function encodeLine(line) {
+  if (line === "" || line === "/") return "_";
+  const map = { "_": "__", "-": "--", "?": "~q", "%": "~p", "#": "~h", '"': "''", "/": "~s", "\\": "~b", "\n": "~n", "&": "~a", "<": "~l", ">": "~g" };
+  let out = "", prev = null;
+  for (let c of line) {
+    if (c === "‘" || c === "’") c = "'";
+    else if (c === "“" || c === "”") c = '"';
+    else if (c === "–") c = "-";
+    if (c === " ") out += prev === "_" ? "-" : "_";
+    else out += map[c] ?? c;
+    prev = c;
+  }
+  return encodeURIComponent(out).replace(/%7E/gi, "~").replace(/%27/g, "'");
+}
+const memePath = (id, lines, ext) => `/images/${id}/${lines.length ? lines.map(encodeLine).join("/") : "_"}.${ext}`;
+const extOf = (url) => url.split(/[?#]/)[0].split(".").pop();
+// Static JPG thumbnails: animated examples are megabytes as GIFs.
+const thumb = (url) => url.replace(/\.\w+$/, ".jpg");
+
+// Copy buttons.
+async function copyText(button, text) {
+  try { await navigator.clipboard.writeText(text); } catch { return; }
+  const label = button.textContent;
+  button.classList.add("ok");
+  button.textContent = "Copied!";
+  setTimeout(() => { button.classList.remove("ok"); button.textContent = label; }, 1400);
+}
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-copy]");
+  if (button) copyText(button, $(button.dataset.copy).textContent.trim());
+});
+
+// Nav border once scrolled.
+const nav = $("#nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
+
+// MCP tabs.
+const tabs = [...document.querySelectorAll('[role="tab"]')];
+tabs.forEach((tab) => tab.addEventListener("click", () => {
+  tabs.forEach((other) => {
+    other.setAttribute("aria-selected", String(other === tab));
+    $("#" + other.getAttribute("aria-controls")).hidden = other !== tab;
+  });
+}));
+
+// Hero: a fake chat cycling through prompts and real renders.
+const SCENES = [
+  { prompt: "Make a meme about deploying on a Friday", id: "drake", lines: ["Deploying on Monday morning", "Deploying on Friday at 4:59 pm"] },
+  { prompt: "Explain MCP to my manager", id: "pigeon", lines: ["My manager", "Any API", "Is this AI?"] },
+  { prompt: "Roast our CSS", id: "mordor", lines: ["One does not simply", "center a div"] },
+  { prompt: "We fixed the flaky test!", id: "pooh", lines: ["Adding a retry", "Stabilizing the test suite"] },
+  { prompt: "What did the code review find?", id: "buzz", lines: ["TODOs", "TODOs everywhere"] },
+];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const loadImage = (src) => new Promise((resolve) => { const img = new Image(); img.onload = img.onerror = () => resolve(img); img.src = src; });
+async function runChat() {
+  const prompt = $("#chat-prompt"), tool = $("#chat-tool"), toolText = $("#chat-tool-text"), result = $("#chat-result"), img = $("#chat-img");
+  for (let i = 0; ; i = (i + 1) % SCENES.length) {
+    const scene = SCENES[i];
+    const src = memePath(scene.id, scene.lines, "png");
+    const loaded = loadImage(src);
+    tool.classList.add("fade"); tool.classList.remove("done"); result.classList.add("fade");
+    prompt.textContent = "";
+    if (reduceMotion) prompt.textContent = scene.prompt;
+    else for (const c of scene.prompt) { prompt.textContent += c; await wait(28 + Math.random() * 40); }
+    await wait(350);
+    toolText.textContent = `generate_meme · ${scene.id}`;
+    tool.classList.remove("fade");
+    await Promise.all([loaded, wait(700)]);
+    tool.classList.add("done");
+    img.src = src; img.alt = scene.lines.join(" / ");
+    result.classList.remove("fade");
+    await wait(4200);
+  }
+}
+runChat();
+
+// Playground.
+const state = { template: null, timer: 0 };
+const linesBox = $("#lines"), extSelect = $("#ext"), fontSelect = $("#font"), memeImg = $("#meme"), stage = $("#stage");
+const START = { id: "drake", lines: ["Writing memes by hand", "Typing them into a URL"] };
+
+async function fetchJson(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${response.status}`);
+  return response.json();
+}
+function chooseTemplate(template, lines) {
+  state.template = template;
+  $("#chosen-img").src = thumb(template.blank);
+  $("#chosen-name").textContent = template.name;
+  $("#chosen-desc").textContent = template.description || "";
+  const example = template.example?.text || [];
+  linesBox.innerHTML = "";
+  const count = Math.max(template.lines, 1);
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement("input");
+    input.className = "input";
+    input.placeholder = example[i] || `Line ${i + 1}`;
+    input.value = lines ? (lines[i] ?? "") : (example[i] ?? "");
+    input.setAttribute("aria-label", `Line ${i + 1}`);
+    input.addEventListener("input", schedule);
+    linesBox.append(input);
+  }
+  extSelect.value = extOf(template.example?.url || "") === "gif" ? "gif" : "png";
+  render();
+}
+function currentPath() {
+  const lines = [...linesBox.querySelectorAll("input")].map((input) => input.value);
+  while (lines.length && lines[lines.length - 1] === "") lines.pop();
+  const path = memePath(state.template.id, lines, extSelect.value);
+  return fontSelect.value ? `${path}?font=${encodeURIComponent(fontSelect.value)}` : path;
+}
+function render() {
+  if (!state.template) return;
+  const path = currentPath();
+  $("#meme-url").textContent = BASE + path;
+  $("#open").href = path;
+  if (memeImg.getAttribute("src") === path) return;
+  stage.classList.add("busy");
+  memeImg.src = path;
+}
+const schedule = debounce(render, 250);
+memeImg.addEventListener("load", () => { stage.classList.remove("busy"); $("#meme-err").hidden = true; });
+memeImg.addEventListener("error", () => { stage.classList.remove("busy"); $("#meme-err").hidden = false; $("#meme-err").textContent = "Couldn't render that one. Try different text or format."; });
+extSelect.addEventListener("change", render);
+fontSelect.addEventListener("change", render);
+$("#copy-md").addEventListener("click", (event) => copyText(event.currentTarget, `![${state.template.name}](${BASE + currentPath()})`));
+
+fetchJson("/fonts/").then((fonts) => {
+  for (const font of fonts) {
+    const option = document.createElement("option");
+    option.value = font.id;
+    option.textContent = font.alias ? `${font.id} (${font.alias})` : font.id;
+    fontSelect.append(option);
+  }
+}).catch(() => {});
+fetchJson(`/templates/${START.id}`).then((template) => chooseTemplate(template, START.lines)).catch(() => {});
+
+// Template search dropdown.
+const search = $("#tpl-search"), results = $("#tpl-results");
+let found = [], active = -1;
+function showResults(items) {
+  found = items.slice(0, 8);
+  active = -1;
+  results.innerHTML = found.length ? found.map((t, i) =>
+    `<button type="button" role="option" data-i="${i}"><img loading="lazy" alt="" src="${escapeHtml(thumb(t.blank))}"><span><b>${escapeHtml(t.name)}</b><small>${escapeHtml(t.id)} · ${t.lines} line${t.lines === 1 ? "" : "s"}</small></span></button>`
+  ).join("") : `<div class="empty" style="padding:10px">No matches</div>`;
+  results.hidden = false;
+  search.setAttribute("aria-expanded", "true");
+}
+function hideResults() { results.hidden = true; search.setAttribute("aria-expanded", "false"); }
+function pick(i) {
+  const template = found[i];
+  if (!template) return;
+  hideResults();
+  search.value = "";
+  chooseTemplate(template);
+}
+const runSearch = debounce(async () => {
+  const q = search.value.trim();
+  if (!q) return hideResults();
+  try { showResults(await fetchJson(`/templates/?filter=${encodeURIComponent(q)}`)); } catch { hideResults(); }
+}, 180);
+search.addEventListener("input", runSearch);
+search.addEventListener("keydown", (event) => {
+  if (results.hidden) return;
+  const buttons = [...results.querySelectorAll("button")];
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    active = (active + (event.key === "ArrowDown" ? 1 : -1) + buttons.length) % buttons.length;
+    buttons.forEach((b, i) => b.classList.toggle("active", i === active));
+    buttons[active]?.scrollIntoView({ block: "nearest" });
+  } else if (event.key === "Enter") {
+    event.preventDefault();
+    pick(active >= 0 ? active : 0);
+  } else if (event.key === "Escape") hideResults();
+});
+results.addEventListener("click", (event) => { const b = event.target.closest("button"); if (b) pick(Number(b.dataset.i)); });
+document.addEventListener("click", (event) => { if (!event.target.closest(".search")) hideResults(); });
+
+// Gallery: load the catalog when it scrolls into view.
+const grid = $("#grid"), more = $("#more"), PAGE = 24;
+// Lead with the classics; the rest follow in catalog order.
+const POPULAR = ["drake", "db", "fry", "astronaut", "rollsafe", "pigeon", "gru", "woman-cat", "buzz", "mordor", "pooh", "stonks", "spongebob", "cmm", "doge", "fine", "harold", "exit", "panik-kalm-panik", "success", "kermit", "aag", "afraid", "ackbar"];
+let catalog = [], shown = [], visible = 0;
+function tile(t) {
+  const button = document.createElement("button");
+  button.className = "tile";
+  button.type = "button";
+  button.innerHTML = `<div class="thumb"><img loading="lazy" alt="${escapeHtml(t.name)}" src="${escapeHtml(thumb(t.example?.url || t.blank))}"></div><div class="meta"><b>${escapeHtml(t.name)}</b><small>${escapeHtml(t.id)}</small></div>`;
+  button.addEventListener("click", () => { chooseTemplate(t); $("#playground").scrollIntoView(); });
+  return button;
+}
+function showMore() {
+  const next = shown.slice(visible, visible + PAGE);
+  grid.append(...next.map(tile));
+  visible += next.length;
+  more.hidden = visible >= shown.length;
+  $("#grid-empty").hidden = shown.length > 0;
+}
+function showList(list) { shown = list; visible = 0; grid.innerHTML = ""; showMore(); }
+more.addEventListener("click", showMore);
+const filterGallery = debounce(async () => {
+  const q = $("#gallery-search").value.trim();
+  if (!q) return showList(catalog);
+  try { showList(await fetchJson(`/templates/?filter=${encodeURIComponent(q)}`)); } catch {}
+}, 200);
+$("#gallery-search").addEventListener("input", filterGallery);
+new IntersectionObserver(async (entries, observer) => {
+  if (!entries.some((entry) => entry.isIntersecting)) return;
+  observer.disconnect();
+  try {
+    const all = await fetchJson("/templates/");
+    const rank = (t) => { const i = POPULAR.indexOf(t.id); return i < 0 ? POPULAR.length : i; };
+    catalog = all.map((t, i) => [rank(t), i, t]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((entry) => entry[2]);
+    showList(catalog);
+  } catch {}
+}, { rootMargin: "600px" }).observe($("#templates"));
+</script>
+</body>
+</html>

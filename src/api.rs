@@ -34,13 +34,17 @@ const PATH: &AsciiSet = &CONTROLS
 /// Characters to escape in any redirect location (non-ASCII is always escaped).
 const LOCATION: &AsciiSet = &CONTROLS.add(b' ');
 
+const LANDING_HTML: &str = include_str!("landing.html");
+
 pub fn router(app: AppState) -> Router {
     Router::new()
-        .route("/", get(|| async { redirect(StatusCode::FOUND, "/docs") }))
+        .route("/", get(landing))
         .route("/docs", get(docs))
         .route("/docs/", get(docs))
         .route("/openapi.json", get(openapi_spec))
         .route("/favicon.ico", get(favicon))
+        .route("/favicon.svg", get(favicon_svg))
+        .route("/apple-touch-icon.png", get(apple_touch_icon))
         .route("/robots.txt", get(robots))
         .route("/templates", get(list_templates))
         .route("/templates/", get(list_templates))
@@ -76,8 +80,20 @@ fn flag(params: &HashMap<String, String>, name: &str) -> Option<bool> {
     }
 }
 
+/// The landing page, with `{{BASE_URL}}` filled in so its snippets point at
+/// this deployment.
+async fn landing(State(app): State<AppState>) -> Html<String> {
+    let base_url = app
+        .base_url()
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;");
+    Html(LANDING_HTML.replace("{{BASE_URL}}", &base_url))
+}
+
 async fn docs() -> Html<&'static str> {
-    Html(openapi::SWAGGER_HTML)
+    Html(openapi::DOCS_HTML)
 }
 
 async fn openapi_spec(State(app): State<AppState>) -> Json<Value> {
@@ -93,6 +109,14 @@ async fn static_file(app: &App, name: &str, content_type: &'static str) -> Respo
 
 async fn favicon(State(app): State<AppState>) -> Response {
     static_file(&app, "favicon.ico", "image/x-icon").await
+}
+
+async fn favicon_svg(State(app): State<AppState>) -> Response {
+    static_file(&app, "favicon.svg", "image/svg+xml").await
+}
+
+async fn apple_touch_icon(State(app): State<AppState>) -> Response {
+    static_file(&app, "apple-touch-icon.png", "image/png").await
 }
 
 async fn robots(State(app): State<AppState>) -> Response {
