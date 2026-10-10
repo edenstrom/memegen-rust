@@ -1,0 +1,37 @@
+name: Unlimited Power
+source: https://imgflip.com/meme/104275496/UNLIMITED-POWER
+description: Gleefully unleashing overwhelming power once restraint is no longer needed, often after pretending to be weak. Top line is the trigger; bottom line is the outburst.
+keywords:
+  - Star Wars
+  - Revenge of the Sith
+  - Palpatine
+  - Darth Sidious
+  - force lightning
+  - overpowered
+  - going all out
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.79
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - when someone finally gives me admin access
+  - unlimited power!

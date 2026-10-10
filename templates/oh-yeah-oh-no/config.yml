@@ -1,0 +1,36 @@
+name: 'Oh Yeah! Oh No...'
+source: https://imgflip.com/meme/184152522/Oh-yeah-Oh-no
+description: Excitement that turns to dread once the catch is revealed. Top line is the exciting part; bottom line is the catch.
+keywords:
+  - oh yeah
+  - oh no
+  - excited then scared
+  - the catch
+  - plot twist
+  - realization
+text:
+  - style: default
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.05
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.42
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: default
+    color: black
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.53
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.42
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Free trial
+  - Credit card required

@@ -1,0 +1,36 @@
+name: Straight to Jail
+source: https://imgflip.com/meme/154739698/Straight-to-Jail
+description: An absurdly harsh punishment for a minor offense. Top line is the offense; bottom line is the verdict.
+keywords:
+  - Parks and Recreation
+  - Fred Armisen
+  - jail
+  - punishment
+  - overreaction
+  - no trial
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'pineapple on pizza?'
+  - straight to jail

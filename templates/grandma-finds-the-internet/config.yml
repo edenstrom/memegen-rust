@@ -1,0 +1,36 @@
+name: Grandma Finds the Internet
+source: https://imgflip.com/meme/61556/Grandma-Finds-The-Internet
+description: An older or out-of-touch person baffled by something online. Top line is the setup; bottom line is the confused reaction.
+keywords:
+  - grandma
+  - old lady
+  - laptop
+  - confused
+  - technology
+  - out of touch
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'what is this "dark mode"'
+  - and why is everything gone

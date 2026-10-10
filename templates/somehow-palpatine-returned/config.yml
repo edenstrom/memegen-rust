@@ -1,0 +1,37 @@
+name: Somehow Palpatine Returned
+source: https://imgflip.com/meme/316487180/Somehow-Palpatine-returned
+description: Something that was gone or settled inexplicably comes back, explained with no justification at all. Top line is what came back; bottom line is the hand-waving explanation.
+keywords:
+  - Star Wars
+  - The Rise of Skywalker
+  - Poe Dameron
+  - Palpatine
+  - inexplicable return
+  - lazy writing
+  - it's back
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.19
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - the bug we closed last sprint
+  - somehow, palpatine returned

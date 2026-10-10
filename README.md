@@ -2,7 +2,7 @@
 
 A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/memegen), built mainly to run locally as an **MCP server**, with the HTTP API kept as well.
 
-- 537 templates: all 210 upstream ones plus 327 more from [tenequm/memegen-rs](https://github.com/tenequm/memegen-rs), and upstream's fonts and text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
+- 568 templates: all 210 upstream ones plus 358 more from [tenequm/memegen-rs](https://github.com/tenequm/memegen-rs) and [imgflip](https://imgflip.com/memetemplates), and upstream's fonts and text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
 - PNG, JPG, GIF and WebP output, including animated GIF/WebP templates

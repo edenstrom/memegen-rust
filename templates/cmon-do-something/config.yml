@@ -1,0 +1,36 @@
+name: 'C''mon, Do Something'
+source: https://imgflip.com/meme/143593925/cmon-do-something
+description: 'Poking something with a stick to provoke a reaction. Top line labels the poker; bottom line labels what''s being poked.'
+keywords:
+  - poke with stick
+  - provoke
+  - stick figure
+  - waiting for a reaction
+  - bored
+  - testing
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.32
+    anchor_y: 0.04
+    angle: 0.0
+    scale_x: 0.66
+    scale_y: 0.3
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.45
+    anchor_y: 0.78
+    angle: 0.0
+    scale_x: 0.53
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - me
+  - the legacy code nobody touches

@@ -1,0 +1,36 @@
+name: Atlas Holding Earth
+source: https://imgflip.com/meme/617760765/Atlas-holding-earth
+description: 'One person carrying the weight of everything. Top line is what''s being carried; bottom line is who''s carrying it.'
+keywords:
+  - Atlas
+  - Greek mythology
+  - carrying the team
+  - burden
+  - holding up the world
+  - load-bearing
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - the entire build system
+  - the one intern who understands it

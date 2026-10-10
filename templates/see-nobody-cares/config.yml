@@ -1,0 +1,35 @@
+name: 'See, Nobody Cares'
+description: Dismissing a concern because nobody else seems bothered. Top line is the concern; bottom line is the dismissal.
+keywords:
+  - Jurassic Park
+  - Dennis Nedry
+  - nobody cares
+  - dismissive
+  - shrug
+  - who cares
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.005
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.005
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 0.99
+    scale_y: 0.18
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - the 400 compiler warnings
+  - 'see, nobody cares'

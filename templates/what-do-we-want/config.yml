@@ -1,0 +1,59 @@
+name: 'What Do We Want?'
+description: 'A protest chant demanding something, with an ironic answer for when. Lines are the four chants: what, the demand, when, the answer.'
+keywords:
+  - X all the Y
+  - protest
+  - chant
+  - demands
+  - when do we want it
+  - hyperbole and a half
+text:
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.5
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.5
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: black
+    font: thick
+    anchor_x: 0.5
+    anchor_y: 0.5
+    angle: 0.0
+    scale_x: 0.5
+    scale_y: 0.17
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - 'what do we want?'
+  - 'faster builds!'
+  - 'when do we want them?'
+  - 'after this 40 minute build!'
