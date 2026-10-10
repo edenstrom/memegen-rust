@@ -9,7 +9,7 @@ pub const DEFAULT_ANIMATED_EXTENSION: &str = "gif";
 
 pub const DEFAULT_SIZE: (u32, u32) = (600, 600);
 
-/// Swagger UI placeholder value; treated as "not provided".
+/// Example value API doc UIs fill in for strings; treated as "not provided".
 pub const PLACEHOLDER: &str = "string";
 
 pub const MAX_SLUG_PART_BYTES: usize = 200;

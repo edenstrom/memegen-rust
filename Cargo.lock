@@ -1335,6 +1335,7 @@ dependencies = [
  "crc32fast",
  "csscolorparser",
  "emojis",
+ "futures",
  "gif",
  "http-body-util",
  "hyper",

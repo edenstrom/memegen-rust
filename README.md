@@ -60,12 +60,17 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
 | `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size |
+| `generate_memes` | Render up to 10 memes in one call: `memes` is a list of `generate_meme` arguments, rendered concurrently. Returns each image and its summary (with `index`) in order, or an `error` for entries that failed. The inline images share the 1 MB limit, so each is downscaled further as the batch grows |
 
-Over stdio there is usually no server behind `http://localhost` URLs, so `memegen mcp` saves every meme to a cache directory (`~/Library/Caches/memegen` on macOS, `$XDG_CACHE_HOME/memegen` or `~/.cache/memegen` on Linux) and returns that path instead. Set `--output-dir` or `MEMEGEN_OUTPUT_DIR` to change it. Saved memes older than a week are deleted while the server runs; other files in the directory are left alone. The URL is still returned when `DOMAIN` is set.
+### MCP Apps
+
+`generate_meme` and `generate_memes` link to an [MCP Apps](https://modelcontextprotocol.io/extensions/apps) view (`ui://memegen/meme.html`). In hosts that support MCP Apps, such as Claude, the memes show up in an interactive view instead of only as images in the tool result. From the view, the user can edit a meme's text and re-render it (the view calls `generate_meme` and tells the model about the change), open the full-size URL, download the image (where the host allows it), and, for a batch, pick the one to use, which sends that choice to the chat. Other hosts ignore the view and show the tool result as before.
+
+Over stdio there is usually no server behind `http://localhost` URLs, so `memegen mcp` saves every meme to a cache directory (`~/Library/Caches/memegen` on macOS, `$XDG_CACHE_HOME/memegen` or `~/.cache/memegen` on Linux) and returns that path instead. Files are named `{date}_{time}_{template}-{hash}.{ext}` in local time (e.g. `2026-10-09_143012_fry-0123456789abcdef.png`), so they sort by when they were made. Repeating a request returns the file already saved for it, whatever its date. Set `--output-dir` or `MEMEGEN_OUTPUT_DIR` to change it. Saved memes older than a week are deleted while the server runs; other files in the directory are left alone. The URL is still returned when `DOMAIN` is set.
 
 ## HTTP API
 
-Start the server with `memegen serve` (or just `memegen`). Swagger docs are at `/docs` and the OpenAPI spec at `/openapi.json`.
+Start the server with `memegen serve` (or just `memegen`). `/` is a landing page with a meme playground, MCP setup snippets and the template gallery (live at [memegen.dev](https://memegen.dev)). API docs ([Scalar](https://scalar.com)) are at `/docs` and the OpenAPI spec at `/openapi.json`.
 
 | Route | Description |
 |---|---|
@@ -103,7 +108,7 @@ npx wrangler dev      # http://localhost:8787
 npx wrangler deploy   # https://memegen.<account>.workers.dev
 ```
 
-The build needs the `wasm32-unknown-unknown` Rust target (`rustup target add wasm32-unknown-unknown`); wrangler installs `worker-build` on first use.
+Wrangler builds with `worker/build.sh`, which adds the `wasm32-unknown-unknown` Rust target and installs `worker-build`. If `cargo` isn't on the `PATH` (as in Cloudflare's Workers Builds), it installs Rust with rustup first.
 
 - **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 1.6 MB gzipped.
 - **Startup**: the template catalog is embedded at build time; fonts (5 MB) are fetched on the first request in each isolate.

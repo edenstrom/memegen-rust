@@ -17,6 +17,7 @@ bytes = "1.12.1"
 crc32fast = "1.5.2"
 csscolorparser = "0.9.0"
 emojis = "0.9.0"
+futures = { version = "0.3.34", default-features = false, features = ["alloc"] }
 gif = "0.14.2"
 image = { version = "0.25", default-features = false, features = ["gif", "jpeg", "png", "rayon", "webp"] }
 image-webp = "0.2.4"
