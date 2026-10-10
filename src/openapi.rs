@@ -58,6 +58,11 @@ pub fn spec(base_url: &str) -> Value {
         })
     };
     let font = query("font", "string", "Font ID or alias (`GET /fonts/`)");
+    let animate_text = query(
+        "animate_text",
+        "boolean",
+        "Type the text out one character at a time, then hold the finished meme (gif and webp only)",
+    );
 
     json!({
         "openapi": "3.0.3",
@@ -130,13 +135,14 @@ pub fn spec(base_url: &str) -> Value {
                     path("template_id", "ID of a meme template"),
                     path("text_filepath", "Lines of text and image extension: `<line1>/<line2>.<png|jpg|gif|webp>`"),
                     font,
+                    animate_text,
                 ],
                 "responses": {
                     "200": image_response("Successfully displayed a custom meme"),
                     "301": { "description": "Redirect to the canonical (normalized) URL" },
                     "404": json_response("Template not found", error.clone()),
                     "414": json_response("Custom text too long (length >200)", error.clone()),
-                    "422": json_response("Invalid extension or font", error.clone())
+                    "422": json_response("Invalid extension or font, or animated text with png/jpg", error.clone())
                 }
             } },
             "/fonts/": { "get": {
@@ -160,6 +166,7 @@ pub fn spec(base_url: &str) -> Value {
                 "text": { "type": "array", "items": { "type": "string" }, "description": "Lines of text (raw, not escape-encoded)" },
                 "font": { "type": "string" },
                 "extension": { "type": "string", "enum": ["png", "jpg", "jpeg", "gif", "webp"] },
+                "animate_text": { "type": "boolean", "description": "Type the text out one character at a time (defaults the extension to gif)" },
                 "redirect": { "type": "boolean", "description": "Redirect to the image instead of returning JSON" }
             } },
             "MemeRequest": { "allOf": [

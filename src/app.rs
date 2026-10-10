@@ -112,13 +112,14 @@ impl App {
     }
 
     /// Upstream `Template.build_custom_url`; returns the URL and whether the
-    /// template exists.
+    /// template exists. Animated text defaults to the animated extension.
     pub fn build_url(
         &self,
         template_id: &str,
         lines: &[String],
         font: &str,
         extension: &str,
+        animate_text: bool,
     ) -> (String, bool) {
         let config = self.config();
         let template = self
@@ -139,6 +140,8 @@ impl App {
         };
         let extension = if settings::ALLOWED_EXTENSIONS.contains(&extension) {
             extension.to_string()
+        } else if animate_text {
+            config.default_animated_extension.clone()
         } else {
             default_extension
         };
@@ -147,9 +150,16 @@ impl App {
             config.base_url,
             crate::slug::encode(&lines)
         );
+        let mut query = vec![];
         if !font.is_empty() && font != settings::PLACEHOLDER {
-            url.push_str("?font=");
-            url.push_str(font);
+            query.push(format!("font={font}"));
+        }
+        if animate_text {
+            query.push("animate_text=true".to_string());
+        }
+        if !query.is_empty() {
+            url.push('?');
+            url.push_str(&query.join("&"));
         }
         (url, template.is_some())
     }

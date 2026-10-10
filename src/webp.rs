@@ -18,7 +18,8 @@ const QUALITY: f32 = 75.0;
 #[cfg(not(target_arch = "wasm32"))]
 const METHOD: i32 = 2;
 
-pub fn encode(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
+/// `delays` are in milliseconds, one per frame.
+pub fn encode(frames: &[RgbaImage], delays: &[u32]) -> Result<Vec<u8>> {
     let first = frames.first().context("no frames")?;
     if frames.len() == 1 {
         return encode_still(first);
@@ -43,14 +44,14 @@ pub fn encode(frames: &[RgbaImage], duration: u32) -> Result<Vec<u8>> {
     write_chunk(&mut body, b"VP8X", &vp8x);
     // Transparent background, loop forever.
     write_chunk(&mut body, b"ANIM", &[0, 0, 0, 0, 0, 0]);
-    for (rect, file) in &encoded {
+    for ((rect, file), delay) in encoded.iter().zip(delays) {
         let data = frame_data(file)?;
         let mut anmf = Vec::with_capacity(data.len() + 16);
         anmf.extend(u24(rect.x / 2));
         anmf.extend(u24(rect.y / 2));
         anmf.extend(u24(rect.width - 1));
         anmf.extend(u24(rect.height - 1));
-        anmf.extend(u24(duration));
+        anmf.extend(u24(*delay));
         anmf.push(NO_BLEND);
         anmf.extend_from_slice(data);
         write_chunk(&mut body, b"ANMF", &anmf);
@@ -217,11 +218,15 @@ mod tests {
             }
         }
         frames.extend([partial.clone(), partial]);
-        let bytes = encode(&frames, 120).unwrap();
+        let delays = [120, 120, 120, 120, 3000];
+        let bytes = encode(&frames, &delays).unwrap();
         let decoder = WebPDecoder::new(Cursor::new(bytes)).unwrap();
         assert!(decoder.has_animation());
         let decoded = decoder.into_frames().collect_frames().unwrap();
         assert_eq!(decoded.len(), 5);
+        for (frame, delay) in decoded.iter().zip(delays) {
+            assert_eq!(frame.delay().numer_denom_ms(), (delay, 1));
+        }
         for (frame, original) in decoded.iter().zip(&frames[..3]) {
             assert_close(frame.buffer(), original);
         }
@@ -236,15 +241,12 @@ mod tests {
                 );
             }
         }
-        for frame in &decoded {
-            assert_eq!(frame.delay().numer_denom_ms(), (120, 1));
-        }
     }
 
     #[test]
     fn encodes_still() {
         let frame = RgbaImage::from_pixel(7, 4, Rgba([1, 2, 3, 255]));
-        let bytes = encode(std::slice::from_ref(&frame), 100).unwrap();
+        let bytes = encode(std::slice::from_ref(&frame), &[100]).unwrap();
         let image = image::load_from_memory(&bytes).unwrap().into_rgba8();
         assert_close(&image, &frame);
     }

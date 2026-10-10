@@ -159,6 +159,23 @@ impl<'f> SizedFont<'f> {
         }
     }
 
+    /// Glyphs with an outline, plus emoji: the marks `DrawOptions::visible`
+    /// counts, so spaces don't take a step of their own.
+    pub fn marks(&self, text: &str) -> usize {
+        text.split('\n')
+            .map(|line| {
+                self.layout_line(line)
+                    .items
+                    .iter()
+                    .filter(|item| match item {
+                        Item::Glyph { id, .. } => self.font.outline(*id).is_some(),
+                        Item::Emoji { .. } => true,
+                    })
+                    .count()
+            })
+            .sum()
+    }
+
     /// Pillow `FreeTypeFont.getlength`.
     fn length(&self, text: &str) -> f32 {
         self.layout_line(text).advance
@@ -401,6 +418,9 @@ pub struct DrawOptions<'a> {
     pub stroke_fill: [u8; 4],
     pub spacing: f32,
     pub align: &'a str,
+    /// Draw only the first this many marks (see [`SizedFont::marks`]), laid
+    /// out where they'd be in the full text.
+    pub visible: Option<usize>,
 }
 
 /// Pillow `ImageDraw.text(xy, text, ...)` with Pilmoji-style emoji images,
@@ -433,7 +453,8 @@ pub fn draw_text(
     let emoji_size = font.emoji_size();
 
     let mut top = xy.1;
-    for layout in &layouts {
+    let mut marks = 0;
+    'lines: for layout in &layouts {
         let left = xy.0
             + if lines.len() > 1 {
                 align_offset(options.align, max_width - layout.advance)
@@ -450,6 +471,10 @@ pub fn draw_text(
                     let Some(outline) = font.font.outline(id) else {
                         continue;
                     };
+                    if options.visible.is_some_and(|visible| marks >= visible) {
+                        break 'lines;
+                    }
+                    marks += 1;
                     let outlined = OutlinedGlyph::new(glyph, outline.clone(), font.scale_factor);
                     let bounds = outlined.px_bounds();
                     let (x0, y0) = (bounds.min.x as i64, bounds.min.y as i64);
@@ -471,6 +496,10 @@ pub fn draw_text(
                     });
                 }
                 Item::Emoji { grapheme, x } => {
+                    if options.visible.is_some_and(|visible| marks >= visible) {
+                        break 'lines;
+                    }
+                    marks += 1;
                     let y = top + font.ascent - emoji_size * 0.9;
                     emoji_draws.push(((left + x).round() as i64, y.round() as i64, grapheme));
                 }

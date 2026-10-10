@@ -118,7 +118,7 @@ pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> 
             renderer.clear_caches();
             let (wall, cpu) = measure(|| {
                 renderer
-                    .render_bytes(&template, &lines, "", case.extension, source)
+                    .render_bytes(&template, &lines, "", case.extension, false, source)
                     .map(drop)
             })?;
             cold.0.push(ms(wall));
@@ -127,12 +127,12 @@ pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> 
 
         // Warm: background cached, output not cached (a new meme every time).
         let mut size = 0;
-        renderer.render_bytes(&template, &lines, "", case.extension, source)?;
+        renderer.render_bytes(&template, &lines, "", case.extension, false, source)?;
         let mut warm = (vec![], vec![]);
         for _ in 0..iterations {
             let (wall, cpu) = measure(|| {
                 size = renderer
-                    .render_bytes(&template, &lines, "", case.extension, source)?
+                    .render_bytes(&template, &lines, "", case.extension, false, source)?
                     .len();
                 Ok(())
             })?;
@@ -146,6 +146,7 @@ pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> 
             lines: lines.clone(),
             font: String::new(),
             extension: case.extension.into(),
+            animate_text: false,
         };
         renderer.render(&request, source).ok();
         let mut cached = vec![];

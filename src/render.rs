@@ -27,6 +27,19 @@ const MAXIMUM_FRAMES: usize = 20;
 const MINIMUM_FRAMES: usize = 5;
 const JPEG_QUALITY: u8 = 95;
 
+/// Animated text: delay per mark on a still background, and how long the
+/// finished text holds before the animation loops.
+const TYPING_DELAY_MS: u32 = 60;
+const TYPING_HOLD_MS: u32 = 3000;
+
+/// Frame budgets for animated text: frames while typing (longer text types
+/// several marks per frame), and frames in total including the hold on an
+/// animated background. Each frame is a full-size image in memory.
+#[cfg(not(target_arch = "wasm32"))]
+const TYPING_FRAMES: (usize, usize) = (60, 120);
+#[cfg(target_arch = "wasm32")]
+const TYPING_FRAMES: (usize, usize) = (24, 40);
+
 /// Frame budget for animated WebP (0 means upstream's default sampling).
 /// Upstream keeps 4x more frames than for GIF; the lossless encoder used on
 /// WebAssembly sticks to the GIF budget to bound memory and file size.
@@ -82,6 +95,8 @@ pub struct MemeRequest {
     pub lines: Vec<String>,
     pub font: String,
     pub extension: String,
+    /// Type the text out one mark at a time (GIF and WebP only).
+    pub animate_text: bool,
 }
 
 fn maximum_frames(extension: &str) -> usize {
@@ -123,6 +138,19 @@ struct Animation {
     duration: u32,
 }
 
+impl Animation {
+    /// Upstream's delay for the sampled frames, longer when frames were
+    /// dropped so the animation keeps its speed.
+    fn frame_duration(&self) -> u32 {
+        let sampled = self.frames.len();
+        if sampled <= MINIMUM_FRAMES {
+            return self.duration;
+        }
+        let ratio = sampled as f64 / self.total.max(MAXIMUM_FRAMES) as f64;
+        (250.0f64).min((self.duration as f64 / ratio).floor()) as u32
+    }
+}
+
 pub struct Renderer {
     config: Config,
     catalog: Arc<Catalog>,
@@ -139,7 +167,18 @@ struct Prepared {
     template: Arc<Template>,
     font: String,
     extension: String,
+    animate_text: bool,
     key: String,
+}
+
+/// A text box's text, wrapped and sized, ready to draw in full or in part.
+struct TextLayout<'a> {
+    text: &'a TextBox,
+    point: (i64, i64),
+    size: (u32, u32),
+    line: String,
+    font: SizedFont<'a>,
+    offset: (f32, f32),
 }
 
 impl Renderer {
@@ -200,6 +239,12 @@ impl Renderer {
                 .ok_or_else(|| RenderError::Invalid(format!("Invalid font: {name}")))?,
         };
 
+        if request.animate_text && !matches!(extension.as_str(), "gif" | "webp") {
+            return Err(RenderError::Invalid(format!(
+                "Animated text needs a gif or webp extension, not {extension}"
+            )));
+        }
+
         let slug = slug::encode(&request.lines);
         if slug
             .split('/')
@@ -207,11 +252,15 @@ impl Renderer {
         {
             return Err(RenderError::TooLong);
         }
-        let key = format!("{}|{slug}|{font}|{extension}", template.id);
+        let mut key = format!("{}|{slug}|{font}|{extension}", template.id);
+        if request.animate_text {
+            key.push_str("|animate_text");
+        }
         Ok(Prepared {
             template,
             font,
             extension,
+            animate_text: request.animate_text,
             key,
         })
     }
@@ -269,11 +318,19 @@ impl Renderer {
             template,
             font,
             extension,
+            animate_text,
             key,
         } = self.prepare(request)?;
         let render = || {
-            self.render_logged(&template, &request.lines, &font, &extension, source)
-                .map(Arc::new)
+            self.render_logged(
+                &template,
+                &request.lines,
+                &font,
+                &extension,
+                animate_text,
+                source,
+            )
+            .map(Arc::new)
         };
         if self.config.debug {
             return render().map_err(|error| RenderError::Internal(format!("{error:#}")));
@@ -289,12 +346,13 @@ impl Renderer {
         lines: &[String],
         font: &str,
         extension: &str,
+        animate_text: bool,
         source: &dyn Source,
     ) -> Result<Rendered> {
         // `Instant::now` panics on wasm32-unknown-unknown.
         #[cfg(not(target_arch = "wasm32"))]
         let started = std::time::Instant::now();
-        let bytes = self.render_bytes(template, lines, font, extension, source)?;
+        let bytes = self.render_bytes(template, lines, font, extension, animate_text, source)?;
         #[cfg(not(target_arch = "wasm32"))]
         tracing::info!(
             "Rendered {}/{} ({extension}, {} bytes) in {:.1?}",
@@ -317,21 +375,24 @@ impl Renderer {
         lines: &[String],
         font: &str,
         extension: &str,
+        animate_text: bool,
         source: &dyn Source,
     ) -> Result<Vec<u8>> {
         match extension {
             "gif" | "webp" => {
-                let (frames, duration) = self.render_animation(
-                    template,
-                    lines,
-                    font,
-                    maximum_frames(extension),
-                    source,
-                )?;
-                if extension == "gif" {
-                    encode_gif(frames, duration)
+                let maximum_frames = maximum_frames(extension);
+                let (frames, delays) = if animate_text {
+                    self.render_typing(template, lines, font, maximum_frames, source)?
                 } else {
-                    crate::webp::encode(&frames, duration)
+                    let (frames, duration) =
+                        self.render_animation(template, lines, font, maximum_frames, source)?;
+                    let delays = vec![duration; frames.len()];
+                    (frames, delays)
+                };
+                if extension == "gif" {
+                    encode_gif(frames, &delays)
+                } else {
+                    crate::webp::encode(&frames, &delays)
                 }
             }
             _ => self.render_static(template, lines, font, extension, source),
@@ -457,12 +518,93 @@ impl Renderer {
             })
             .collect();
 
-        let mut duration = animation.duration;
-        if frames.len() > MINIMUM_FRAMES {
-            let ratio = frames.len() as f64 / total.max(MAXIMUM_FRAMES) as f64;
-            duration = (250.0f64).min((duration as f64 / ratio).floor()) as u32;
+        Ok((frames, animation.frame_duration()))
+    }
+
+    /// Animated text: the lines are typed out in order, a mark at a time,
+    /// over the template's frames (looped as needed), then the finished text
+    /// holds for [`TYPING_HOLD_MS`]. Text boxes' `start`/`stop` are ignored.
+    /// Returns the frames and each frame's delay in milliseconds.
+    fn render_typing(
+        &self,
+        template: &Template,
+        lines: &[String],
+        font: &str,
+        maximum_frames: usize,
+        source: &dyn Source,
+    ) -> Result<(Vec<RgbaImage>, Vec<u32>)> {
+        let animation = self.animation(template, maximum_frames, source)?;
+        let backgrounds = &animation.frames;
+        let Some((_, first)) = backgrounds.first() else {
+            return Err(anyhow!("no frames decoded for {}", template.id));
+        };
+        let size = first.dimensions();
+        let layouts: Vec<TextLayout> = template
+            .text
+            .iter()
+            .enumerate()
+            .filter_map(|(index, text)| self.text_layout(text, lines.get(index), lines, font, size))
+            .collect();
+        let (marks, full): (Vec<usize>, Vec<_>) = layouts
+            .par_iter()
+            .map(|layout| {
+                let full = self.draw_layout(layout, None, source);
+                (layout.font.marks(&layout.line), full)
+            })
+            .unzip();
+        let total: usize = marks.iter().sum();
+        if total == 0 {
+            let (frames, duration) =
+                self.render_animation(template, lines, font, maximum_frames, source)?;
+            let delays = vec![duration; frames.len()];
+            return Ok((frames, delays));
         }
-        Ok((frames, duration))
+        let still = backgrounds.len() == 1;
+        let step = if still {
+            TYPING_DELAY_MS
+        } else {
+            animation.frame_duration().max(1)
+        };
+        let (typing_budget, frame_budget) = TYPING_FRAMES;
+        let typing = (total as u64 * TYPING_DELAY_MS as u64)
+            .div_ceil(step as u64)
+            .clamp(1, typing_budget as u64) as usize;
+        let holding = if still {
+            0
+        } else {
+            (TYPING_HOLD_MS.div_ceil(step) as usize).min(frame_budget - typing)
+        };
+
+        let frames: Vec<RgbaImage> = (0..typing + holding)
+            .into_par_iter()
+            .map(|index| {
+                // Marks shown so far, filled into the boxes in order.
+                let mut shown = (total * (index + 1)).div_ceil(typing).min(total);
+                let mut image = backgrounds[index % backgrounds.len()].1.clone();
+                for ((layout, marks), full) in layouts.iter().zip(&marks).zip(&full) {
+                    let visible = shown.min(*marks);
+                    shown -= visible;
+                    if visible == *marks {
+                        if let Some((point, layer)) = full {
+                            typeset::paste_with_alpha(&mut image, layer, *point);
+                        }
+                    } else if visible > 0
+                        && let Some((point, layer)) =
+                            self.draw_layout(layout, Some(visible), source)
+                    {
+                        typeset::paste_with_alpha(&mut image, &layer, point);
+                    }
+                }
+                image
+            })
+            .collect();
+
+        let mut delays = vec![step; frames.len()];
+        if let Some(last) = delays.last_mut() {
+            // Make up whatever hold the frame budget didn't cover.
+            *last += TYPING_HOLD_MS.saturating_sub(step * (holding as u32 + 1));
+        }
+        Ok((frames, delays))
     }
 
     /// Upstream `get_image_element`, drawn and rotated into a layer.
@@ -475,6 +617,19 @@ impl Renderer {
         image_size: (u32, u32),
         source: &dyn Source,
     ) -> Option<((i64, i64), RgbaImage)> {
+        let layout = self.text_layout(text, line, lines, font_name, image_size)?;
+        self.draw_layout(&layout, None, source)
+    }
+
+    /// Upstream `get_image_element`'s wrapping and font fitting.
+    fn text_layout<'a>(
+        &'a self,
+        text: &'a TextBox,
+        line: Option<&String>,
+        lines: &[String],
+        font_name: &str,
+        image_size: (u32, u32),
+    ) -> Option<TextLayout<'a>> {
         let line = line?;
         let font = self
             .fonts
@@ -498,22 +653,49 @@ impl Renderer {
             return None;
         }
         let sized: SizedFont = typeset::fit_font(font, &line, max_size, max_font_size);
-        let (x_offset, y_offset) = typeset::text_offset(&line, &sized, max_size, &text.align);
-        let (stroke_width, stroke_fill) = text.get_stroke(sized.stroke_width());
+        let offset = typeset::text_offset(&line, &sized, max_size, &text.align);
+        Some(TextLayout {
+            text,
+            point,
+            size: max_size,
+            line,
+            font: sized,
+            offset,
+        })
+    }
+
+    /// Draw the first `visible` marks of `layout` (all if `None`) and rotate
+    /// them into a layer.
+    fn draw_layout(
+        &self,
+        layout: &TextLayout,
+        visible: Option<usize>,
+        source: &dyn Source,
+    ) -> Option<((i64, i64), RgbaImage)> {
+        let TextLayout {
+            text,
+            point,
+            size,
+            line,
+            font,
+            offset: (x_offset, y_offset),
+        } = layout;
+        let (stroke_width, stroke_fill) = text.get_stroke(font.stroke_width());
         let rows = line.matches('\n').count() + 1;
 
-        let mut layer = RgbaImage::new(max_size.0, max_size.1);
+        let mut layer = RgbaImage::new(size.0, size.1);
         typeset::draw_text(
             &mut layer,
             (-x_offset, -y_offset),
-            &line,
-            &sized,
+            line,
+            font,
             &DrawOptions {
                 fill: typeset::parse_color(&text.color).unwrap_or([255, 255, 255, 255]),
                 stroke_width,
                 stroke_fill: typeset::parse_color(&stroke_fill).unwrap_or([0, 0, 0, 255]),
                 spacing: -y_offset / (rows * 2) as f32,
                 align: &text.align,
+                visible,
             },
             &|grapheme, size| self.emoji.get(grapheme, size, source),
         );
@@ -641,7 +823,7 @@ fn resize_default(image: &RgbaImage, expand: bool) -> RgbaImage {
 /// Re-encode `rendered` in the same format, downscaled until it's at most
 /// `max_bytes`. Animations keep every frame.
 pub fn shrink(rendered: &Rendered, max_bytes: usize) -> Result<Vec<u8>> {
-    let (frames, duration) = decode_frames(&rendered.bytes, &rendered.extension)?;
+    let (frames, delays) = decode_frames(&rendered.bytes, &rendered.extension)?;
     let (width, height) = frames.first().context("no frames")?.dimensions();
     // Encoded size is roughly proportional to area.
     let mut scale = (max_bytes as f64 / rendered.bytes.len() as f64).sqrt();
@@ -656,8 +838,8 @@ pub fn shrink(rendered: &Rendered, max_bytes: usize) -> Result<Vec<u8>> {
             .map(|frame| image::imageops::resize(frame, size.0, size.1, FilterType::Lanczos3))
             .collect();
         let bytes = match rendered.extension.as_str() {
-            "gif" => encode_gif(frames, duration)?,
-            "webp" => crate::webp::encode(&frames, duration)?,
+            "gif" => encode_gif(frames, &delays)?,
+            "webp" => crate::webp::encode(&frames, &delays)?,
             "png" => png::Strips::new(&frames[0]).encode(&[], |_| unreachable!()),
             _ => jpeg::Rows::new(&frames[0], JPEG_QUALITY)?.encode(&[], |_| unreachable!())?,
         };
@@ -670,42 +852,38 @@ pub fn shrink(rendered: &Rendered, max_bytes: usize) -> Result<Vec<u8>> {
     ))
 }
 
-/// Every frame of an encoded image, composited, and the first frame's delay.
-fn decode_frames(bytes: &[u8], extension: &str) -> Result<(Vec<RgbaImage>, u32)> {
+/// Every frame of an encoded image, composited, and each frame's delay.
+fn decode_frames(bytes: &[u8], extension: &str) -> Result<(Vec<RgbaImage>, Vec<u32>)> {
     let frames = match extension {
         "gif" => GifDecoder::new(Cursor::new(bytes))?.into_frames(),
         "webp" => {
             let decoder = WebPDecoder::new(Cursor::new(bytes))?;
             if !decoder.has_animation() {
-                return Ok((vec![load_image(bytes)?], 0));
+                return Ok((vec![load_image(bytes)?], vec![0]));
             }
             decoder.into_frames()
         }
-        _ => return Ok((vec![load_image(bytes)?], 0)),
+        _ => return Ok((vec![load_image(bytes)?], vec![0])),
     }
     .collect_frames()?;
-    let duration = frames.first().map_or(100, |frame| {
-        let (numerator, denominator) = frame.delay().numer_denom_ms();
-        numerator / denominator.max(1)
-    });
-    Ok((
-        frames
-            .into_iter()
-            .map(|frame| frame.into_buffer())
-            .collect(),
-        duration,
-    ))
+    Ok(frames
+        .into_iter()
+        .map(|frame| {
+            let (numerator, denominator) = frame.delay().numer_denom_ms();
+            (frame.into_buffer(), numerator / denominator.max(1))
+        })
+        .unzip())
 }
 
 /// Encode frames with one shared palette; later frames only store the
 /// pixels that changed (the rest are transparent over the previous frame).
-fn encode_gif(frames: Vec<RgbaImage>, duration: u32) -> Result<Vec<u8>> {
+/// `delays` are in milliseconds, one per frame.
+fn encode_gif(frames: Vec<RgbaImage>, delays: &[u32]) -> Result<Vec<u8>> {
     let first = frames.first().context("no frames")?;
     let (width, height) = (
         u16::try_from(first.width())?,
         u16::try_from(first.height())?,
     );
-    let delay = (duration as f32 / 10.0).round() as u16;
 
     // Build one palette from an evenly spaced sample of all frames.
     const SAMPLE_PIXELS: usize = 400_000;
@@ -737,7 +915,7 @@ fn encode_gif(frames: Vec<RgbaImage>, duration: u32) -> Result<Vec<u8>> {
         .enumerate()
         .map(|(index, current)| {
             let mut frame = gif::Frame {
-                delay,
+                delay: (delays[index] as f32 / 10.0).round() as u16,
                 ..Default::default()
             };
             if index == 0 {
@@ -848,6 +1026,7 @@ mod tests {
                 lines: template.example.clone(),
                 font: String::new(),
                 extension: "jpg".into(),
+                animate_text: false,
             };
             let rendered = renderer
                 .render(&request, &Directory::new(root()))
@@ -873,6 +1052,7 @@ mod tests {
                 lines: vec!["hello :fire:".into(), "world".into()],
                 font: "impact".into(),
                 extension: extension.into(),
+                animate_text: false,
             };
             let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             assert_eq!(rendered.content_type, content_type);
@@ -896,6 +1076,7 @@ mod tests {
                 lines: vec!["a".into(), "b".into()],
                 font: String::new(),
                 extension: extension.into(),
+                animate_text: false,
             };
             let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             let max_bytes = rendered.bytes.len() / 2;
@@ -920,6 +1101,7 @@ mod tests {
             lines: vec![line.into()],
             font: font.into(),
             extension: extension.into(),
+            animate_text: false,
         };
         assert!(matches!(
             renderer.render(&request("nope", "", "png", "a"), &directory),
@@ -957,6 +1139,72 @@ mod tests {
     }
 
     #[test]
+    fn types_text_out_then_holds() {
+        let renderer = renderer();
+        let directory = Directory::new(root());
+        let lines: Vec<String> = vec!["hi you".into(), "ok :fire:".into()];
+
+        // A still background: a frame per mark (spaces don't count; the emoji
+        // does), then the last frame holds.
+        let template = renderer.catalog().get("sf").unwrap().clone();
+        let (frames, delays) = renderer
+            .render_typing(&template, &lines, "", 0, &directory)
+            .unwrap();
+        assert_eq!(frames.len(), 8);
+        assert!(delays[..7].iter().all(|&delay| delay == TYPING_DELAY_MS));
+        assert_eq!(delays[7], TYPING_HOLD_MS);
+        assert!(frames.windows(2).all(|pair| pair[0] != pair[1]));
+        let (full, _) = renderer
+            .render_animation(&template, &lines, "", 0, &directory)
+            .unwrap();
+        assert!(frames[7] == full[0]);
+
+        // An animated background keeps moving through the typing and the hold.
+        let template = renderer.catalog().get("oprah").unwrap().clone();
+        let (frames, delays) = renderer
+            .render_typing(&template, &lines, "", 0, &directory)
+            .unwrap();
+        let total: u32 = delays.iter().sum();
+        assert!(frames.len() > 8);
+        assert!(total >= TYPING_HOLD_MS + 8 * TYPING_DELAY_MS, "{delays:?}");
+
+        // Long text types several marks per frame to stay in budget.
+        let template = renderer.catalog().get("sf").unwrap().clone();
+        let long = vec!["a".repeat(150), "b".repeat(150)];
+        let (frames, _) = renderer
+            .render_typing(&template, &long, "", 0, &directory)
+            .unwrap();
+        assert_eq!(frames.len(), TYPING_FRAMES.0);
+
+        for extension in ["gif", "webp"] {
+            let request = MemeRequest {
+                template_id: "sf".into(),
+                lines: lines.clone(),
+                font: String::new(),
+                extension: extension.into(),
+                animate_text: true,
+            };
+            let rendered = renderer.render(&request, &directory).unwrap();
+            let (decoded, decoded_delays) = decode_frames(&rendered.bytes, extension).unwrap();
+            assert_eq!(decoded.len(), 8, "{extension}");
+            assert_eq!(decoded_delays[7], TYPING_HOLD_MS, "{extension}");
+            let shrunk = shrink(&rendered, rendered.bytes.len() / 2).unwrap();
+            assert_eq!(decode_frames(&shrunk, extension).unwrap().1, decoded_delays);
+        }
+        let request = MemeRequest {
+            template_id: "fry".into(),
+            lines,
+            font: String::new(),
+            extension: "png".into(),
+            animate_text: true,
+        };
+        assert!(matches!(
+            renderer.render(&request, &directory),
+            Err(RenderError::Invalid(_))
+        ));
+    }
+
+    #[test]
     fn lists_missing_assets() {
         let renderer = renderer_with(false);
         let directory = Directory::new(root());
@@ -965,6 +1213,7 @@ mod tests {
             lines: vec![":fire: hot".into(), ":fire:".into()],
             font: String::new(),
             extension: extension.into(),
+            animate_text: false,
         };
         assert_eq!(
             renderer.missing(&request("png")),
