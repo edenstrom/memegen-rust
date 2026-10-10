@@ -3,7 +3,7 @@ main = "build/index.js"
 compatibility_date = "2026-09-01"
 
 [build]
-command = "cargo install -q worker-build@^0.8.7 && worker-build --release"
+command = "sh build.sh"
 
 # templates/, fonts/, emoji/ and static/ (symlinks to the repository root).
 # The Worker runs first for every request and reads them via the binding, so
