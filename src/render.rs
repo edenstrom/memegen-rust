@@ -138,7 +138,7 @@ pub struct MemeRequest {
     pub lines: Vec<String>,
     pub font: String,
     pub extension: String,
-    /// Type the text out (GIF, WebP and MP4 only).
+    /// Type the text out (GIF, WebP, AVIF and MP4 only).
     pub animate_text: AnimateText,
 }
 
@@ -152,7 +152,7 @@ fn maximum_frames(extension: &str) -> usize {
 
 /// Whether `extension` is an animated format.
 pub fn is_animated(extension: &str) -> bool {
-    matches!(extension, "gif" | "webp" | "mp4")
+    matches!(extension, "avif" | "gif" | "webp" | "mp4")
 }
 
 pub fn content_type(extension: &str) -> &'static str {
@@ -314,7 +314,7 @@ impl Renderer {
 
         if request.animate_text.is_on() && !is_animated(&extension) {
             return Err(RenderError::Invalid(format!(
-                "Animated text needs a gif, webp or mp4 extension, not {extension}"
+                "Animated text needs a gif, webp, avif or mp4 extension, not {extension}"
             )));
         }
 
@@ -352,7 +352,7 @@ impl Renderer {
         let template = &prepared.template;
         let extension = prepared.extension.as_str();
         let mut paths: Vec<String> = match extension {
-            "gif" | "webp" | "mp4" => {
+            "avif" | "gif" | "webp" | "mp4" => {
                 let key = (template.id.clone(), maximum_frames(extension));
                 (!self.animations.contains(&key))
                     .then(|| template.animated_image.clone())
@@ -454,7 +454,7 @@ impl Renderer {
         source: &dyn Source,
     ) -> Result<Vec<u8>> {
         match extension {
-            "gif" | "webp" | "mp4" => {
+            "avif" | "gif" | "webp" | "mp4" => {
                 let (frames, delays) = if animate_text.is_on() {
                     self.render_typing(template, lines, font, extension, animate_text, source)?
                 } else {
@@ -467,6 +467,7 @@ impl Renderer {
                 match extension {
                     "gif" => encode_gif(frames, &delays),
                     "webp" => crate::webp::encode(&frames, &delays),
+                    "avif" => crate::avif::encode(&frames, &delays),
                     _ => crate::mp4::encode(&frames, &delays),
                 }
             }
@@ -493,16 +494,6 @@ impl Renderer {
         source: &dyn Source,
     ) -> Result<Vec<u8>> {
         let background = self.background(template, source)?;
-        if extension == "avif" {
-            let (width, height) = background.dimensions();
-            let mut image = (*background).clone();
-            for ((left, top), layer) in
-                self.text_layers(template, lines, font, (width, height), source)
-            {
-                typeset::paste_with_alpha(&mut image, &layer, (left, top));
-            }
-            return crate::avif::encode(&image);
-        }
         let format = if extension == "png" { "png" } else { "jpg" };
         let encoded = self
             .encoded
@@ -997,7 +988,7 @@ pub fn shrink(rendered: &Rendered, max_bytes: usize) -> Result<Vec<u8>> {
             "gif" => encode_gif(frames, &delays)?,
             "webp" => crate::webp::encode(&frames, &delays)?,
             "png" => png::Strips::new(&frames[0]).encode(&[], |_| unreachable!()),
-            "avif" => crate::avif::encode(&frames[0])?,
+            "avif" => crate::avif::encode(&frames, &delays)?,
             _ => jpeg::Rows::new(&frames[0], JPEG_QUALITY)?.encode(&[], |_| unreachable!())?,
         };
         if bytes.len() <= max_bytes {
@@ -1206,8 +1197,9 @@ mod tests {
             ("oprah", "gif", "image/gif"),
             ("oprah", "webp", "image/webp"),
             ("fry", "avif", "image/avif"),
-            // Animated templates render their static image.
             ("oprah", "avif", "image/avif"),
+            // No animation: a still image.
+            ("sf", "avif", "image/avif"),
             ("fry", "mp4", "video/mp4"),
             ("oprah", "mp4", "video/mp4"),
         ] {
@@ -1222,8 +1214,12 @@ mod tests {
             assert_eq!(rendered.content_type, content_type);
             match extension {
                 "webp" => {}
-                // The image crate can't decode AVIF without dav1d.
-                "avif" => assert_eq!(&rendered.bytes[4..12], b"ftypavif"),
+                // The image crate can't decode AVIF without dav1d (C).
+                // Decoded in `avif::tests`; animations are image sequences.
+                "avif" => {
+                    let brand: &[u8] = if template == "sf" { b"avif" } else { b"avis" };
+                    assert_eq!(&rendered.bytes[4..12], [b"ftyp", brand].concat());
+                }
                 // Decoded in `mp4::tests`.
                 "mp4" => assert_eq!(&rendered.bytes[4..8], b"ftyp"),
                 _ => {

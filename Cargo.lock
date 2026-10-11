@@ -1347,6 +1347,7 @@ dependencies = [
  "libc",
  "moka",
  "percent-encoding",
+ "rav1e",
  "ravif",
  "rayon",
  "rmcp",

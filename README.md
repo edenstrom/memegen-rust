@@ -5,7 +5,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - 568 templates: all 210 upstream ones plus 358 more from [tenequm/memegen-rs](https://github.com/tenequm/memegen-rs) and [imgflip](https://imgflip.com/memetemplates), and upstream's fonts and text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
-- PNG, JPG, GIF, WebP, AVIF and MP4 output, including animated GIF/WebP/MP4 templates (AVIF is static only)
+- PNG, JPG, GIF, WebP, AVIF and MP4 output, including animated GIF/WebP/AVIF/MP4 templates. Animated AVIF is far smaller than GIF and, unlike MP4, plays in an `<img>`, but AV1 is slow to encode: about 0.5–1 s for a 24-frame meme the first time it's rendered
 - Animated text: the text boxes are typed out one after another, a character or a word at a time (with eased timing in MP4), then hold the finished meme for 3 seconds before looping, on static and animated templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
@@ -75,7 +75,7 @@ Start the server with `memegen serve` (or just `memegen`). `/` is a landing page
 
 | Route | Description |
 |---|---|
-| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,avif,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out a character at a time, `?animate_text=words` a word at a time (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,avif,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out a character at a time, `?animate_text=words` a word at a time (gif/webp/avif/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
 | `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, redirect}` (JSON or form) |
@@ -94,7 +94,7 @@ With `animate_text`, the text boxes are typed out in order, with a 0.6 s pause b
 
 The pacing depends on the format:
 
-- **GIF and WebP**: every step takes the same time. On an animated template the text types over the template's frames, several marks per frame if they're slow. Long text types several marks per frame to stay within 60 typing frames (24 on Workers).
+- **GIF, WebP and AVIF**: every step takes the same time. On an animated template the text types over the template's frames, several marks per frame if they're slow. Long text types several marks per frame to stay within 60 typing frames (24 on Workers).
 - **MP4**: the timing is eased in and out (an inverse ease-in-out sine). Each box starts slowly, speeds up to about 1.6 times the average pace in the middle (about 40 ms per mark), and slows down again for the last marks or words. On an animated template the text is drawn at up to 30 fps between the template's frames, which video compresses well.
 
 On an animated template the background keeps playing through the pauses and the hold.
@@ -129,7 +129,7 @@ npx wrangler deploy   # https://memegen.<account>.workers.dev
 
 Wrangler builds with `worker/build.sh`, which adds the `wasm32-unknown-unknown` Rust target and installs `worker-build`. If `cargo` isn't on the `PATH` (as in Cloudflare's Workers Builds), it installs Rust with rustup first. In Workers Builds it keeps the toolchain, `worker-build` and the target directory under `~/.npm`, which the [build cache](https://developers.cloudflare.com/workers/ci-cd/builds/build-caching/) saves between builds (`worker/package.json` exists only so the cache detects npm).
 
-- **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 2 MB gzipped.
+- **Assets**: `templates/`, `fonts/`, `emoji/` and `static/` (about 4,700 files, 105 MB) are uploaded as [static assets](https://developers.cloudflare.com/workers/static-assets/) through symlinks in `worker/assets/`; later deploys only upload changed files. The Worker runs first for every request (`run_worker_first`), so the raw files aren't public. The compiled Worker is about 3 MB gzipped.
 - **Startup**: the template catalog is embedded at build time; fonts (5 MB) are fetched on the first request in each isolate.
 - **Caching**: successful `/images/...` responses go into Cloudflare's cache, so a repeated meme isn't rendered again. The Cache API has no effect on `*.workers.dev`, so use a [custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) to get this. Each isolate also keeps small in-memory caches (isolates have 128 MB of memory).
 - **CPU time**: rendering needs the Workers Paid plan. In local `wrangler dev`, a new static meme took 8–17 ms, an animated GIF about 85 ms and an animated MP4 a few hundred ms, so most renders exceed the Free plan's 10 ms CPU limit. `wrangler.toml` sets a 30 s limit.

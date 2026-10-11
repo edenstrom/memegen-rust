@@ -10,9 +10,7 @@ use rusty_h264_encoder::{Encoder, EncoderConfig, Preset};
 /// Constant quantizer (0-51, lower is better). 23 is x264's default CRF.
 const QP: u8 = 23;
 /// Delays are in milliseconds.
-const TIMESCALE: u32 = 1000;
-/// Browsers show GIF frames with a delay of 10 ms or less for 100 ms; do the
-/// same, since a video sample can't last 0 ms.
+pub(crate) const TIMESCALE: u32 = 1000;
 const MINIMUM_DELAY: u32 = 10;
 const DEFAULT_DELAY: u32 = 100;
 
@@ -35,16 +33,7 @@ pub fn encode(frames: &[RgbaImage], delays: &[u32]) -> Result<Vec<u8>> {
     // 4:2:0 chroma needs even dimensions; drop an odd last row or column.
     let (width, height) = (first.width() & !1, first.height() & !1);
     ensure!(width > 0 && height > 0, "image too small for MP4");
-    let delays: Vec<u32> = delays
-        .iter()
-        .map(|&delay| {
-            if delay <= MINIMUM_DELAY {
-                DEFAULT_DELAY
-            } else {
-                delay
-            }
-        })
-        .collect();
+    let delays = sample_delays(delays);
 
     let mut config = EncoderConfig::new(width as usize, height as usize);
     // Twice as fast as Balanced for files about 5% larger.
@@ -77,6 +66,21 @@ pub fn encode(frames: &[RgbaImage], delays: &[u32]) -> Result<Vec<u8>> {
     Ok(track.mux(width, height, &delays))
 }
 
+/// Browsers show GIF frames with a delay of [`MINIMUM_DELAY`] or less for
+/// [`DEFAULT_DELAY`]; do the same, since a sample can't last 0 ms.
+pub(crate) fn sample_delays(delays: &[u32]) -> Vec<u32> {
+    delays
+        .iter()
+        .map(|&delay| {
+            if delay <= MINIMUM_DELAY {
+                DEFAULT_DELAY
+            } else {
+                delay
+            }
+        })
+        .collect()
+}
+
 /// The lowest level whose frame size and macroblock rate admit the video.
 fn level(width: u32, height: u32, minimum_delay: u32) -> u8 {
     // (level_idc, MaxMBPS, MaxFS) from Table A-1.
@@ -101,7 +105,7 @@ fn level(width: u32, height: u32, minimum_delay: u32) -> u8 {
 
 /// Limited-range BT.709 4:2:0, each chroma sample from the average of 2x2
 /// pixels.
-fn to_yuv(frame: &RgbaImage, width: u32, height: u32) -> YuvFrame {
+pub(crate) fn to_yuv(frame: &RgbaImage, width: u32, height: u32) -> YuvFrame {
     let (width, height, stride) = (width as usize, height as usize, frame.width() as usize * 4);
     let pixels = frame.as_raw();
     let rgb = |x: usize, y: usize| {
@@ -197,168 +201,246 @@ impl Track {
 
     /// A faststart MP4 (`moov` before `mdat`) with a single chunk.
     fn mux(&self, width: u32, height: u32, delays: &[u32]) -> Vec<u8> {
-        let mut out = Vec::new();
-        write_box(&mut out, b"ftyp", |out| {
-            out.extend(b"isom");
-            out.extend(0x200u32.to_be_bytes());
-            out.extend(b"isomiso2avc1mp41");
-        });
-        // The chunk offset doesn't change the size of `moov`.
-        let mut moov = self.moov(width, height, delays, 0);
-        let offset = (out.len() + moov.len() + 8) as u32;
-        moov = self.moov(width, height, delays, offset);
-        out.extend(moov);
-        write_box(&mut out, b"mdat", |out| {
-            for (sample, _) in &self.samples {
-                out.extend(sample);
-            }
-        });
-        out
+        mux(
+            &Container {
+                brands: b"isom\0\0\x02\0isomiso2avc1mp41",
+                handler: b"vide",
+                entry: b"avc1",
+                config: (b"avcC", &self.avcc()),
+                looping: false,
+                meta: None,
+            },
+            &self.samples,
+            width,
+            height,
+            delays,
+        )
     }
 
-    fn moov(&self, width: u32, height: u32, delays: &[u32], offset: u32) -> Vec<u8> {
-        let duration: u32 = delays.iter().sum();
+    fn avcc(&self) -> Vec<u8> {
         let mut out = Vec::new();
-        write_box(&mut out, b"moov", |out| {
-            write_full_box(out, b"mvhd", 0, |out| {
-                out.extend([0; 8]); // creation and modification time
-                out.extend(TIMESCALE.to_be_bytes());
-                out.extend(duration.to_be_bytes());
-                out.extend(0x0001_0000u32.to_be_bytes()); // rate 1.0
-                out.extend(0x0100u16.to_be_bytes()); // volume 1.0
-                out.extend([0; 10]);
-                out.extend(MATRIX);
-                out.extend([0; 24]);
-                out.extend(2u32.to_be_bytes()); // next track ID
-            });
-            write_box(out, b"trak", |out| {
-                // Enabled, in the movie.
-                write_full_box(out, b"tkhd", 3, |out| {
-                    out.extend([0; 8]);
-                    out.extend(1u32.to_be_bytes()); // track ID
-                    out.extend([0; 4]);
-                    out.extend(duration.to_be_bytes());
-                    out.extend([0; 16]); // reserved, layer, group, volume
-                    out.extend(MATRIX);
-                    out.extend((width << 16).to_be_bytes());
-                    out.extend((height << 16).to_be_bytes());
-                });
-                write_box(out, b"mdia", |out| {
-                    write_full_box(out, b"mdhd", 0, |out| {
-                        out.extend([0; 8]);
-                        out.extend(TIMESCALE.to_be_bytes());
-                        out.extend(duration.to_be_bytes());
-                        out.extend(0x55c4u16.to_be_bytes()); // language "und"
-                        out.extend([0; 2]);
-                    });
-                    write_full_box(out, b"hdlr", 0, |out| {
-                        out.extend([0; 4]);
-                        out.extend(b"vide");
-                        out.extend([0; 12]);
-                        out.extend(b"VideoHandler\0");
-                    });
-                    write_box(out, b"minf", |out| {
-                        write_full_box(out, b"vmhd", 1, |out| out.extend([0; 8]));
-                        write_box(out, b"dinf", |out| {
-                            write_full_box(out, b"dref", 0, |out| {
-                                out.extend(1u32.to_be_bytes());
-                                // The data is in this file.
-                                write_full_box(out, b"url ", 1, |_| {});
-                            });
-                        });
-                        write_box(out, b"stbl", |out| {
-                            self.stbl(out, width, height, delays, offset)
-                        });
-                    });
-                });
-            });
-        });
-        out
-    }
-
-    fn stbl(&self, out: &mut Vec<u8>, width: u32, height: u32, delays: &[u32], offset: u32) {
-        write_full_box(out, b"stsd", 0, |out| {
-            out.extend(1u32.to_be_bytes());
-            write_box(out, b"avc1", |out| {
-                out.extend([0; 6]);
-                out.extend(1u16.to_be_bytes()); // data reference index
-                out.extend([0; 16]);
-                out.extend((width as u16).to_be_bytes());
-                out.extend((height as u16).to_be_bytes());
-                out.extend(0x0048_0000u32.to_be_bytes()); // 72 dpi
-                out.extend(0x0048_0000u32.to_be_bytes());
-                out.extend([0; 4]);
-                out.extend(1u16.to_be_bytes()); // frames per sample
-                out.extend([0; 32]); // compressor name
-                out.extend(0x18u16.to_be_bytes()); // depth
-                out.extend((-1i16).to_be_bytes());
-                write_box(out, b"avcC", |out| {
-                    // Version, then profile, compatibility and level.
-                    out.push(1);
-                    out.extend(&self.sps[1..4]);
-                    out.push(0xfc | 3); // 4-byte NAL unit lengths
-                    out.push(0xe0 | 1);
-                    out.extend((self.sps.len() as u16).to_be_bytes());
-                    out.extend(&self.sps);
-                    out.push(1);
-                    out.extend((self.pps.len() as u16).to_be_bytes());
-                    out.extend(&self.pps);
-                    // High profiles add the chroma format and bit depths.
-                    if ![66, 77, 88].contains(&self.sps[1]) {
-                        out.extend([0xfc | 1, 0xf8, 0xf8, 0]);
-                    }
-                });
-                write_box(out, b"colr", |out| {
-                    out.extend(b"nclx");
-                    // BT.709 primaries, transfer and matrix; limited range.
-                    out.extend([0, 1, 0, 1, 0, 1, 0]);
-                });
-            });
-        });
-        let mut runs: Vec<(u32, u32)> = Vec::new();
-        for &delay in delays {
-            match runs.last_mut() {
-                Some((count, last)) if *last == delay => *count += 1,
-                _ => runs.push((1, delay)),
-            }
+        // Version, then profile, compatibility and level.
+        out.push(1);
+        out.extend(&self.sps[1..4]);
+        out.push(0xfc | 3); // 4-byte NAL unit lengths
+        out.push(0xe0 | 1);
+        out.extend((self.sps.len() as u16).to_be_bytes());
+        out.extend(&self.sps);
+        out.push(1);
+        out.extend((self.pps.len() as u16).to_be_bytes());
+        out.extend(&self.pps);
+        // High profiles add the chroma format and bit depths.
+        if ![66, 77, 88].contains(&self.sps[1]) {
+            out.extend([0xfc | 1, 0xf8, 0xf8, 0]);
         }
-        write_full_box(out, b"stts", 0, |out| {
-            out.extend((runs.len() as u32).to_be_bytes());
-            for (count, delay) in &runs {
-                out.extend(count.to_be_bytes());
-                out.extend(delay.to_be_bytes());
-            }
-        });
-        let sync: Vec<u32> = (1..)
-            .zip(&self.samples)
-            .filter(|(_, (_, idr))| *idr)
-            .map(|(number, _)| number)
-            .collect();
-        write_full_box(out, b"stss", 0, |out| {
-            out.extend((sync.len() as u32).to_be_bytes());
-            for number in &sync {
-                out.extend(number.to_be_bytes());
-            }
-        });
-        let count = self.samples.len() as u32;
-        write_full_box(out, b"stsc", 0, |out| {
-            out.extend(1u32.to_be_bytes());
-            out.extend(1u32.to_be_bytes()); // first chunk
-            out.extend(count.to_be_bytes());
-            out.extend(1u32.to_be_bytes()); // sample description
-        });
-        write_full_box(out, b"stsz", 0, |out| {
-            out.extend(0u32.to_be_bytes());
-            out.extend(count.to_be_bytes());
-            for (sample, _) in &self.samples {
-                out.extend((sample.len() as u32).to_be_bytes());
-            }
-        });
-        write_full_box(out, b"stco", 0, |out| {
-            out.extend(1u32.to_be_bytes());
-            out.extend(offset.to_be_bytes());
-        });
+        out
     }
+}
+
+/// What sets a video file apart: MP4 with H.264, or an AVIF image sequence.
+pub(crate) struct Container<'a> {
+    /// `ftyp`'s payload: major brand, minor version and compatible brands.
+    pub brands: &'a [u8],
+    pub handler: &'a [u8; 4],
+    /// The sample entry type, and its codec configuration box and payload.
+    pub entry: &'a [u8; 4],
+    pub config: (&'a [u8; 4], &'a [u8]),
+    /// Repeat forever, with an edit list (image sequences loop; videos don't).
+    pub looping: bool,
+    /// A `meta` box before `moov`, given the file offset of the first sample.
+    pub meta: Option<&'a dyn Fn(u32) -> Vec<u8>>,
+}
+
+/// One track of `samples` (each with whether it's a sync sample) in a single
+/// chunk, `moov` before `mdat`. `delays` are in milliseconds, one per sample.
+pub(crate) fn mux(
+    container: &Container,
+    samples: &[(Vec<u8>, bool)],
+    width: u32,
+    height: u32,
+    delays: &[u32],
+) -> Vec<u8> {
+    let mut out = Vec::new();
+    write_box(&mut out, b"ftyp", |out| out.extend(container.brands));
+    // Neither `meta` nor `moov` changes size with the chunk offset.
+    let header = |offset| {
+        let mut out = container.meta.map(|meta| meta(offset)).unwrap_or_default();
+        moov(&mut out, container, samples, width, height, delays, offset);
+        out
+    };
+    let offset = (out.len() + header(0).len() + 8) as u32;
+    out.extend(header(offset));
+    write_box(&mut out, b"mdat", |out| {
+        for (sample, _) in samples {
+            out.extend(sample);
+        }
+    });
+    out
+}
+
+fn moov(
+    out: &mut Vec<u8>,
+    container: &Container,
+    samples: &[(Vec<u8>, bool)],
+    width: u32,
+    height: u32,
+    delays: &[u32],
+    offset: u32,
+) {
+    let media_duration: u32 = delays.iter().sum();
+    // A track that repeats forever has an indefinite duration.
+    let duration = if container.looping {
+        u32::MAX
+    } else {
+        media_duration
+    };
+    write_box(out, b"moov", |out| {
+        write_full_box(out, b"mvhd", 0, |out| {
+            out.extend([0; 8]); // creation and modification time
+            out.extend(TIMESCALE.to_be_bytes());
+            out.extend(duration.to_be_bytes());
+            out.extend(0x0001_0000u32.to_be_bytes()); // rate 1.0
+            out.extend(0x0100u16.to_be_bytes()); // volume 1.0
+            out.extend([0; 10]);
+            out.extend(MATRIX);
+            out.extend([0; 24]);
+            out.extend(2u32.to_be_bytes()); // next track ID
+        });
+        write_box(out, b"trak", |out| {
+            // Enabled, in the movie.
+            write_full_box(out, b"tkhd", 3, |out| {
+                out.extend([0; 8]);
+                out.extend(1u32.to_be_bytes()); // track ID
+                out.extend([0; 4]);
+                out.extend(duration.to_be_bytes());
+                out.extend([0; 16]); // reserved, layer, group, volume
+                out.extend(MATRIX);
+                out.extend((width << 16).to_be_bytes());
+                out.extend((height << 16).to_be_bytes());
+            });
+            if container.looping {
+                write_box(out, b"edts", |out| {
+                    // Flag 1: repeat the edit list.
+                    write_full_box(out, b"elst", 1, |out| {
+                        out.extend(1u32.to_be_bytes());
+                        out.extend(media_duration.to_be_bytes());
+                        out.extend(0u32.to_be_bytes()); // media time
+                        out.extend(0x0001_0000u32.to_be_bytes()); // rate 1.0
+                    });
+                });
+            }
+            write_box(out, b"mdia", |out| {
+                write_full_box(out, b"mdhd", 0, |out| {
+                    out.extend([0; 8]);
+                    out.extend(TIMESCALE.to_be_bytes());
+                    out.extend(media_duration.to_be_bytes());
+                    out.extend(0x55c4u16.to_be_bytes()); // language "und"
+                    out.extend([0; 2]);
+                });
+                write_full_box(out, b"hdlr", 0, |out| {
+                    out.extend([0; 4]);
+                    out.extend(container.handler);
+                    out.extend([0; 12]);
+                    out.extend(b"VideoHandler\0");
+                });
+                write_box(out, b"minf", |out| {
+                    write_full_box(out, b"vmhd", 1, |out| out.extend([0; 8]));
+                    write_box(out, b"dinf", |out| {
+                        write_full_box(out, b"dref", 0, |out| {
+                            out.extend(1u32.to_be_bytes());
+                            // The data is in this file.
+                            write_full_box(out, b"url ", 1, |_| {});
+                        });
+                    });
+                    write_box(out, b"stbl", |out| {
+                        stbl(out, container, samples, width, height, delays, offset)
+                    });
+                });
+            });
+        });
+    });
+}
+
+fn stbl(
+    out: &mut Vec<u8>,
+    container: &Container,
+    samples: &[(Vec<u8>, bool)],
+    width: u32,
+    height: u32,
+    delays: &[u32],
+    offset: u32,
+) {
+    write_full_box(out, b"stsd", 0, |out| {
+        out.extend(1u32.to_be_bytes());
+        write_box(out, container.entry, |out| {
+            out.extend([0; 6]);
+            out.extend(1u16.to_be_bytes()); // data reference index
+            out.extend([0; 16]);
+            out.extend((width as u16).to_be_bytes());
+            out.extend((height as u16).to_be_bytes());
+            out.extend(0x0048_0000u32.to_be_bytes()); // 72 dpi
+            out.extend(0x0048_0000u32.to_be_bytes());
+            out.extend([0; 4]);
+            out.extend(1u16.to_be_bytes()); // frames per sample
+            out.extend([0; 32]); // compressor name
+            out.extend(0x18u16.to_be_bytes()); // depth
+            out.extend((-1i16).to_be_bytes());
+            let (kind, config) = container.config;
+            write_box(out, kind, |out| out.extend(config));
+            write_colr(out);
+        });
+    });
+    let mut runs: Vec<(u32, u32)> = Vec::new();
+    for &delay in delays {
+        match runs.last_mut() {
+            Some((count, last)) if *last == delay => *count += 1,
+            _ => runs.push((1, delay)),
+        }
+    }
+    write_full_box(out, b"stts", 0, |out| {
+        out.extend((runs.len() as u32).to_be_bytes());
+        for (count, delay) in &runs {
+            out.extend(count.to_be_bytes());
+            out.extend(delay.to_be_bytes());
+        }
+    });
+    let sync: Vec<u32> = (1..)
+        .zip(samples)
+        .filter(|(_, (_, sync))| *sync)
+        .map(|(number, _)| number)
+        .collect();
+    write_full_box(out, b"stss", 0, |out| {
+        out.extend((sync.len() as u32).to_be_bytes());
+        for number in &sync {
+            out.extend(number.to_be_bytes());
+        }
+    });
+    let count = samples.len() as u32;
+    write_full_box(out, b"stsc", 0, |out| {
+        out.extend(1u32.to_be_bytes());
+        out.extend(1u32.to_be_bytes()); // first chunk
+        out.extend(count.to_be_bytes());
+        out.extend(1u32.to_be_bytes()); // sample description
+    });
+    write_full_box(out, b"stsz", 0, |out| {
+        out.extend(0u32.to_be_bytes());
+        out.extend(count.to_be_bytes());
+        for (sample, _) in samples {
+            out.extend((sample.len() as u32).to_be_bytes());
+        }
+    });
+    write_full_box(out, b"stco", 0, |out| {
+        out.extend(1u32.to_be_bytes());
+        out.extend(offset.to_be_bytes());
+    });
+}
+
+/// BT.709 primaries, transfer and matrix; limited range.
+pub(crate) fn write_colr(out: &mut Vec<u8>) {
+    write_box(out, b"colr", |out| {
+        out.extend(b"nclx");
+        out.extend([0, 1, 0, 1, 0, 1, 0]);
+    });
 }
 
 /// Identity transformation matrix.
@@ -407,7 +489,7 @@ fn write_length_prefixed(out: &mut Vec<u8>, unit: &[u8]) {
     out.extend(unit);
 }
 
-fn write_box(out: &mut Vec<u8>, kind: &[u8; 4], body: impl FnOnce(&mut Vec<u8>)) {
+pub(crate) fn write_box(out: &mut Vec<u8>, kind: &[u8; 4], body: impl FnOnce(&mut Vec<u8>)) {
     let start = out.len();
     out.extend([0; 4]);
     out.extend(kind);
@@ -416,8 +498,13 @@ fn write_box(out: &mut Vec<u8>, kind: &[u8; 4], body: impl FnOnce(&mut Vec<u8>))
     out[start..start + 4].copy_from_slice(&size.to_be_bytes());
 }
 
-/// A box with a version (always 0 here) and 24 bits of flags.
-fn write_full_box(out: &mut Vec<u8>, kind: &[u8; 4], flags: u32, body: impl FnOnce(&mut Vec<u8>)) {
+/// A box with a version (the top byte of `flags`) and 24 bits of flags.
+pub(crate) fn write_full_box(
+    out: &mut Vec<u8>,
+    kind: &[u8; 4],
+    flags: u32,
+    body: impl FnOnce(&mut Vec<u8>),
+) {
     write_box(out, kind, |out| {
         out.extend(flags.to_be_bytes());
         body(out);
@@ -425,14 +512,14 @@ fn write_full_box(out: &mut Vec<u8>, kind: &[u8; 4], flags: u32, body: impl FnOn
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use image::Rgba;
     use rusty_h264_decoder::Decoder;
 
     use super::*;
 
     /// The payload of the first `kind` box in `data`.
-    fn child<'a>(data: &'a [u8], kind: &[u8; 4]) -> &'a [u8] {
+    pub(crate) fn child<'a>(data: &'a [u8], kind: &[u8; 4]) -> &'a [u8] {
         let mut rest = data;
         while rest.len() >= 8 {
             let size = u32::from_be_bytes(rest[..4].try_into().unwrap()) as usize;
@@ -444,16 +531,16 @@ mod tests {
         panic!("no {} box", String::from_utf8_lossy(kind));
     }
 
-    fn path<'a>(data: &'a [u8], kinds: &[&[u8; 4]]) -> &'a [u8] {
+    pub(crate) fn path<'a>(data: &'a [u8], kinds: &[&[u8; 4]]) -> &'a [u8] {
         kinds.iter().fold(data, |data, kind| child(data, kind))
     }
 
-    fn u32_at(data: &[u8], offset: usize) -> u32 {
+    pub(crate) fn u32_at(data: &[u8], offset: usize) -> u32 {
         u32::from_be_bytes(data[offset..offset + 4].try_into().unwrap())
     }
 
     /// A table of u32 values after a full box's version, flags and count.
-    fn table(data: &[u8], skip: usize) -> Vec<u32> {
+    pub(crate) fn table(data: &[u8], skip: usize) -> Vec<u32> {
         let count = u32_at(data, 4 + skip) as usize;
         let size = (data.len() - 8 - skip) / count.max(1);
         (0..count)

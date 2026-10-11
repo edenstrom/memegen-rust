@@ -29,7 +29,7 @@ string per line. Prefer a `filter`: it runs a ranked search over names, keywords
 through every template with a description of what it means and what each line is for; pass \
 `next_offset` back as `offset` to get the next page. \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
-Animated templates render as GIF/WebP/MP4; use `extension` to choose the format. \
+Animated templates render as GIF/WebP/AVIF/MP4; use `extension` to choose the format. \
 To render several memes at once, call `generate_memes` with a list of them.";
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -140,13 +140,13 @@ pub struct GenerateMemeRequest {
     pub template_id: String,
     /// Lines of text in order, one per text box (see the template's `lines`). Use "" to leave a box empty.
     pub text: Vec<String>,
-    /// Image format: "png" (default for static templates), "jpg", "gif" (default for animated templates), "webp", "avif" (static only, smallest; returned as a URL or saved file, not inline), or "mp4" (H.264 video, far smaller than GIF; returned as a URL or saved file, not inline).
+    /// Image format: "png" (default for static templates), "jpg", "gif" (default for animated templates), "webp", "avif" (still or animated, far smaller than GIF and plays in an <img> unlike MP4, but slow to render the first time; returned as a URL or saved file, not inline), or "mp4" (H.264 video, far smaller than GIF; returned as a URL or saved file, not inline).
     #[serde(default)]
     pub extension: Option<String>,
     /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
     #[serde(default)]
     pub font: Option<String>,
-    /// Type the text boxes out one after another, then hold the finished meme for a few seconds before looping: true or "characters" for a character at a time, "words" for a word at a time (MP4 eases the timing: slow, fast, then slow again). Works with any template; needs "gif" (the default when this is set), "webp" or "mp4".
+    /// Type the text boxes out one after another, then hold the finished meme for a few seconds before looping: true or "characters" for a character at a time, "words" for a word at a time (MP4 eases the timing: slow, fast, then slow again). Works with any template; needs "gif" (the default when this is set), "webp", "avif" or "mp4".
     #[serde(default)]
     pub animate_text: Option<AnimateTextArg>,
     /// Absolute file path to write the image to, e.g. "/tmp/meme.png".

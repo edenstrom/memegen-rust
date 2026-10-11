@@ -62,7 +62,7 @@ pub fn spec(base_url: &str) -> Value {
     let animate_text = json!({
         "name": "animate_text", "in": "query", "required": false,
         "schema": { "type": "string", "enum": ["true", "characters", "words"] },
-        "description": "Type the text boxes out one after another, a character (`true` or `characters`) or a word (`words`) at a time, with eased timing in mp4, then hold the finished meme (gif, webp and mp4 only)",
+        "description": "Type the text boxes out one after another, a character (`true` or `characters`) or a word (`words`) at a time, with eased timing in mp4, then hold the finished meme (gif, webp, avif and mp4 only)",
     });
 
     json!({

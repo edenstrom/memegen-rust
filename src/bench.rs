@@ -56,9 +56,10 @@ pub const CASES: &[Case] = &[
         lines: &[":fire: this is fine :thumbsup:", "emoji ok"],
         extension: "png",
     },
+    // `sf` has no animation, so AVIF is a still image.
     Case {
         name: "static avif",
-        template: "fry",
+        template: "sf",
         lines: &["not sure if trolling", "or just stupid"],
         extension: "avif",
     },
@@ -74,6 +75,12 @@ pub const CASES: &[Case] = &[
         template: "fry",
         lines: &["not sure if animated", "or just slow"],
         extension: "webp",
+    },
+    Case {
+        name: "animated avif (24 frames)",
+        template: "fry",
+        lines: &["not sure if animated", "or just slow"],
+        extension: "avif",
     },
     Case {
         name: "animated mp4 (24 frames)",
