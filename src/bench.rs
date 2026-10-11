@@ -56,6 +56,12 @@ pub const CASES: &[Case] = &[
         lines: &[":fire: this is fine :thumbsup:", "emoji ok"],
         extension: "png",
     },
+    Case {
+        name: "static avif",
+        template: "fry",
+        lines: &["not sure if trolling", "or just stupid"],
+        extension: "avif",
+    },
     // `fry` rather than `oprah`: memegen-rs maps `oprah` to a still image.
     Case {
         name: "animated gif (24 frames)",

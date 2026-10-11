@@ -134,7 +134,7 @@ pub fn spec(base_url: &str) -> Value {
                 "description": "Lines are separated by `/`. Escapes: `_` space, `__` underscore, `--` dash, `~q` ?, `~a` &, `~p` %, `~h` #, `~s` /, `~b` \\, `~l` <, `~g` >, `~n` newline, `''` double quote. Use `:alias:` for emoji.",
                 "parameters": [
                     path("template_id", "ID of a meme template"),
-                    path("text_filepath", "Lines of text and image extension: `<line1>/<line2>.<png|jpg|gif|webp|mp4>`"),
+                    path("text_filepath", "Lines of text and image extension: `<line1>/<line2>.<png|jpg|gif|webp|avif|mp4>`"),
                     font,
                     animate_text,
                 ],
@@ -166,7 +166,7 @@ pub fn spec(base_url: &str) -> Value {
             "MemeTemplateRequest": { "type": "object", "properties": {
                 "text": { "type": "array", "items": { "type": "string" }, "description": "Lines of text (raw, not escape-encoded)" },
                 "font": { "type": "string" },
-                "extension": { "type": "string", "enum": ["png", "jpg", "jpeg", "gif", "webp", "mp4"] },
+                "extension": { "type": "string", "enum": ["png", "jpg", "jpeg", "gif", "webp", "avif", "mp4"] },
                 "animate_text": {
                     "oneOf": [{ "type": "boolean" }, { "type": "string", "enum": ["characters", "words"] }],
                     "description": "Type the text boxes out one after another, a character (`true` or \"characters\") or a word (\"words\") at a time (defaults the extension to gif)"

@@ -140,7 +140,7 @@ pub struct GenerateMemeRequest {
     pub template_id: String,
     /// Lines of text in order, one per text box (see the template's `lines`). Use "" to leave a box empty.
     pub text: Vec<String>,
-    /// Image format: "png" (default for static templates), "jpg", "gif" (default for animated templates), "webp", or "mp4" (H.264 video, far smaller than GIF; returned as a URL or saved file, not inline).
+    /// Image format: "png" (default for static templates), "jpg", "gif" (default for animated templates), "webp", "avif" (static only, smallest; returned as a URL or saved file, not inline), or "mp4" (H.264 video, far smaller than GIF; returned as a URL or saved file, not inline).
     #[serde(default)]
     pub extension: Option<String>,
     /// Font ID or alias from `list_fonts`, e.g. "impact" or "comic". Defaults to each template's font.
@@ -493,8 +493,10 @@ impl MemegenMcp {
         });
         let content_type = rendered.content_type;
         let bytes = rendered.bytes.len();
-        // MCP image content can't hold a video.
-        let inline = if request.include_image.unwrap_or(true) && content_type.starts_with("image/")
+        // MCP image content can't hold a video, and clients don't show AVIF.
+        let inline = if request.include_image.unwrap_or(true)
+            && content_type.starts_with("image/")
+            && content_type != "image/avif"
         {
             Some(
                 self.app

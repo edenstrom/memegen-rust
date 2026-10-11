@@ -24,6 +24,7 @@ image-webp = "0.2.4"
 imageproc = "0.27.0"
 jpeg-encoder = { version = "0.7.1", features = ["simd"] }
 percent-encoding = "2.3.2"
+ravif = "0.13.0"
 rayon = "1.12.0"
 rmcp = { version = "3.5.1", default-features = false, features = ["macros", "server"] }
 # Without the default `global-alloc` feature, which replaces the global allocator.

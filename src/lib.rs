@@ -4,6 +4,7 @@
 pub mod api;
 pub mod app;
 pub mod assets;
+pub mod avif;
 pub mod cache;
 pub mod config;
 pub mod emoji;

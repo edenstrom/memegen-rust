@@ -5,7 +5,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - 568 templates: all 210 upstream ones plus 358 more from [tenequm/memegen-rs](https://github.com/tenequm/memegen-rs) and [imgflip](https://imgflip.com/memetemplates), and upstream's fonts and text layout: auto-wrapping, font fitting, stroke, rotated text and `:emoji:` aliases (drawn with Twemoji)
 - Classic meme styling: templates that use upstream's `thick` font (Titillium Web Black) render in Impact instead, and text gets a heavier outline than upstream
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
-- PNG, JPG, GIF, WebP and MP4 output, including animated GIF/WebP/MP4 templates
+- PNG, JPG, GIF, WebP, AVIF and MP4 output, including animated GIF/WebP/MP4 templates (AVIF is static only)
 - Animated text: the text boxes are typed out one after another, a character or a word at a time (with eased timing in MP4), then hold the finished meme for 3 seconds before looping, on static and animated templates
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
@@ -75,7 +75,7 @@ Start the server with `memegen serve` (or just `memegen`). `/` is a landing page
 
 | Route | Description |
 |---|---|
-| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out a character at a time, `?animate_text=words` a word at a time (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,avif,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out a character at a time, `?animate_text=words` a word at a time (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
 | `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, redirect}` (JSON or form) |
