@@ -20,7 +20,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::app::App;
-use crate::render::{AnimateText, MemeRequest};
+use crate::render::{AnimateText, Background, Custom, MemeRequest};
+use crate::settings;
+use crate::textbox::TextBox;
 
 const INSTRUCTIONS: &str = "Generate meme images from 500+ classic templates. \
 Typical flow: call `list_templates` to find a template, then call `generate_meme` with its ID and one \
@@ -30,7 +32,9 @@ through every template with a description of what it means and what each line is
 `next_offset` back as `offset` to get the next page. \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
 Animated templates render as GIF/WebP/MP4; use `extension` to choose the format. \
-To render several memes at once, call `generate_memes` with a list of them.";
+To render several memes at once, call `generate_memes` with a list of them. \
+To use your own image, pass it as `background` (with template_id \"custom\" for no template); \
+`text_boxes` places each line anywhere on the image.";
 
 #[cfg(not(target_arch = "wasm32"))]
 const GENERATE_MEME: &str = "Render a meme image from a template and lines of text. Returns the \
@@ -136,7 +140,7 @@ impl From<Option<AnimateTextArg>> for AnimateText {
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct GenerateMemeRequest {
-    /// Template ID from `list_templates`, e.g. "fry".
+    /// Template ID from `list_templates`, e.g. "fry", or "custom" to draw on your own `background` with no template.
     pub template_id: String,
     /// Lines of text in order, one per text box (see the template's `lines`). Use "" to leave a box empty.
     pub text: Vec<String>,
@@ -149,6 +153,12 @@ pub struct GenerateMemeRequest {
     /// Type the text boxes out one after another, then hold the finished meme for a few seconds before looping: true or "characters" for a character at a time, "words" for a word at a time (MP4 eases the timing: slow, fast, then slow again). Works with any template; needs "gif" (the default when this is set), "webp" or "mp4".
     #[serde(default)]
     pub animate_text: Option<AnimateTextArg>,
+    /// Your own image to draw the text on instead of the template's: a PNG, JPG, GIF (stays animated) or WebP up to 10 MB, given as an absolute file path (when the server runs locally) or a data URL (data:image/png;base64,...). With template_id "custom" the text goes at the top and bottom (or in `text_boxes`); with a template ID, in that template's text boxes. The result has no URL.
+    #[serde(default)]
+    pub background: Option<String>,
+    /// Where to draw each line instead of the template's text boxes, one box per line in order. Fields left out take their defaults: a full-width box at the top left that's a fifth of the height, white uppercase Impact, centered. E.g. top and bottom: [{}, {"anchor_y": 0.8}].
+    #[serde(default)]
+    pub text_boxes: Option<Vec<TextBox>>,
     /// Absolute file path to write the image to, e.g. "/tmp/meme.png".
     #[cfg(not(target_arch = "wasm32"))]
     #[serde(default)]
@@ -411,44 +421,70 @@ impl MemegenMcp {
         max_inline: usize,
     ) -> Result<Generated, String> {
         let config = self.app.config();
-        let template = self
-            .app
-            .catalog()
-            .get(&request.template_id)
-            .filter(|t| t.valid());
-        let Some(template) = template else {
-            return Err(format!(
-                "Template not found: {}. Use list_templates to find valid IDs.",
-                request.template_id
-            ));
+        let background = match request
+            .background
+            .as_deref()
+            .filter(|value| !value.is_empty())
+        {
+            Some(value) => Some(load_background(value).await?),
+            None => None,
         };
+        let template = if request.template_id == settings::CUSTOM_TEMPLATE {
+            None
+        } else {
+            let template = self
+                .app
+                .catalog()
+                .get(&request.template_id)
+                .filter(|t| t.valid());
+            let Some(template) = template else {
+                return Err(format!(
+                    "Template not found: {}. Use list_templates to find valid IDs, or \"{}\" with a `background`.",
+                    request.template_id,
+                    settings::CUSTOM_TEMPLATE
+                ));
+            };
+            Some(template)
+        };
+        let template_id = template.map_or(settings::CUSTOM_TEMPLATE, |template| &template.id);
         let animate_text = AnimateText::from(request.animate_text);
+        let animated = match (&background, template) {
+            (Some(background), _) => background.is_animated(),
+            (None, Some(template)) => template.is_animated(),
+            (None, None) => false,
+        };
         let extension = request
             .extension
             .filter(|ext| !ext.is_empty())
             .unwrap_or_else(|| {
-                if animate_text.is_on() {
-                    return config.default_animated_extension.clone();
+                if animate_text.is_on() || animated {
+                    config.default_animated_extension.clone()
+                } else {
+                    config.default_static_extension.clone()
                 }
-                template
-                    .default_extension(
-                        &config.default_static_extension,
-                        &config.default_animated_extension,
-                    )
-                    .to_string()
             })
             .trim_start_matches('.')
             .to_lowercase();
         let font = request.font.unwrap_or_default();
+        let custom = Custom {
+            background,
+            text_boxes: request.text_boxes,
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        let custom_key = custom.key();
+        // No URL draws on a background of the request's own.
+        let has_url = custom.background.is_none();
+        let text_boxes = custom.text_boxes.clone();
 
         let rendered = self
             .app
             .render(MemeRequest {
-                template_id: template.id.clone(),
+                template_id: template_id.to_string(),
                 lines: request.text.clone(),
                 font: font.clone(),
                 extension: extension.clone(),
                 animate_text,
+                custom,
             })
             .await
             .map_err(|error| error.to_string())?;
@@ -462,8 +498,14 @@ impl MemegenMcp {
             ) {
                 (Some(path), _) => Some(save(path.into(), &rendered.bytes).await?),
                 (None, Some(output)) => {
-                    let key =
-                        files::key(&template.id, &request.text, &font, &extension, animate_text);
+                    let key = files::key(
+                        template_id,
+                        &request.text,
+                        &font,
+                        &extension,
+                        animate_text,
+                        &custom_key,
+                    );
                     let (dir, existing) = (output.dir.clone(), key.clone());
                     let reused = tokio::task::spawn_blocking(move || files::reuse(&dir, &existing))
                         .await
@@ -483,12 +525,21 @@ impl MemegenMcp {
         #[cfg(target_arch = "wasm32")]
         let saved_to: Option<String> = None;
 
-        let (url, _) =
+        let url = has_url.then(|| {
             self.app
-                .build_url(&template.id, &request.text, &font, &extension, animate_text);
+                .build_url(
+                    template_id,
+                    &request.text,
+                    &font,
+                    &extension,
+                    animate_text,
+                    text_boxes.as_deref(),
+                )
+                .0
+        });
         // Over stdio nothing serves localhost URLs, so return only the file.
         #[cfg(not(target_arch = "wasm32"))]
-        let url = Some(url).filter(|_| {
+        let url = url.filter(|_| {
             self.output.is_none() || !self.app.base_url().starts_with("http://localhost:")
         });
         let content_type = rendered.content_type;
@@ -507,7 +558,7 @@ impl MemegenMcp {
         };
         let summary = json!({
             "url": url,
-            "template_id": template.id,
+            "template_id": template_id,
             "text": request.text,
             "extension": extension,
             "content_type": content_type,
@@ -521,6 +572,60 @@ impl MemegenMcp {
         });
         Ok(Generated { image, summary })
     }
+}
+
+/// A `background` argument: a data URL or, natively, an absolute file path.
+async fn load_background(value: &str) -> Result<Background, String> {
+    let bytes = if let Some(data_url) = value.strip_prefix("data:") {
+        let (_, data) = data_url
+            .split_once(";base64,")
+            .ok_or("`background` data URLs must be base64, e.g. data:image/png;base64,...")?;
+        let data: String = data.chars().filter(|c| !c.is_whitespace()).collect();
+        base64::engine::general_purpose::STANDARD
+            .decode(data)
+            .map_err(|error| format!("`background` isn't valid base64: {error}"))?
+    } else if value.starts_with("http://") || value.starts_with("https://") {
+        return Err(format!("`background` can't be a URL. {BACKGROUND_SOURCES}"));
+    } else {
+        read_background(value).await?
+    };
+    Background::new(bytes.into()).map_err(|error| error.to_string())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+const BACKGROUND_SOURCES: &str =
+    "Pass the image's absolute file path or a data URL (data:image/png;base64,...).";
+#[cfg(target_arch = "wasm32")]
+const BACKGROUND_SOURCES: &str = "Pass the image as a data URL (data:image/png;base64,...).";
+
+#[cfg(not(target_arch = "wasm32"))]
+async fn read_background(path: &str) -> Result<Vec<u8>, String> {
+    let path = std::path::Path::new(path);
+    if !path.is_absolute() {
+        return Err(format!(
+            "`background` must be an absolute file path or a data URL, not {}",
+            path.display()
+        ));
+    }
+    let metadata = tokio::fs::metadata(path)
+        .await
+        .map_err(|error| format!("Could not read {}: {error}", path.display()))?;
+    if metadata.len() > settings::MAX_BACKGROUND_BYTES as u64 {
+        return Err(format!(
+            "Background: the image is over {} MB",
+            settings::MAX_BACKGROUND_BYTES / 1024 / 1024
+        ));
+    }
+    tokio::fs::read(path)
+        .await
+        .map_err(|error| format!("Could not read {}: {error}", path.display()))
+}
+
+#[cfg(target_arch = "wasm32")]
+async fn read_background(_: &str) -> Result<Vec<u8>, String> {
+    Err(format!(
+        "`background` can't be a file path here. {BACKGROUND_SOURCES}"
+    ))
 }
 
 /// Write the image to `path`; returns the path written.

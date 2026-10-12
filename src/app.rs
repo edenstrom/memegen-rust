@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use bytes::Bytes;
+use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use serde::Serialize;
 
 use crate::assets::Assets;
@@ -11,6 +12,27 @@ use crate::fonts::Fonts;
 use crate::render::{AnimateText, MemeRequest, RenderError, Rendered, Renderer};
 use crate::settings;
 use crate::template::{Catalog, Template, TemplateInfo};
+use crate::textbox::{self, TextBox};
+
+/// Characters to escape in a query value.
+const QUERY: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b'#')
+    .add(b'%')
+    .add(b'&')
+    .add(b'+')
+    .add(b'<')
+    .add(b'=')
+    .add(b'>')
+    .add(b'[')
+    .add(b'\\')
+    .add(b']')
+    .add(b'^')
+    .add(b'`')
+    .add(b'{')
+    .add(b'|')
+    .add(b'}');
 
 pub struct App {
     pub renderer: Renderer,
@@ -120,6 +142,7 @@ impl App {
         font: &str,
         extension: &str,
         animate_text: AnimateText,
+        text_boxes: Option<&[TextBox]>,
     ) -> (String, bool) {
         let config = self.config();
         let template = self
@@ -128,7 +151,7 @@ impl App {
             .filter(|template| template.valid());
         let (lines, default_extension) = match template {
             Some(template) => (
-                template.normalize_lines(lines),
+                textbox::normalize_lines(text_boxes.unwrap_or(&template.text), lines),
                 template
                     .default_extension(
                         &config.default_static_extension,
@@ -156,6 +179,10 @@ impl App {
         }
         if let Some(value) = animate_text.query() {
             query.push(format!("animate_text={value}"));
+        }
+        if let Some(boxes) = text_boxes {
+            let json = textbox::compact(boxes);
+            query.push(format!("text_boxes={}", utf8_percent_encode(&json, QUERY)));
         }
         if !query.is_empty() {
             url.push('?');

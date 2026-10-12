@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use axum::body::Bytes;
-use axum::extract::{Path, Query, RawQuery, State};
+use axum::extract::{DefaultBodyLimit, Path, Query, RawQuery, State};
 use axum::http::{HeaderMap, HeaderValue, StatusCode, header};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::get;
@@ -13,8 +13,9 @@ use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use serde_json::{Value, json};
 
 use crate::app::App;
-use crate::render::{AnimateText, MemeRequest, RenderError};
-use crate::{openapi, slug};
+use crate::render::{AnimateText, Background, Custom, MemeRequest, RenderError};
+use crate::textbox::TextBox;
+use crate::{openapi, settings, slug};
 
 type AppState = Arc<App>;
 
@@ -52,7 +53,12 @@ pub fn router(app: AppState) -> Router {
         .route("/images", get(list_examples).post(create_image))
         .route("/images/", get(list_examples).post(create_image))
         .route("/images/{filename}", get(blank_image))
-        .route("/images/{template_id}/{*text_filepath}", get(meme_image))
+        .route(
+            "/images/{template_id}/{*text_filepath}",
+            get(meme_image)
+                .post(meme_image_on_background)
+                .layer(DefaultBodyLimit::max(settings::MAX_BACKGROUND_BYTES)),
+        )
         .route("/fonts", get(list_fonts))
         .route("/fonts/", get(list_fonts))
         .route("/fonts/{id}", get(font_detail))
@@ -171,6 +177,7 @@ struct Payload {
     font: String,
     extension: String,
     animate_text: AnimateText,
+    text_boxes: Option<Vec<TextBox>>,
     redirect: bool,
 }
 
@@ -201,6 +208,7 @@ fn parse_payload(headers: &HeaderMap, body: &Bytes) -> Payload {
                 "font" => payload.font = value,
                 "extension" => payload.extension = value,
                 "animate_text" => payload.animate_text = AnimateText::parse(&value),
+                "text_boxes" => payload.text_boxes = serde_json::from_str(&value).ok(),
                 "redirect" => payload.redirect = truthy(&value),
                 _ => {}
             }
@@ -236,6 +244,11 @@ fn parse_payload(headers: &HeaderMap, body: &Bytes) -> Payload {
         Some(_) if boolean("animate_text") => AnimateText::Characters,
         _ => AnimateText::Off,
     };
+    payload.text_boxes = match get(&["text_boxes"]) {
+        Some(Value::String(json)) => serde_json::from_str(json).ok(),
+        Some(value) => serde_json::from_value(value.clone()).ok(),
+        None => None,
+    };
     payload.redirect = boolean("redirect");
     payload
 }
@@ -251,6 +264,7 @@ fn generate_url(app: &App, template_id: &str, payload: &Payload) -> Response {
         &payload.font,
         &payload.extension,
         payload.animate_text,
+        payload.text_boxes.as_deref(),
     );
     if payload.redirect {
         return redirect(StatusCode::FOUND, &url);
@@ -328,6 +342,7 @@ async fn blank_image(
         font: params.get("font").cloned().unwrap_or_default(),
         extension: extension.to_string(),
         animate_text: AnimateText::Off,
+        custom: Custom::default(),
     };
     render_response(&app, request, headers.get(header::RANGE)).await
 }
@@ -340,13 +355,9 @@ async fn meme_image(
     Query(params): Query<HashMap<String, String>>,
     headers: HeaderMap,
 ) -> Response {
-    let Some((text_paths, extension)) = text_filepath
-        .rsplit_once('.')
-        .filter(|(_, ext)| !ext.contains('/'))
-    else {
+    let Some((text_paths, extension)) = split_extension(&text_filepath) else {
         return error(StatusCode::NOT_FOUND, "Missing image extension (e.g. .png)");
     };
-
     let (normalized, changed) = slug::normalize(text_paths);
     if changed {
         let mut location = format!(
@@ -360,17 +371,78 @@ async fn meme_image(
         }
         return redirect(StatusCode::MOVED_PERMANENTLY, &location);
     }
+    match meme_request(template_id, &normalized, extension, &params, None) {
+        Ok(request) => render_response(&app, request, headers.get(header::RANGE)).await,
+        Err(message) => error(StatusCode::UNPROCESSABLE_ENTITY, message),
+    }
+}
 
-    let request = MemeRequest {
+/// `POST /images/{id}/{line1}/{line2}.{ext}` with an image as the body: the
+/// meme drawn on that image instead of the template's (`custom` for the
+/// default top and bottom text boxes).
+async fn meme_image_on_background(
+    State(app): State<AppState>,
+    Path((template_id, text_filepath)): Path<(String, String)>,
+    Query(params): Query<HashMap<String, String>>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> Response {
+    let Some((text_paths, extension)) = split_extension(&text_filepath) else {
+        return error(StatusCode::NOT_FOUND, "Missing image extension (e.g. .png)");
+    };
+    let background = match Background::new(body) {
+        Ok(background) => background,
+        Err(render_error) => {
+            return error(StatusCode::UNPROCESSABLE_ENTITY, render_error.to_string());
+        }
+    };
+    let (normalized, _) = slug::normalize(text_paths);
+    match meme_request(
         template_id,
-        lines: slug::decode(&normalized),
+        &normalized,
+        extension,
+        &params,
+        Some(background),
+    ) {
+        Ok(request) => render_response(&app, request, headers.get(header::RANGE)).await,
+        Err(message) => error(StatusCode::UNPROCESSABLE_ENTITY, message),
+    }
+}
+
+/// `{line1}/{line2}.{ext}` split into the lines and the extension.
+fn split_extension(text_filepath: &str) -> Option<(&str, &str)> {
+    text_filepath
+        .rsplit_once('.')
+        .filter(|(_, ext)| !ext.contains('/'))
+}
+
+fn meme_request(
+    template_id: String,
+    normalized: &str,
+    extension: &str,
+    params: &HashMap<String, String>,
+    background: Option<Background>,
+) -> Result<MemeRequest, String> {
+    let text_boxes = match params.get("text_boxes").filter(|json| !json.is_empty()) {
+        Some(json) => Some(
+            serde_json::from_str(json)
+                .map_err(|parse_error| format!("Invalid text_boxes: {parse_error}"))?,
+        ),
+        None => None,
+    };
+    Ok(MemeRequest {
+        template_id,
+        lines: slug::decode(normalized),
         font: params.get("font").cloned().unwrap_or_default(),
         extension: extension.to_string(),
         animate_text: params
             .get("animate_text")
             .map_or(AnimateText::Off, |value| AnimateText::parse(value)),
-    };
-    render_response(&app, request, headers.get(header::RANGE)).await
+        custom: Custom {
+            background,
+            text_boxes,
+        },
+    })
 }
 
 /// A successful response for `bytes`, or the part a `Range` header asks
@@ -482,6 +554,94 @@ mod tests {
         let unsatisfiable = byte_range(Some(&range), parts(), bytes);
         assert_eq!(unsatisfiable.status(), StatusCode::RANGE_NOT_SATISFIABLE);
         assert_eq!(unsatisfiable.headers()[header::CONTENT_RANGE], "bytes */10");
+    }
+
+    #[tokio::test]
+    async fn draws_on_uploaded_backgrounds_and_in_custom_text_boxes() {
+        use axum::body::Body;
+        use axum::http::Request;
+        use tower::ServiceExt;
+
+        use crate::assets::Directory;
+        use crate::config::Config;
+
+        let app = App::load(
+            Config::default(),
+            Directory::new(env!("CARGO_MANIFEST_DIR")),
+        )
+        .unwrap();
+        let router = router(app);
+        let send = |request: Request<Body>| {
+            let router = router.clone();
+            async move {
+                let response = router.oneshot(request).await.unwrap();
+                let status = response.status();
+                let content_type = response
+                    .headers()
+                    .get(header::CONTENT_TYPE)
+                    .map(|value| value.to_str().unwrap().to_string());
+                let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+                    .await
+                    .unwrap();
+                (status, content_type, body)
+            }
+        };
+
+        let mut png = Vec::new();
+        image::RgbaImage::from_pixel(40, 30, image::Rgba([0, 90, 200, 255]))
+            .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
+            .unwrap();
+        let upload = |uri: &str, body: Vec<u8>| {
+            Request::post(uri)
+                .header(header::CONTENT_TYPE, "image/png")
+                .body(Body::from(body))
+                .unwrap()
+        };
+        let (status, content_type, body) =
+            send(upload("/images/custom/hello/world.jpg", png.clone())).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(content_type.as_deref(), Some("image/jpeg"));
+        let image = image::load_from_memory(&body).unwrap();
+        assert_eq!((image.width(), image.height()), (800, 600));
+
+        let (status, ..) = send(upload("/images/fry/a/b.png", png)).await;
+        assert_eq!(status, StatusCode::OK);
+        let (status, _, body) =
+            send(upload("/images/custom/a.png", b"not an image".to_vec())).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert!(String::from_utf8_lossy(&body).contains("PNG"));
+        let get = |uri: &str| Request::get(uri).body(Body::empty()).unwrap();
+        let (status, ..) = send(get("/images/custom/a.png")).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+
+        // Text boxes in the URL, as `POST /images/` builds it.
+        let request = Request::post("/images/")
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(
+                r#"{"template_id": "fry", "text": ["A", "b"], "extension": "png", "text_boxes": [{"anchor_y": 0.4, "style": "none"}, {}]}"#,
+            ))
+            .unwrap();
+        let (status, _, body) = send(request).await;
+        assert_eq!(status, StatusCode::CREATED);
+        let url: Value = serde_json::from_slice(&body).unwrap();
+        let url = url["url"].as_str().unwrap();
+        let path = url.strip_prefix("http://localhost:5000").unwrap();
+        assert_eq!(
+            path,
+            "/images/fry/A/b.png?text_boxes=[{\"anchor_y\":0.4,\"style\":\"none\"},{}]"
+                .replace('"', "%22")
+                .replace('{', "%7B")
+                .replace('}', "%7D")
+                .replace('[', "%5B")
+                .replace(']', "%5D")
+        );
+        let (status, content_type, _) = send(get(path)).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(content_type.as_deref(), Some("image/png"));
+        let (status, ..) = send(get("/images/fry/a.png?text_boxes=nope")).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        let (status, ..) = send(get("/images/fry/a.png?text_boxes=[{%22scale_x%22:5}]")).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
     }
 
     #[test]

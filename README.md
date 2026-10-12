@@ -7,6 +7,7 @@ A high-performance Rust port of [memegen.link](https://github.com/jacebrowning/m
 - Every template has a description of what it means and what each line is for, plus keywords, so agents can pick the right one; search is ranked and tolerates typos
 - PNG, JPG, GIF, WebP and MP4 output, including animated GIF/WebP/MP4 templates
 - Animated text: the text boxes are typed out one after another, a character or a word at a time (with eased timing in MP4), then hold the finished meme for 3 seconds before looping, on static and animated templates
+- [Custom backgrounds and text boxes](#custom-backgrounds-and-text-boxes): draw on your own PNG, JPG, GIF or WebP, and put the text wherever you want
 - Recently rendered memes are kept in a 256 MB in-memory cache
 - A new static PNG meme takes about 0.5 ms; see [Performance](#performance)
 - Also runs on [Cloudflare Workers](#cloudflare-workers), with the API and a remote MCP endpoint
@@ -60,7 +61,7 @@ claude mcp add --transport http memegen http://localhost:5000/mcp
 | `list_templates` | Templates with their ID, name, description (what it means and what each line is for), line count and example text. With `filter`, a ranked search (word order doesn't matter, typos are tolerated) returning the top 20. Without it, every template, 100 per page. Returns `{templates, total, next_offset}`; pass `next_offset` back as `offset` for the next page (`limit` sets the page size, up to 100). `animated` limits to animated or static templates |
 | `get_template` | Full details for one template |
 | `list_fonts` | Fonts available for `font` |
-| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (`true`/`"characters"` or `"words"`: type the text out a character or a word at a time; defaults `extension` to gif), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size. MP4 isn't returned inline (MCP has no video content) |
+| `generate_meme` | Render `template_id` + `text[]`. Optional: `extension`, `font`, `animate_text` (`true`/`"characters"` or `"words"`: type the text out a character or a word at a time; defaults `extension` to gif), `background` (your own image: an absolute file path or a data URL; use `template_id: "custom"` for no template), `text_boxes` (where to draw each line), `save_to` (absolute path), `include_image`. Returns the image inline plus a URL, or over stdio the path of a saved copy (`saved_to`). Inline images over 1 MB (base64) are downscaled in the same format; the URL and saved file stay full size. MP4 isn't returned inline (MCP has no video content) |
 | `generate_memes` | Render up to 10 memes in one call: `memes` is a list of `generate_meme` arguments, rendered concurrently. Returns each image and its summary (with `index`) in order, or an `error` for entries that failed. The inline images share the 1 MB limit, so each is downscaled further as the batch grows |
 
 ### MCP Apps
@@ -75,10 +76,11 @@ Start the server with `memegen serve` (or just `memegen`). `/` is a landing page
 
 | Route | Description |
 |---|---|
-| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out a character at a time, `?animate_text=words` a word at a time (gif/webp/mp4 only, see [Animated text](#animated-text)); non-canonical text redirects with a 301 |
+| `GET /images/{template}/{line1}/{line2}.{png,jpg,gif,webp,mp4}` | Render a meme. `?font=` sets the font; `?animate_text=true` types the text out a character at a time, `?animate_text=words` a word at a time (gif/webp/mp4 only, see [Animated text](#animated-text)); `?text_boxes=` moves the text (see [Custom text boxes](#custom-backgrounds-and-text-boxes)); non-canonical text redirects with a 301 |
 | `GET /images/{template}.{ext}` | Template background without text |
 | `GET /images/` | Example memes (`?filter=`, `?animated=`) |
-| `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, redirect}` (JSON or form) |
+| `POST /images/{template}/{line1}/{line2}.{ext}` | Render a meme on the image sent as the body (see [Custom backgrounds](#custom-backgrounds-and-text-boxes)) |
+| `POST /images/` | Build a meme URL from `{template_id, text[], font, extension, animate_text, text_boxes, redirect}` (JSON or form) |
 | `GET /templates/`, `GET /templates/{id}` | Template catalog (`?filter=` for a ranked search, `?animated=`) |
 | `POST /templates/{id}` | Build a meme URL for a template |
 | `GET /fonts/`, `GET /fonts/{id}` | Fonts |
@@ -98,6 +100,33 @@ The pacing depends on the format:
 - **MP4**: the timing is eased in and out (an inverse ease-in-out sine). Each box starts slowly, speeds up to about 1.6 times the average pace in the middle (about 40 ms per mark), and slows down again for the last marks or words. On an animated template the text is drawn at up to 30 fps between the template's frames, which video compresses well.
 
 On an animated template the background keeps playing through the pauses and the hold.
+
+### Custom backgrounds and text boxes
+
+To draw on your own image, send it as the body of a `POST` to the meme's URL. `custom` as the template puts the text at the top and bottom; a template ID uses that template's text boxes instead (its own image isn't used):
+
+```sh
+curl --data-binary @background.png localhost:5000/images/custom/top_text/bottom_text.png -o meme.png
+```
+
+Over MCP, pass `background` to `generate_meme`: an absolute file path (when the server runs locally, like `save_to`) or a data URL (`data:image/png;base64,...`), e.g. `{"template_id": "custom", "text": ["top", "bottom"], "background": "/Users/me/background.png"}`.
+
+The background can be a PNG, JPG, GIF or WebP of up to 10 MB, with one side at most 5 times the other, and up to 100 megapixels (8 on Workers; a GIF's frames count together). It's scaled so its short side is 600 px, like the templates. A GIF stays animated, and defaults the extension to gif. There's no URL for a meme on your own background: the API returns the image itself, and `generate_meme` returns it inline and saved, with `url` set to null. Fetching a background from a URL isn't supported.
+
+`text_boxes` puts the text where you want it, on your background or a template's: a list of boxes, one per line in order, replacing the template's. Positions and sizes are fractions of the image's width and height, and fields left out take their defaults:
+
+| Field | Default | |
+|---|---|---|
+| `anchor_x`, `anchor_y` | `0`, `0` | Top left corner of the box, 0 to 1 |
+| `scale_x`, `scale_y` | `1`, `0.2` | Size of the box, 0 to 1. Text wraps and shrinks to fit it |
+| `angle` | `0` | Counterclockwise rotation in degrees |
+| `align` | `center` | `left`, `center` or `right` |
+| `color` | `white` | A CSS color name or hex code |
+| `style` | `upper` | Letter case: `upper`, `lower`, `title`, `capitalize`, `swapcase`, `mock`, `none` (as typed) or `default` (as typed, capitalizing sentences) |
+| `font` | `impact` | Font ID or alias; `font` on the request overrides it |
+| `start`, `stop` | `0`, `1` | On an animated background, when the text shows, as fractions of the animation |
+
+So `[{}, {"anchor_y": 0.8}]` is the usual top and bottom. Over HTTP it's a JSON query parameter, `?text_boxes=[{},{"anchor_y":0.8}]` (URL-encoded); on templates' own backgrounds that gives a regular cacheable URL, which `POST /images/` and `generate_meme` return.
 
 ### MP4
 
@@ -143,7 +172,7 @@ claude mcp add --transport http memegen https://memegen.<account>.workers.dev/mc
 
 ## Not ported
 
-Watermarks, previews, error images, custom backgrounds and overlays, size/color/layout parameters, upstream's per-line animated text timing (`start`/`stop`; this port's `animate_text` is a different, typewriter effect), legacy shortcut redirects, and the remote API-key/analytics integrations.
+Watermarks, previews, error images, backgrounds fetched from a URL (`?background=`; send the image instead), overlays, size/color/layout parameters, upstream's per-line animated text timing (`start`/`stop`; this port's `animate_text` is a different, typewriter effect), legacy shortcut redirects, and the remote API-key/analytics integrations.
 
 ## Performance
 

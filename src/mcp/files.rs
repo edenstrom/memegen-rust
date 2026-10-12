@@ -34,14 +34,18 @@ pub fn key(
     font: &str,
     extension: &str,
     animate_text: AnimateText,
+    custom: &str,
 ) -> String {
     let mut hasher = DefaultHasher::new();
     (template_id, lines, font, extension).hash(&mut hasher);
-    // Only hashed when set, so keys of memes saved before it existed hold.
+    // Only hashed when set, so keys of memes saved before they existed hold.
     match animate_text {
         AnimateText::Off => {}
         AnimateText::Characters => true.hash(&mut hasher),
         AnimateText::Words => "words".hash(&mut hasher),
+    }
+    if !custom.is_empty() {
+        custom.hash(&mut hasher);
     }
     format!("{template_id}-{:016x}.{extension}", hasher.finish())
 }
@@ -157,7 +161,14 @@ mod tests {
 
     fn name(template_id: &str, text: &[&str], font: &str, extension: &str) -> String {
         file_name(
-            &key(template_id, &lines(text), font, extension, AnimateText::Off),
+            &key(
+                template_id,
+                &lines(text),
+                font,
+                extension,
+                AnimateText::Off,
+                "",
+            ),
             SystemTime::now(),
         )
     }
@@ -171,18 +182,25 @@ mod tests {
 
     #[test]
     fn keys_are_stable_and_distinct() {
-        let a = key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Off);
+        let a = key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Off, "");
         assert_eq!(
             a,
-            key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Off)
+            key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Off, "")
         );
         assert_ne!(
             a,
-            key("fry", &lines(&["a", "c"]), "", "gif", AnimateText::Off)
+            key("fry", &lines(&["a", "c"]), "", "gif", AnimateText::Off, "")
         );
         assert_ne!(
             a,
-            key("fry", &lines(&["a", "b"]), "comic", "gif", AnimateText::Off)
+            key(
+                "fry",
+                &lines(&["a", "b"]),
+                "comic",
+                "gif",
+                AnimateText::Off,
+                ""
+            )
         );
         let characters = key(
             "fry",
@@ -190,10 +208,27 @@ mod tests {
             "",
             "gif",
             AnimateText::Characters,
+            "",
         );
-        let words = key("fry", &lines(&["a", "b"]), "", "gif", AnimateText::Words);
+        let words = key(
+            "fry",
+            &lines(&["a", "b"]),
+            "",
+            "gif",
+            AnimateText::Words,
+            "",
+        );
         assert_ne!(a, characters);
         assert_ne!(a, words);
+        let custom = key(
+            "fry",
+            &lines(&["a", "b"]),
+            "",
+            "gif",
+            AnimateText::Off,
+            "|background=0123",
+        );
+        assert_ne!(a, custom);
         assert_ne!(characters, words);
         assert!(a.starts_with("fry-") && a.ends_with(".gif"));
         assert!(is_saved_meme(&a));
@@ -205,8 +240,8 @@ mod tests {
     fn file_names_sort_by_time() {
         let earlier = SystemTime::now();
         let later = earlier + Duration::from_secs(24 * 60 * 60 + 1);
-        let a = file_name(&key("zzz", &[], "", "png", AnimateText::Off), earlier);
-        let b = file_name(&key("aaa", &[], "", "png", AnimateText::Off), later);
+        let a = file_name(&key("zzz", &[], "", "png", AnimateText::Off, ""), earlier);
+        let b = file_name(&key("aaa", &[], "", "png", AnimateText::Off, ""), later);
         assert!(a < b, "{a} should sort before {b}");
         let date = &a[..10];
         assert!(date.starts_with("20") && date.as_bytes()[4] == b'-');
@@ -227,7 +262,7 @@ mod tests {
     #[test]
     fn reuses_saved_memes_from_any_date() {
         let dir = temp_dir("reuse");
-        let fry = key("fry", &lines(&["a"]), "", "png", AnimateText::Off);
+        let fry = key("fry", &lines(&["a"]), "", "png", AnimateText::Off, "");
         assert_eq!(reuse(&dir, &fry), None);
 
         let week_ago = SystemTime::now() - MAX_AGE + Duration::from_secs(60);
@@ -243,13 +278,13 @@ mod tests {
         let modified = std::fs::metadata(&saved).unwrap().modified().unwrap();
         assert!(modified > week_ago + Duration::from_secs(60));
 
-        let legacy = key("fry", &lines(&["b"]), "", "png", AnimateText::Off);
+        let legacy = key("fry", &lines(&["b"]), "", "png", AnimateText::Off, "");
         std::fs::write(dir.join(&legacy), b"image").unwrap();
         assert_eq!(reuse(&dir, &legacy), Some(dir.join(&legacy)));
         assert_eq!(
             reuse(
                 &dir,
-                &key("fry", &lines(&["a"]), "", "gif", AnimateText::Off)
+                &key("fry", &lines(&["a"]), "", "gif", AnimateText::Off, "")
             ),
             None
         );

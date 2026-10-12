@@ -174,6 +174,7 @@ pub fn run(app: Arc<App>, source: &dyn Source, iterations: usize) -> Result<()> 
             font: String::new(),
             extension: case.extension.into(),
             animate_text: AnimateText::Off,
+            ..Default::default()
         };
         renderer.render(&request, source).ok();
         let mut cached = vec![];

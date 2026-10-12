@@ -2,6 +2,8 @@
 
 use serde_json::{Value, json};
 
+use crate::textbox::TextBox;
+
 pub const DOCS_HTML: &str = r##"<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,6 +66,24 @@ pub fn spec(base_url: &str) -> Value {
         "schema": { "type": "string", "enum": ["true", "characters", "words"] },
         "description": "Type the text boxes out one after another, a character (`true` or `characters`) or a word (`words`) at a time, with eased timing in mp4, then hold the finished meme (gif, webp and mp4 only)",
     });
+    let text_boxes = query(
+        "text_boxes",
+        "string",
+        "Where to draw each line instead of the template's text boxes: a JSON array of `TextBox` objects, one per line, e.g. `[{},{\"anchor_y\":0.8}]` for top and bottom. Fields left out take their defaults",
+    );
+    let meme_parameters = json!([
+        path(
+            "template_id",
+            "ID of a meme template, or `custom` (with an uploaded background) for the default top and bottom text boxes"
+        ),
+        path(
+            "text_filepath",
+            "Lines of text and image extension: `<line1>/<line2>.<png|jpg|gif|webp|mp4>`"
+        ),
+        font,
+        animate_text,
+        text_boxes,
+    ]);
 
     json!({
         "openapi": "3.0.3",
@@ -132,18 +152,25 @@ pub fn spec(base_url: &str) -> Value {
             "/images/{template_id}/{text_filepath}": { "get": {
                 "tags": ["Images"], "summary": "Display a custom meme",
                 "description": "Lines are separated by `/`. Escapes: `_` space, `__` underscore, `--` dash, `~q` ?, `~a` &, `~p` %, `~h` #, `~s` /, `~b` \\, `~l` <, `~g` >, `~n` newline, `''` double quote. Use `:alias:` for emoji.",
-                "parameters": [
-                    path("template_id", "ID of a meme template"),
-                    path("text_filepath", "Lines of text and image extension: `<line1>/<line2>.<png|jpg|gif|webp|mp4>`"),
-                    font,
-                    animate_text,
-                ],
+                "parameters": meme_parameters.clone(),
                 "responses": {
                     "200": image_response("Successfully displayed a custom meme"),
                     "301": { "description": "Redirect to the canonical (normalized) URL" },
                     "404": json_response("Template not found", error.clone()),
                     "414": json_response("Custom text too long (length >200)", error.clone()),
-                    "422": json_response("Invalid extension or font, or animated text with png/jpg", error.clone())
+                    "422": json_response("Invalid extension, font or text boxes, or animated text with png/jpg", error.clone())
+                }
+            }, "post": {
+                "tags": ["Images"], "summary": "Display a meme on your own background",
+                "description": "Send an image as the request body to draw the meme on it instead of the template's background, in the template's text boxes (or `text_boxes`). Use `custom` as the template for the default top and bottom boxes. PNG, JPG, GIF (stays animated) or WebP, up to 10 MB, with one side at most 5 times the other; it's scaled so its short side is 600 px. The image is returned directly; no URL draws it. E.g. `curl --data-binary @background.png localhost:5000/images/custom/top/bottom.png -o meme.png`.",
+                "parameters": meme_parameters,
+                "requestBody": { "required": true, "content": { "image/*": { "schema": { "type": "string", "format": "binary" } } } },
+                "responses": {
+                    "200": image_response("Successfully displayed a meme on the uploaded background"),
+                    "404": json_response("Template not found", error.clone()),
+                    "413": { "description": "Background over 10 MB" },
+                    "414": json_response("Custom text too long (length >200)", error.clone()),
+                    "422": json_response("Invalid background, extension, font or text boxes, or animated text with png/jpg", error.clone())
                 }
             } },
             "/fonts/": { "get": {
@@ -171,12 +198,17 @@ pub fn spec(base_url: &str) -> Value {
                     "oneOf": [{ "type": "boolean" }, { "type": "string", "enum": ["characters", "words"] }],
                     "description": "Type the text boxes out one after another, a character (`true` or \"characters\") or a word (\"words\") at a time (defaults the extension to gif)"
                 },
+                "text_boxes": {
+                    "type": "array", "items": { "$ref": "#/components/schemas/TextBox" },
+                    "description": "Where to draw each line instead of the template's text boxes, one per line (a JSON string in a form)"
+                },
                 "redirect": { "type": "boolean", "description": "Redirect to the image instead of returning JSON" }
             } },
             "MemeRequest": { "allOf": [
                 { "type": "object", "required": ["template_id"], "properties": { "template_id": { "type": "string" } } },
                 { "$ref": "#/components/schemas/MemeTemplateRequest" }
             ] },
+            "TextBox": text_box_schema(),
             "Font": { "type": "object", "properties": {
                 "id": { "type": "string" }, "alias": { "type": "string", "nullable": true },
                 "filename": { "type": "string" }, "_self": { "type": "string" }
@@ -196,4 +228,16 @@ pub fn spec(base_url: &str) -> Value {
             } }
         } }
     })
+}
+
+/// [`TextBox`]'s schema from its documentation, in OpenAPI 3.0's dialect.
+fn text_box_schema() -> Value {
+    let schema = schemars::generate::SchemaSettings::openapi3()
+        .into_generator()
+        .into_root_schema_for::<TextBox>();
+    let mut schema = schema.to_value();
+    if let Some(object) = schema.as_object_mut() {
+        object.retain(|key, _| !key.starts_with('$') && key != "title");
+    }
+    schema
 }
