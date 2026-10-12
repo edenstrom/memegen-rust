@@ -24,10 +24,12 @@ use crate::render::{AnimateText, MemeRequest};
 
 const INSTRUCTIONS: &str = "Generate meme images from 500+ classic templates. \
 Typical flow: call `list_templates` to find a template, then call `generate_meme` with its ID and one \
-string per line. Prefer a `filter`: it runs a ranked search over names, keywords, and descriptions \
-(e.g. \"drake\", \"surprised\", \"choosing between options\"). Without one, `list_templates` pages \
-through every template with a description of what it means and what each line is for; pass \
-`next_offset` back as `offset` to get the next page. \
+string per line. Prefer a `filter` describing the joke's shape rather than a famous template: it \
+runs a ranked search over names, keywords, and descriptions (e.g. \"surprised\", \"awkward \
+silence\", \"choosing between options\"). Read the matches' descriptions and pick the one whose format \
+fits the joke best; don't default to the overused classics like Drake, and vary templates across \
+memes. Without a filter, `list_templates` pages through every template with a description of what it \
+means and what each line is for; pass `next_offset` back as `offset` to get the next page. \
 Text is raw (no URL escaping needed); `:alias:` emoji shortcodes like `:fire:` are supported. \
 Animated templates render as GIF/WebP/MP4; use `extension` to choose the format. \
 To render several memes at once, call `generate_memes` with a list of them.";
@@ -87,7 +89,7 @@ const MAX_INLINE_IMAGE_BYTES: usize = 750_000;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ListTemplatesRequest {
-    /// Words describing the template or the idea to express, e.g. "drake" or "awkward silence". Matched against ID, name, keywords, description, and example text, tolerating typos; best matches first. Omit to list every template.
+    /// Words describing the template or the idea to express, e.g. "surprised" or "awkward silence". Matched against ID, name, keywords, description, and example text, tolerating typos; best matches first. Omit to list every template.
     #[serde(default)]
     pub filter: Option<String>,
     /// Only animated templates (true) or only static templates (false).
@@ -103,7 +105,7 @@ pub struct ListTemplatesRequest {
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct GetTemplateRequest {
-    /// Template ID, e.g. "fry" or "drake".
+    /// Template ID, e.g. "fry" or "pigeon".
     pub id: String,
 }
 
