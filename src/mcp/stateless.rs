@@ -242,6 +242,106 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn generates_memes_on_custom_backgrounds() {
+        use base64::Engine as _;
+
+        let router = router(app());
+        let mut png = Vec::new();
+        image::RgbaImage::from_pixel(60, 40, image::Rgba([0, 160, 60, 255]))
+            .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
+            .unwrap();
+        let data_url = format!(
+            "data:image/png;base64,{}",
+            base64::engine::general_purpose::STANDARD.encode(&png)
+        );
+        let path =
+            std::env::temp_dir().join(format!("memegen-background-{}.png", std::process::id()));
+        std::fs::write(&path, &png).unwrap();
+
+        let call = |id: u32, arguments: Value| {
+            let router = router.clone();
+            async move {
+                let (_, body) = post(
+                    &router,
+                    request(
+                        id,
+                        "tools/call",
+                        json!({ "name": "generate_meme", "arguments": arguments }),
+                    ),
+                )
+                .await;
+                body["result"].clone()
+            }
+        };
+        for (id, background) in [(1, data_url.clone()), (2, path.display().to_string())] {
+            let result = call(
+                id,
+                json!({
+                    "template_id": "custom",
+                    "text": ["one", "two", "three"],
+                    "background": background,
+                    "text_boxes": [{}, { "anchor_y": 0.4 }, { "anchor_y": 0.8, "color": "yellow" }],
+                }),
+            )
+            .await;
+            assert_eq!(result["isError"], false, "{result}");
+            assert_eq!(result["content"][0]["mimeType"], "image/png");
+            let summary: Value =
+                serde_json::from_str(result["content"][1]["text"].as_str().unwrap()).unwrap();
+            assert_eq!(summary["template_id"], "custom");
+            // No URL draws on the caller's own background.
+            assert_eq!(summary["url"], Value::Null);
+        }
+        std::fs::remove_file(&path).ok();
+
+        // Text boxes alone on a template keep a URL.
+        let result = call(
+            3,
+            json!({ "template_id": "fry", "text": ["a"], "text_boxes": [{ "anchor_y": 0.5 }] }),
+        )
+        .await;
+        let summary: Value =
+            serde_json::from_str(result["content"][1]["text"].as_str().unwrap()).unwrap();
+        assert!(
+            summary["url"].as_str().unwrap().contains("text_boxes="),
+            "{summary}"
+        );
+
+        for (id, arguments, message) in [
+            (
+                4,
+                json!({ "template_id": "custom", "text": ["a"] }),
+                "needs a background",
+            ),
+            (
+                5,
+                json!({ "template_id": "custom", "text": ["a"], "background": "relative.png" }),
+                "absolute",
+            ),
+            (
+                6,
+                json!({ "template_id": "custom", "text": ["a"], "background": "https://example.com/a.png" }),
+                "URL",
+            ),
+            (
+                7,
+                json!({ "template_id": "custom", "text": ["a"], "background": "data:image/png;base64,bm9wZQ==" }),
+                "PNG",
+            ),
+            (
+                8,
+                json!({ "template_id": "fry", "text": ["a"], "text_boxes": [{ "align": "middle" }] }),
+                "align",
+            ),
+        ] {
+            let result = call(id, arguments).await;
+            assert_eq!(result["isError"], true, "{result}");
+            let text = result["content"][0]["text"].as_str().unwrap();
+            assert!(text.contains(message), "{text}");
+        }
+    }
+
+    #[tokio::test]
     async fn generates_batches() {
         let router = router(app());
         let memes = json!([

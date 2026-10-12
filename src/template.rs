@@ -7,7 +7,8 @@ use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::search::{Index, Query};
-use crate::{slug, textbox::TextBox};
+use crate::slug;
+use crate::textbox::{self, TextBox};
 
 const PLACEHOLDER_SUFFIX: &str = "img";
 
@@ -166,15 +167,7 @@ impl Template {
             source: raw.source.filter(|s| !s.is_empty()),
             description: raw.description.filter(|s| !s.is_empty()),
             keywords: raw.keywords.into_iter().flatten().collect(),
-            text: raw.text.unwrap_or_else(|| {
-                vec![
-                    TextBox::default(),
-                    TextBox {
-                        anchor_y: 0.8,
-                        ..Default::default()
-                    },
-                ]
-            }),
+            text: raw.text.unwrap_or_else(textbox::default_boxes),
             example: raw
                 .example
                 .map(|lines| lines.into_iter().map(Option::unwrap_or_default).collect())
@@ -193,6 +186,55 @@ impl Template {
             &template.example,
         );
         Ok(template)
+    }
+
+    /// `base` (or a blank template, for `custom`) drawn on a background of
+    /// the request's own, `(id, asset path, animated)`, and with its own
+    /// text boxes.
+    pub fn customize(
+        base: Option<&Template>,
+        background: Option<(&str, String, bool)>,
+        text: Option<Vec<TextBox>>,
+    ) -> Self {
+        let id = base.map_or(crate::settings::CUSTOM_TEMPLATE, |base| &base.id);
+        let text = text
+            .or_else(|| base.map(|base| base.text.clone()))
+            .unwrap_or_else(textbox::default_boxes);
+        let (id, styles, static_image, animated_image) = match background {
+            Some((background_id, path, animated)) => (
+                format!("{id}@{background_id}"),
+                if animated {
+                    vec!["animated".into(), "default".into()]
+                } else {
+                    vec![]
+                },
+                Some(path.clone()),
+                Some(path),
+            ),
+            None => {
+                let base = base.expect("a template without a background has a base");
+                (
+                    base.id.clone(),
+                    base.styles.clone(),
+                    base.static_image.clone(),
+                    base.animated_image.clone(),
+                )
+            }
+        };
+        Self {
+            id,
+            name: base.map_or_else(|| "Custom".into(), |base| base.name.clone()),
+            source: None,
+            description: None,
+            keywords: vec![],
+            example: vec![],
+            overlays: 0,
+            text,
+            styles,
+            static_image,
+            animated_image,
+            index: Index::default(),
+        }
     }
 
     /// Public, renderable template (mirrors upstream `Template.valid`).
@@ -214,14 +256,7 @@ impl Template {
 
     /// Lowercase lines where the matching text box style would anyway.
     pub fn normalize_lines(&self, lines: &[String]) -> Vec<String> {
-        lines
-            .iter()
-            .enumerate()
-            .map(|(index, line)| match self.text.get(index) {
-                Some(text) => text.normalize(line),
-                None => line.clone(),
-            })
-            .collect()
+        textbox::normalize_lines(&self.text, lines)
     }
 
     pub fn image_url(&self, base_url: &str, lines: &[String], extension: &str) -> String {

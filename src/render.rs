@@ -19,7 +19,7 @@ use crate::emoji::EmojiImages;
 use crate::fonts::Fonts;
 use crate::quantize::Palette;
 use crate::template::{Catalog, Template};
-use crate::textbox::TextBox;
+use crate::textbox::{self, TextBox};
 use crate::typeset::{self, DrawOptions, SizedFont};
 use crate::{jpeg, png, settings, slug};
 
@@ -132,7 +132,7 @@ impl AnimateText {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct MemeRequest {
     pub template_id: String,
     pub lines: Vec<String>,
@@ -140,6 +140,159 @@ pub struct MemeRequest {
     pub extension: String,
     /// Type the text out (GIF, WebP and MP4 only).
     pub animate_text: AnimateText,
+    pub custom: Custom,
+}
+
+/// What a request changes about its template.
+#[derive(Debug, Clone, Default)]
+pub struct Custom {
+    /// An image to draw the text on instead of the template's (required
+    /// for [`settings::CUSTOM_TEMPLATE`]).
+    pub background: Option<Background>,
+    /// Text boxes to use instead of the template's.
+    pub text_boxes: Option<Vec<TextBox>>,
+}
+
+impl Custom {
+    pub fn is_empty(&self) -> bool {
+        self.background.is_none() && self.text_boxes.is_none()
+    }
+
+    /// Identifies the customization in cache keys and file names; empty
+    /// when there is none.
+    pub fn key(&self) -> String {
+        let mut key = String::new();
+        if let Some(background) = &self.background {
+            key.push_str(&format!("|background={}", background.id));
+        }
+        if let Some(boxes) = &self.text_boxes {
+            key.push_str(&format!("|text_boxes={}", textbox::compact(boxes)));
+        }
+        key
+    }
+}
+
+/// An image supplied with a request to use as the background.
+#[derive(Clone)]
+pub struct Background {
+    bytes: Bytes,
+    /// Hex digest of `bytes`.
+    id: String,
+    /// GIFs are animated (like templates with a `default.gif`).
+    animated: bool,
+}
+
+impl std::fmt::Debug for Background {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("Background")
+            .field("id", &self.id)
+            .field("bytes", &self.bytes.len())
+            .field("animated", &self.animated)
+            .finish()
+    }
+}
+
+impl Background {
+    /// Check that `bytes` is an image within the limits in [`settings`].
+    pub fn new(bytes: Bytes) -> Result<Self, RenderError> {
+        let invalid = |message: String| RenderError::Invalid(format!("Background: {message}"));
+        if bytes.is_empty() {
+            return Err(invalid("the image is empty".into()));
+        }
+        if bytes.len() > settings::MAX_BACKGROUND_BYTES {
+            return Err(invalid(format!(
+                "the image is over {} MB",
+                settings::MAX_BACKGROUND_BYTES / 1024 / 1024
+            )));
+        }
+        let format = image::guess_format(&bytes)
+            .ok()
+            .filter(|format| {
+                use image::ImageFormat::*;
+                matches!(format, Png | Jpeg | Gif | WebP)
+            })
+            .ok_or_else(|| invalid("expected a PNG, JPG, GIF or WebP image".into()))?;
+        let (width, height) = ImageReader::with_format(Cursor::new(&bytes), format)
+            .into_dimensions()
+            .map_err(|error| invalid(format!("could not read the image: {error}")))?;
+        let (short, long) = (width.min(height), width.max(height));
+        if short == 0 || long > short.saturating_mul(settings::MAX_BACKGROUND_RATIO) {
+            return Err(invalid(format!(
+                "{width}x{height} is too long and thin (at most {}:1)",
+                settings::MAX_BACKGROUND_RATIO
+            )));
+        }
+        let animated = format == image::ImageFormat::Gif;
+        let frames = if animated { gif_frames(&bytes) } else { 1 };
+        if width as u64 * height as u64 * frames > settings::MAX_BACKGROUND_PIXELS {
+            return Err(invalid(format!(
+                "{width}x{height}{} is too large (at most {} megapixels)",
+                if frames > 1 {
+                    format!(" with {frames} frames")
+                } else {
+                    String::new()
+                },
+                settings::MAX_BACKGROUND_PIXELS / 1_000_000
+            )));
+        }
+        use sha2::Digest as _;
+        let digest = sha2::Sha256::digest(&bytes);
+        let id = digest[..16]
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect();
+        Ok(Self {
+            bytes,
+            id,
+            animated,
+        })
+    }
+
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn is_animated(&self) -> bool {
+        self.animated
+    }
+
+    /// The asset path the renderer reads it from.
+    fn path(&self) -> String {
+        let extension = if self.animated { "gif" } else { "png" };
+        format!("backgrounds/{}.{extension}", self.id)
+    }
+}
+
+/// Frames in a GIF, counted without decompressing them.
+fn gif_frames(bytes: &[u8]) -> u64 {
+    let mut options = gif::DecodeOptions::new();
+    options.skip_frame_decoding(true);
+    let Ok(mut decoder) = options.read_info(Cursor::new(bytes)) else {
+        return 1;
+    };
+    let mut frames = 0;
+    while let Ok(Some(_)) = decoder.read_next_frame() {
+        frames += 1;
+    }
+    frames.max(1)
+}
+
+/// `source`, plus a request's own background.
+struct WithBackground<'a> {
+    source: &'a dyn Source,
+    path: String,
+    bytes: Bytes,
+}
+
+impl Source for WithBackground<'_> {
+    fn read(&self, path: &str) -> Option<Bytes> {
+        if path == self.path {
+            Some(self.bytes.clone())
+        } else {
+            self.source.read(path)
+        }
+    }
 }
 
 fn maximum_frames(extension: &str) -> usize {
@@ -214,6 +367,7 @@ pub struct Renderer {
 /// A validated request and its output cache key.
 struct Prepared {
     template: Arc<Template>,
+    background: Option<Background>,
     font: String,
     extension: String,
     animate_text: AnimateText,
@@ -295,12 +449,45 @@ impl Renderer {
                 settings::ALLOWED_EXTENSIONS.join(", ")
             )));
         }
-        let template = self
-            .catalog
-            .get(&request.template_id)
-            .filter(|template| template.static_image.is_some())
-            .ok_or_else(|| RenderError::NotFound(request.template_id.clone()))?
-            .clone();
+        let Custom {
+            background,
+            text_boxes,
+        } = &request.custom;
+        let base = if request.template_id == settings::CUSTOM_TEMPLATE {
+            if background.is_none() {
+                return Err(RenderError::Invalid(format!(
+                    "The {:?} template needs a background image",
+                    settings::CUSTOM_TEMPLATE
+                )));
+            }
+            None
+        } else {
+            Some(
+                self.catalog
+                    .get(&request.template_id)
+                    .filter(|template| template.static_image.is_some())
+                    .ok_or_else(|| RenderError::NotFound(request.template_id.clone()))?,
+            )
+        };
+        if let Some(boxes) = text_boxes {
+            textbox::validate(boxes).map_err(RenderError::Invalid)?;
+            if let Some(text) = boxes
+                .iter()
+                .find(|text| self.fonts.get(&text.font).is_none())
+            {
+                return Err(RenderError::Invalid(format!("Invalid font: {}", text.font)));
+            }
+        }
+        let template = match base {
+            Some(base) if request.custom.is_empty() => base.clone(),
+            base => Arc::new(Template::customize(
+                base.map(|base| &**base),
+                background
+                    .as_ref()
+                    .map(|background| (background.id(), background.path(), background.animated)),
+                text_boxes.clone(),
+            )),
+        };
 
         let font = match request.font.as_str() {
             "" | settings::PLACEHOLDER => String::new(),
@@ -330,8 +517,12 @@ impl Renderer {
             AnimateText::Characters => key.push_str("|animate_text"),
             AnimateText::Words => key.push_str("|animate_words"),
         }
+        if let Some(boxes) = text_boxes {
+            key.push_str(&format!("|text_boxes={}", textbox::compact(boxes)));
+        }
         Ok(Prepared {
             template,
+            background: background.clone(),
             font,
             extension,
             animate_text: request.animate_text,
@@ -349,6 +540,7 @@ impl Renderer {
             return vec![];
         }
         let template = &prepared.template;
+        let background = prepared.background.as_ref().map(Background::path);
         let extension = prepared.extension.as_str();
         let mut paths: Vec<String> = match extension {
             "gif" | "webp" | "mp4" => {
@@ -368,6 +560,7 @@ impl Renderer {
                 .iter()
                 .flat_map(|line| self.emoji.missing(line)),
         )
+        .filter(|path| background.as_ref() != Some(path))
         .collect();
         paths.sort();
         paths.dedup();
@@ -390,11 +583,21 @@ impl Renderer {
     ) -> Result<Arc<Rendered>, RenderError> {
         let Prepared {
             template,
+            background,
             font,
             extension,
             animate_text,
             key,
         } = self.prepare(request)?;
+        let with_background = background.map(|background| WithBackground {
+            source,
+            path: background.path(),
+            bytes: background.bytes,
+        });
+        let source: &dyn Source = match &with_background {
+            Some(with_background) => with_background,
+            None => source,
+        };
         let render = || {
             self.render_logged(
                 &template,
@@ -1172,6 +1375,7 @@ mod tests {
                 font: String::new(),
                 extension: "jpg".into(),
                 animate_text: AnimateText::Off,
+                ..Default::default()
             };
             let rendered = renderer
                 .render(&request, &Directory::new(root()))
@@ -1200,6 +1404,7 @@ mod tests {
                 font: "impact".into(),
                 extension: extension.into(),
                 animate_text: AnimateText::Off,
+                ..Default::default()
             };
             let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             assert_eq!(rendered.content_type, content_type);
@@ -1229,6 +1434,7 @@ mod tests {
                 font: String::new(),
                 extension: extension.into(),
                 animate_text: AnimateText::Off,
+                ..Default::default()
             };
             let rendered = renderer.render(&request, &Directory::new(root())).unwrap();
             let max_bytes = rendered.bytes.len() / 2;
@@ -1254,6 +1460,7 @@ mod tests {
             font: font.into(),
             extension: extension.into(),
             animate_text: AnimateText::Off,
+            ..Default::default()
         };
         assert!(matches!(
             renderer.render(&request("nope", "", "png", "a"), &directory),
@@ -1361,6 +1568,7 @@ mod tests {
                 font: String::new(),
                 extension: extension.into(),
                 animate_text: AnimateText::Characters,
+                ..Default::default()
             };
             let rendered = renderer.render(&request, &directory).unwrap();
             let (decoded, decoded_delays) = decode_frames(&rendered.bytes, extension).unwrap();
@@ -1375,6 +1583,7 @@ mod tests {
             font: String::new(),
             extension: "mp4".into(),
             animate_text: AnimateText::Characters,
+            ..Default::default()
         };
         assert!(renderer.render(&request, &directory).is_ok());
 
@@ -1448,6 +1657,7 @@ mod tests {
             font: String::new(),
             extension: "gif".into(),
             animate_text,
+            ..Default::default()
         };
         let characters = renderer.render(&request(AnimateText::Characters), &directory);
         let words = renderer.render(&request(AnimateText::Words), &directory);
@@ -1459,11 +1669,172 @@ mod tests {
             font: String::new(),
             extension: "png".into(),
             animate_text: AnimateText::Characters,
+            ..Default::default()
         };
         assert!(matches!(
             renderer.render(&request, &directory),
             Err(RenderError::Invalid(_))
         ));
+    }
+
+    /// A PNG of `size` in one color.
+    fn solid_png((width, height): (u32, u32), color: [u8; 4]) -> Bytes {
+        let image = RgbaImage::from_pixel(width, height, image::Rgba(color));
+        let mut bytes = Vec::new();
+        image
+            .write_to(&mut Cursor::new(&mut bytes), image::ImageFormat::Png)
+            .unwrap();
+        Bytes::from(bytes)
+    }
+
+    #[test]
+    fn draws_on_a_custom_background() {
+        let renderer = renderer_with(false);
+        let directory = Directory::new(root());
+        let red = [200, 0, 0, 255];
+        let background = Background::new(solid_png((300, 200), red)).unwrap();
+        assert!(!background.is_animated());
+        let request = |template: &str, extension: &str| MemeRequest {
+            template_id: template.into(),
+            lines: vec!["top".into(), "bottom".into()],
+            extension: extension.into(),
+            custom: Custom {
+                background: Some(background.clone()),
+                text_boxes: None,
+            },
+            ..Default::default()
+        };
+
+        // The background isn't an asset to load, even on a template.
+        assert!(renderer.missing(&request("custom", "png")).is_empty());
+        assert!(renderer.missing(&request("ds", "png")).is_empty());
+
+        // Scaled so the short side is 600, like templates; the text is drawn
+        // at the top and bottom, leaving the middle alone.
+        let rendered = renderer
+            .render(&request("custom", "png"), &directory)
+            .unwrap();
+        let image = decode(&rendered.bytes).into_rgba8();
+        assert_eq!(image.dimensions(), (900, 600));
+        assert_eq!(image.get_pixel(450, 300).0, red);
+        assert!(image.rows().take(120).flatten().any(|pixel| pixel.0 != red));
+
+        // On a template, the template's text boxes are used, and the
+        // template's own background stays as it was.
+        let on_ds = renderer.render(&request("ds", "png"), &directory).unwrap();
+        let on_ds = decode(&on_ds.bytes).into_rgba8();
+        assert_eq!(on_ds.dimensions(), (900, 600));
+        assert_ne!(on_ds, image);
+        let ds = MemeRequest {
+            custom: Custom::default(),
+            ..request("ds", "png")
+        };
+        let ds = decode(&renderer.render(&ds, &directory).unwrap().bytes);
+        assert_ne!((ds.width(), ds.height()), (900, 600));
+
+        for extension in ["jpg", "gif", "webp", "mp4"] {
+            renderer
+                .render(&request("custom", extension), &directory)
+                .unwrap_or_else(|error| panic!("{extension}: {error}"));
+        }
+        let typed = MemeRequest {
+            animate_text: AnimateText::Words,
+            ..request("custom", "gif")
+        };
+        let (frames, _) =
+            decode_frames(&renderer.render(&typed, &directory).unwrap().bytes, "gif").unwrap();
+        assert_eq!(frames.len(), 2);
+
+        let missing = MemeRequest {
+            custom: Custom::default(),
+            ..request("custom", "png")
+        };
+        assert!(matches!(
+            renderer.render(&missing, &directory),
+            Err(RenderError::Invalid(_))
+        ));
+    }
+
+    #[test]
+    fn keeps_a_gif_background_animated() {
+        let renderer = renderer();
+        let directory = Directory::new(root());
+        let bytes = directory.read("templates/oprah/default.gif").unwrap();
+        let background = Background::new(bytes).unwrap();
+        assert!(background.is_animated());
+        let request = MemeRequest {
+            template_id: "custom".into(),
+            lines: vec!["a".into(), "b".into()],
+            extension: "gif".into(),
+            custom: Custom {
+                background: Some(background),
+                text_boxes: None,
+            },
+            ..Default::default()
+        };
+        let rendered = renderer.render(&request, &directory).unwrap();
+        let (frames, _) = decode_frames(&rendered.bytes, "gif").unwrap();
+        assert!(frames.len() > 1);
+    }
+
+    #[test]
+    fn rejects_bad_backgrounds() {
+        let invalid = |bytes: Bytes| match Background::new(bytes) {
+            Err(RenderError::Invalid(message)) => message,
+            other => panic!("{other:?}"),
+        };
+        assert!(invalid(Bytes::new()).contains("empty"));
+        assert!(invalid(Bytes::from_static(b"not an image")).contains("PNG"));
+        assert!(invalid(solid_png((600, 100), [0; 4])).contains("too long"));
+        assert!(Background::new(solid_png((500, 100), [0; 4])).is_ok());
+    }
+
+    #[test]
+    fn draws_in_custom_text_boxes() {
+        let renderer = renderer_with(false);
+        let directory = Directory::new(root());
+        let request = |text_boxes: Option<Vec<TextBox>>| MemeRequest {
+            template_id: "fry".into(),
+            lines: vec!["a".into(), "b".into()],
+            extension: "png".into(),
+            custom: Custom {
+                background: None,
+                text_boxes,
+            },
+            ..Default::default()
+        };
+        let template = renderer.render(&request(None), &directory).unwrap();
+        // The template's own boxes, given explicitly, look the same.
+        let fry = renderer.catalog().get("fry").unwrap().text.clone();
+        let same = renderer.render(&request(Some(fry)), &directory).unwrap();
+        assert_eq!(same.bytes, template.bytes);
+        let middle = vec![TextBox {
+            anchor_y: 0.4,
+            color: "yellow".into(),
+            ..Default::default()
+        }];
+        let moved = renderer
+            .render(&request(Some(middle.clone())), &directory)
+            .unwrap();
+        assert_ne!(moved.bytes, template.bytes);
+        // Moving text doesn't need the background loaded again.
+        assert!(renderer.missing(&request(Some(middle))).is_empty());
+
+        for bad in [
+            TextBox {
+                scale_y: 3.0,
+                ..Default::default()
+            },
+            TextBox {
+                font: "nope".into(),
+                ..Default::default()
+            },
+        ] {
+            assert!(matches!(
+                renderer.render(&request(Some(vec![bad])), &directory),
+                Err(RenderError::Invalid(_))
+            ));
+        }
     }
 
     #[test]
@@ -1476,6 +1847,7 @@ mod tests {
             font: String::new(),
             extension: extension.into(),
             animate_text: AnimateText::Off,
+            ..Default::default()
         };
         assert_eq!(
             renderer.missing(&request("png")),
