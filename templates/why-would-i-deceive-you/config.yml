@@ -1,0 +1,41 @@
+name: Why Would I Deceive You
+description: "Elizabeth Holmes in Nathan Fielder's Theranos documentary \"You Can See Everything\": the interviewer leans in close, then Holmes answers wide-eyed with a deadpan smile, \"why would I deceive you\". For callouts and anyone caught red-handed in an obvious lie. Top line sets up the deception or the accusation; bottom line is the innocent denial, usually \"Why would I deceive you\"."
+keywords:
+  - Elizabeth Holmes
+  - Theranos
+  - Nathan Fielder
+  - You Can See Everything
+  - deceive
+  - lie
+  - lying
+  - caught red-handed
+  - callout
+  - denial
+  - innocent
+  - fraud
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.01
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.02
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.96
+    scale_y: 0.15
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Did you eat my lunch from the office fridge?
+  - Why would I deceive you
