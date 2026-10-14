@@ -1,0 +1,42 @@
+name: Zuck Pretending to Enjoy Guinness
+description: "Mark Zuckerberg takes a long, dutiful gulp of Guinness at a pub table, then very visibly pretends to enjoy it: slow nods, pursed lips, a thoughtful stare into the distance. Faking enthusiasm for something you clearly don't like, to fit in or be polite. Top line is the thing being endured; bottom line is the unconvincing verdict."
+keywords:
+  - Mark Zuckerberg
+  - Zuck
+  - Guinness
+  - beer
+  - pub
+  - pretending to enjoy
+  - faking it
+  - forced enjoyment
+  - acquired taste
+  - fitting in
+  - being polite
+  - unconvincing
+  - relatable human
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - Me trying my coworker's homemade kombucha
+  - Mmm. Yes. Very fermented.
