@@ -24,6 +24,9 @@ use crate::typeset::{self, DrawOptions, SizedFont};
 use crate::{jpeg, png, settings, slug};
 
 const MAXIMUM_FRAMES: usize = 20;
+/// Upstream's longest frame delay. A clip too long for [`MAXIMUM_FRAMES`]
+/// at this delay keeps more frames, so it isn't sped up.
+const MAXIMUM_FRAME_DELAY_MS: u32 = 250;
 const MINIMUM_FRAMES: usize = 5;
 const JPEG_QUALITY: u8 = 95;
 
@@ -348,8 +351,9 @@ impl Animation {
         if sampled <= MINIMUM_FRAMES {
             return self.duration;
         }
-        let ratio = sampled as f64 / self.total.max(MAXIMUM_FRAMES) as f64;
-        (250.0f64).min((self.duration as f64 / ratio).floor()) as u32
+        let ratio =
+            sampled as f64 / self.total.max(default_frames(self.total, self.duration)) as f64;
+        (MAXIMUM_FRAME_DELAY_MS as f64).min((self.duration as f64 / ratio).floor()) as u32
     }
 }
 
@@ -1129,7 +1133,7 @@ fn load_animation(bytes: &[u8], is_gif: bool, maximum_frames: usize) -> Result<A
     } else if maximum_frames > 0 {
         round1(total as f64 / maximum_frames as f64).max(1.0)
     } else {
-        round1(total as f64 / MAXIMUM_FRAMES as f64).max(1.0)
+        round1(total as f64 / default_frames(total, duration) as f64).max(1.0)
     };
 
     let frames = sources
@@ -1143,6 +1147,12 @@ fn load_animation(bytes: &[u8], is_gif: bool, maximum_frames: usize) -> Result<A
         total,
         duration,
     })
+}
+
+/// Upstream's frame budget, raised for a clip longer than [`MAXIMUM_FRAMES`]
+/// frames at [`MAXIMUM_FRAME_DELAY_MS`] so it plays at its own speed.
+fn default_frames(total: usize, duration: u32) -> usize {
+    MAXIMUM_FRAMES.max(total * duration as usize / MAXIMUM_FRAME_DELAY_MS as usize)
 }
 
 fn round1(value: f64) -> f64 {
@@ -1495,6 +1505,19 @@ mod tests {
             .unwrap();
         assert!(frames.len() > 1);
         assert!(duration > 0);
+    }
+
+    #[test]
+    fn long_animated_template_keeps_its_speed() {
+        // zuck-guinness is 13 s at 250 ms a frame: more than upstream's 20
+        // frames, so it keeps every frame instead of playing 2.6 times faster.
+        let renderer = renderer();
+        let template = renderer.catalog().get("zuck-guinness").unwrap().clone();
+        let animation = renderer
+            .animation(&template, 0, &Directory::new(root()))
+            .unwrap();
+        assert_eq!(animation.frames.len(), animation.total);
+        assert_eq!(animation.frame_duration(), MAXIMUM_FRAME_DELAY_MS);
     }
 
     #[test]
