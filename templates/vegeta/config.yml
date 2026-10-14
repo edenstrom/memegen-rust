@@ -1,0 +1,44 @@
+name: "Vegeta: It's Over 9000!"
+source: https://imgflip.com/meme/161537510/Over-9000
+description: "Vegeta crushes his scouter in Dragon Ball Z after Nappa asks what Goku's power level is: \"It's over 9000!\" Disbelief and outrage at a number or amount far bigger than expected, or anything that's off the charts. Top line asks the question or reads the measurement; bottom line is the shocked answer, usually \"It's over 9000!\"."
+keywords:
+  - Vegeta
+  - Dragon Ball Z
+  - DBZ
+  - anime
+  - over 9000
+  - power level
+  - scouter
+  - Nappa
+  - Goku
+  - off the charts
+  - huge number
+  - exaggeration
+  - disbelief
+  - outrage
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - How many unread Slack messages do you have?
+  - It's over 9000!
