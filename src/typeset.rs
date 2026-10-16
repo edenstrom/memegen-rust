@@ -12,8 +12,9 @@ use crate::emoji;
 use crate::fonts::Font;
 use crate::settings;
 
-/// Pilmoji draws emoji at 80% of the font size.
-const EMOJI_SCALE: f32 = 0.8;
+/// Emoji height relative to the font's cap height. Twemoji art is padded and
+/// mostly round, so it needs to be a bit taller than capitals to look as big.
+const EMOJI_SCALE: f32 = 1.25;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rect {
@@ -77,6 +78,9 @@ pub struct SizedFont<'f> {
     scale: PxScale,
     scale_factor: PxScaleFactor,
     ascent: f32,
+    emoji_size: f32,
+    /// Offset of the emoji's top from the ascender line.
+    emoji_top: f32,
 }
 
 impl<'f> SizedFont<'f> {
@@ -86,22 +90,32 @@ impl<'f> SizedFont<'f> {
             .pt_to_px_scale(size as f32)
             .unwrap_or(PxScale::from(size as f32));
         let scaled = font.data.as_scaled(scale);
+        let scale_factor = scaled.scale_factor();
+        let ascent = scaled.ascent().ceil();
+        // Size emoji from the drawn capitals, not the nominal size: the pixel
+        // scale varies by font, so a fixed fraction of `size` can come out
+        // far shorter than the text around it.
+        let cap_height = font
+            .outline(scaled.glyph_id('H'))
+            .map(|outline| -outline.px_bounds(scale_factor, point(0.0, 0.0)).min.y)
+            .filter(|height| *height > 0.0)
+            .unwrap_or(ascent * 0.75);
+        let emoji_size = (cap_height * EMOJI_SCALE).round();
         Self {
             font,
             size,
             scale,
-            scale_factor: scaled.scale_factor(),
-            ascent: scaled.ascent().ceil(),
+            scale_factor,
+            ascent,
+            emoji_size,
+            // Centered on the capitals.
+            emoji_top: ascent - (cap_height + emoji_size) / 2.0,
         }
     }
 
     /// Upstream `get_stroke_width`, widened from `(size / 12).clamp(1, 3)`.
     pub fn stroke_width(&self) -> u32 {
         (self.size / 10).clamp(1, 6)
-    }
-
-    fn emoji_size(&self) -> f32 {
-        (self.size as f32 * EMOJI_SCALE).round()
     }
 
     /// Lay out a single line with the origin at the left of the ascender line.
@@ -114,8 +128,8 @@ impl<'f> SizedFont<'f> {
 
         for grapheme in emoji::segments(text) {
             if emoji::is_emoji(grapheme) {
-                let size = self.emoji_size();
-                let top = self.ascent - size * 0.9;
+                let size = self.emoji_size;
+                let top = self.emoji_top;
                 let rect = Rect {
                     x0: x,
                     y0: top,
@@ -450,7 +464,7 @@ pub fn draw_text(
     let layouts: Vec<LineLayout> = lines.iter().map(|line| font.layout_line(line)).collect();
     let max_width = layouts.iter().map(|l| l.advance).fold(0.0, f32::max);
     let line_spacing = font.line_spacing(options.spacing, stroke);
-    let emoji_size = font.emoji_size();
+    let emoji_size = font.emoji_size;
 
     let mut top = xy.1;
     let mut marks = 0;
@@ -500,7 +514,7 @@ pub fn draw_text(
                         break 'lines;
                     }
                     marks += 1;
-                    let y = top + font.ascent - emoji_size * 0.9;
+                    let y = top + font.emoji_top;
                     emoji_draws.push(((left + x).round() as i64, y.round() as i64, grapheme));
                 }
             }
