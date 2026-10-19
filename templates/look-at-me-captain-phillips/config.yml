@@ -1,0 +1,40 @@
+name: "Look at Me (Captain Phillips)"
+source: https://imgflip.com/meme/18423077/look-at-me
+description: "Muse, the Somali pirate in Captain Phillips, points two fingers at his own eyes and tells Captain Phillips \"Look at me\", just before \"I'm the captain now\". Demanding someone's full attention, or taking control of a situation. Top line is who is talking or the setup; bottom line is the demand, usually \"Look at me\"."
+keywords:
+  - Captain Phillips
+  - look at me
+  - Barkhad Abdi
+  - Tom Hanks
+  - pirate
+  - "I'm the captain now"
+  - attention
+  - taking control
+  - eyes up here
+  - focus
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "When the toddler hears you open a snack"
+  - "Look at me"

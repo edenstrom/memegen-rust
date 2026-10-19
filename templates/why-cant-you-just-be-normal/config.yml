@@ -1,0 +1,40 @@
+name: "Why Can't You Just Be Normal?"
+source: https://imgflip.com/meme/132276604/Why-cant-you-just-be-normal-blank
+description: "A mother screams at her son in the car, and the son screams right back. The parent's \"Why can't you just be normal?\" is met with chaotic screaming. Top line is the reasonable request; bottom line is the unhinged reaction, often \"*Screams*\"."
+keywords:
+  - "why can't you just be normal"
+  - screaming
+  - mom
+  - kid
+  - car
+  - screams
+  - chaotic
+  - unhinged
+  - weird behavior
+  - parent
+text:
+  - style: default
+    color: white
+    font: impact
+    anchor_x: 0.0
+    anchor_y: 0.3
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: default
+    color: white
+    font: impact
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Why can't you just run the tests like a normal developer?"
+  - "*Ships to prod on Friday*"

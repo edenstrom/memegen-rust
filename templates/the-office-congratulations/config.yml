@@ -1,0 +1,40 @@
+name: "The Office Congratulations"
+source: https://imgflip.com/meme/153695877/the-office-congratulations
+description: "Michael Scott in The Office shakes hands with his boss in an awkward, grinning \"Congratulations\" photo op. Sarcastically congratulating someone for doing the bare minimum, or a forced, awkward celebration. Top line is the achievement; bottom line is the congratulations."
+keywords:
+  - The Office
+  - Michael Scott
+  - Steve Carell
+  - congratulations
+  - handshake
+  - award
+  - bare minimum
+  - sarcastic
+  - achievement
+  - photo op
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "You answered the email in under a week"
+  - "Congratulations"

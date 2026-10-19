@@ -1,0 +1,40 @@
+name: "I Don't Want to Play With You Anymore"
+source: https://imgflip.com/meme/196435636/I-dont-want-to-play-with-you-anymore
+description: "A kid in Toy Story tosses Woody and Jessie aside: \"I don't want to play with you anymore\" (subtitle in the image). Losing interest in something you used to love and abandoning it for something new. Top line labels who is walking away; bottom line labels what is being dropped."
+keywords:
+  - Toy Story
+  - Woody
+  - Jessie
+  - Pixar
+  - "I don't want to play with you anymore"
+  - abandoned
+  - lost interest
+  - replaced
+  - outgrown
+  - moving on
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.62
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me after two weeks of a new hobby"
+  - "The hobby"

@@ -1,0 +1,39 @@
+name: "Robert Pattinson as Chris Hansen"
+source: https://imgflip.com/meme/666784284/Chris-Hansen-Pattinson
+description: "Robert Pattinson in suit and tie, styled exactly like To Catch a Predator host Chris Hansen with a solemn stare. Catching someone in the act and calmly confronting them, \"why don't you have a seat over there\". Top line is the setup or who's been caught; bottom line is Hansen's line."
+keywords:
+  - Robert Pattinson
+  - Chris Hansen
+  - To Catch a Predator
+  - have a seat
+  - "why don't you have a seat"
+  - caught
+  - busted
+  - confrontation
+  - lookalike
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "When you open the fridge at 2am"
+  - "Why don't you have a seat over there"

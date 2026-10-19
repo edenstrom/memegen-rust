@@ -1,0 +1,42 @@
+name: "Frodo: It's Over, It's Done"
+source: https://imgflip.com/meme/52031060/Frodo-Its-Over-Its-Done
+description: "Exhausted, soot-covered Frodo on Mount Doom in The Return of the King after the Ring is destroyed: \"It's over. It's done.\" Relief at finally finishing a long, painful ordeal. Top line is the ordeal that's finally finished; bottom line is the relieved verdict, usually \"It's over, it's done\"."
+keywords:
+  - Frodo
+  - Lord of the Rings
+  - LOTR
+  - Return of the King
+  - Mount Doom
+  - Sam
+  - "it's over"
+  - "it's done"
+  - relief
+  - finally finished
+  - exhausted
+  - ordeal
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me after closing the last Jira ticket of the quarter"
+  - "It's over, it's done"
