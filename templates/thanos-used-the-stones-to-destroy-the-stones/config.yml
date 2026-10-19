@@ -1,0 +1,40 @@
+name: "Thanos: I Used the Stones to Destroy the Stones"
+source: https://imgflip.com/meme/185835192/I-used-the-stones-to-destroy-the-stones
+description: "A battered Thanos in Avengers: Endgame explains \"I used the stones to destroy the stones\" (subtitle already in the image). Using the very thing that's the problem to get rid of it, circular solutions, or fighting fire with fire. Top line is what was used and why; bottom line is optional extra context."
+keywords:
+  - Thanos
+  - Avengers
+  - Endgame
+  - Marvel
+  - infinity stones
+  - destroy the stones
+  - circular logic
+  - self-defeating
+  - fight fire with fire
+  - ironic solution
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.62
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.16
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "I wrote a script to automate deleting my scripts"
+  - ""

@@ -1,0 +1,28 @@
+name: "Damn, Got Hands"
+source: https://imgflip.com/meme/293131641/damn-got-hands
+description: "A low-poly boxer says \"ok ima fight\" and walks in; next he's slumped on a stool sipping water: \"damn got hands\" (both captions in the image). Underestimating something and getting beaten by it, being surprised by how tough or capable someone turned out. The single line is the setup: what you took on."
+keywords:
+  - damn got hands
+  - ok ima fight
+  - boxer
+  - boxing
+  - fight
+  - underestimated
+  - got beat
+  - humbled
+  - surprisingly strong
+  - they got hands
+text:
+  - style: none
+    color: black
+    font: thin
+    anchor_x: 0.22
+    anchor_y: 0.12
+    angle: 0.0
+    scale_x: 0.76
+    scale_y: 0.3
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Me starting leg day after a year off"

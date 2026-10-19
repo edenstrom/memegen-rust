@@ -1,0 +1,39 @@
+name: "My Body Is a Machine"
+source: https://imgflip.com/meme/441502473/My-body-is-machine
+description: "A skeleton squatting a huge barbell under \"My body is a machine that turns ___ into ___\" with two black blanks. Bragging that you reliably convert one thing into another, usually something mundane or self-destructive. Line one is the input (\"that turns X\"); line two is the output (\"into Y\")."
+keywords:
+  - my body is a machine
+  - machine that turns
+  - skeleton
+  - gym
+  - barbell
+  - squat
+  - input output
+  - converts
+  - turns X into Y
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.37
+    anchor_y: 0.49
+    angle: 0.0
+    scale_x: 0.31
+    scale_y: 0.1
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.215
+    anchor_y: 0.805
+    angle: 0.0
+    scale_x: 0.6
+    scale_y: 0.095
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Coffee"
+  - "Anxiety"

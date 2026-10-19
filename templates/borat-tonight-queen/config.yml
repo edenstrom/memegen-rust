@@ -1,0 +1,53 @@
+name: "Borat: Tonight Queen??"
+source: https://imgflip.com/meme/478588645/Borat-2-Tonight-Queen
+description: "Three iMessage bubbles over a few days: \"___ tonite 👀\", \"___ tonight queen??\", \"___ tonite 👀\", from the Borat 2 release texts. Someone persistently and suggestively pestering you about the same plan. Each line fills the blank at the start of a bubble, usually the same thing three times (e.g. \"Borat 2\")."
+keywords:
+  - Borat
+  - tonight queen
+  - tonite
+  - eyes emoji
+  - text messages
+  - iMessage
+  - persistent
+  - pestering
+  - suggestive
+  - plans tonight
+  - double texting
+text:
+  - style: none
+    color: black
+    font: segoe
+    anchor_x: 0.075
+    anchor_y: 0.165
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.1
+    align: right
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: segoe
+    anchor_x: 0.075
+    anchor_y: 0.53
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.1
+    align: right
+    start: 0.0
+    stop: 1.0
+  - style: none
+    color: black
+    font: segoe
+    anchor_x: 0.075
+    anchor_y: 0.84
+    angle: 0.0
+    scale_x: 0.2
+    scale_y: 0.1
+    align: right
+    start: 0.0
+    stop: 1.0
+example:
+  - "Tacos"
+  - "Tacos"
+  - "Tacos"

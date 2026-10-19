@@ -1,0 +1,41 @@
+name: "Viking Funeral"
+source: https://imgflip.com/meme/120227527/viking-funeral
+description: "A Viking longship burning on dark water at night. Giving something a glorious, dramatic send-off as it's retired or abandoned, from an old laptop to a dead project. Top line is what's being sent off; bottom line is the eulogy or farewell."
+keywords:
+  - Viking
+  - funeral
+  - burning ship
+  - longship
+  - send-off
+  - farewell
+  - RIP
+  - retired
+  - goodbye
+  - honorable death
+  - Valhalla
+text:
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.0
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+  - style: upper
+    color: white
+    font: thick
+    anchor_x: 0.0
+    anchor_y: 0.8
+    angle: 0.0
+    scale_x: 1.0
+    scale_y: 0.2
+    align: center
+    start: 0.0
+    stop: 1.0
+example:
+  - "Our legacy Perl service"
+  - "You served us well. Now go to Valhalla"
